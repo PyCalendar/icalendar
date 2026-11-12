@@ -17,8 +17,8 @@ if TYPE_CHECKING:
     from icalendar.prop.factory import TypesFactory
 
 
-    """A parser for components.
 class XCalComponentsParser(XCalParser):
+    """A parser of an iCalendar stream which contains xCal components that yields :class:`~icalendar.cal.component.Component`\ s.
 
     Parameters:
         component_factory: The component factory to use.
@@ -27,8 +27,8 @@ class XCalComponentsParser(XCalParser):
 
     Examples:
 
-        The ``element`` can be a an ``icalendar`` stream that contains
-        one or more ``vcalendar`` components.
+        ``element`` can be an iCalendar stream that contains
+        one or more IC:vcalendar components.
 
         .. code-block:: xml
 
@@ -38,8 +38,8 @@ class XCalComponentsParser(XCalParser):
               </vcalendar>
             </icalendar>
 
-        Components can contain other components inside the ``components`` tag.
-        The parameter ``element`` can be such a ``components`` tag.
+        Components can contain other components inside the IC:components XML element.
+        The parameter ``element`` can be such an IC:components XML element.
 
         .. code-block:: xml
 
@@ -48,7 +48,6 @@ class XCalComponentsParser(XCalParser):
                 ...
               </vevent>
             </components>
-
     """
 
     def __init__(
