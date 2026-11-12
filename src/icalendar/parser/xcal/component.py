@@ -17,8 +17,8 @@ if TYPE_CHECKING:
     from icalendar.prop.factory import TypesFactory
 
 
-class XCalComponentParser(XCalParser):
     """A parser for components.
+class XCalComponentsParser(XCalParser):
 
     Parameters:
         component_factory: The component factory to use.
@@ -135,7 +135,7 @@ class XCalComponentParser(XCalParser):
             properties_parser.parse_properties()
         components = self.child.get_child_with_tag("components")
         if components is not None:
-            components_parser = XCalComponentParser(
+            components_parser = XCalComponentsParser(
                 components, self._component_factory, self._types_factory
             )
             while not components_parser.is_finished():
@@ -143,4 +143,4 @@ class XCalComponentParser(XCalParser):
         return component
 
 
-__all__ = ["XCalComponentParser"]
+__all__ = ["XCalComponentsParser"]

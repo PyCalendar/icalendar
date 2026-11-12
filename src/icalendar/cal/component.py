@@ -1341,7 +1341,7 @@ class Component(CaselessDict):
             True
 
         """
-        from icalendar.parser.xcal.component import XCalComponentParser
+        from icalendar.parser.xcal.component import XCalComponentsParser
 
         if isinstance(xcal, Path):
             xcal = xcal.open("rb")
@@ -1355,7 +1355,7 @@ class Component(CaselessDict):
             raise TypeError(
                 f"Expected an XML Element, bytes, Path, or file object. Got {xcal}"
             )
-        parser = XCalComponentParser(
+        parser = XCalComponentsParser(
             element, cls._get_component_factory(), cls.types_factory
         )
         components = []
