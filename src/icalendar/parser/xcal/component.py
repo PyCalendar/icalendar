@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 
 class XCalComponentsParser(XCalParser):
-    """A parser of an iCalendar stream which contains xCal components that yields :class:`~icalendar.cal.component.Component`\ s.
+    """A parser of an :term:`iCalendar stream` which contains xCal components that yields :class:`~icalendar.cal.component.Component`\ s.
 
     Parameters:
         component_factory: The component factory to use.
@@ -28,7 +28,7 @@ class XCalComponentsParser(XCalParser):
     Examples:
 
         ``element`` can be an iCalendar stream that contains
-        one or more IC:vcalendar components.
+        one or more :term:`IC:vcalendar` components.
 
         .. code-block:: xml
 
@@ -38,7 +38,7 @@ class XCalComponentsParser(XCalParser):
               </vcalendar>
             </icalendar>
 
-        Components can contain other components inside the IC:components XML element.
+        Components can contain other components inside the :term:`IC:components` XML element.
         The parameter ``element`` can be such an IC:components XML element.
 
         .. code-block:: xml
@@ -74,16 +74,16 @@ class XCalComponentsParser(XCalParser):
         Raises:
             ~icalendar.error.XCalParsingError: If there is an error in the child.
             ~icalendar.parser.xcal.base.InvalidParserState:
-                If all components have been parsed or a property value type did not
+                If all components have been parsed or a property value type didn't
                 parse anything.
 
         Example:
 
-            The XML below shows the structure of one component
+            The XML below shows the structure of one :term:`IC:component`
             element that gets parsed by this method.
-            ``vcalendar`` is the name of the component.
-            Each component can contain a ``properties`` and
-            a ``components`` element with more components.
+            ``vcalendar`` is the name of the IC:component.
+            Each IC:component can contain an :term:`IC:properties` and
+            an IC:components element with more components.
 
             .. code-block:: xml
 
@@ -111,7 +111,7 @@ class XCalComponentsParser(XCalParser):
         Raises:
             ~icalendar.error.XCalParsingError: If there is an error in the child.
             ~icalendar.parser.xcal.base.InvalidParserState:
-                If all components have been parsed or a property value type did not
+                If all components have been parsed or a property value type didn't
                 parse anything.
 
         """

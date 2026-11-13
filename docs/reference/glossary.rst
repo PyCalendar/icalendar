@@ -67,8 +67,53 @@ Glossary
         For example, the calendar component can specify an event, a to-do, a journal entry, time zone information, free/busy time information, or an alarm.
 
         All calendar components start with the letter "V".
-        For example, "VEVENT" refers to the event calendar component.
+        For example, VEVENT refers to the event calendar component.
 
         ..  seealso::
 
             :rfc:`5545#section-3.6`
+
+    iCalendar stream
+        At the top level of the iCalendar object model is an iCalendar stream.
+        An iCalendar stream can contain one or more iCalendar objects.
+
+    IC:icalendar
+        In xCal, an IC:icalendar XML element representation of an :term:`iCalendar stream`.
+
+        ..  seealso::
+
+            :rfc:`6321#section-3.2`
+
+    IC:vcalendar
+        In xCal, an IC:vcalendar XML element representation of a single :term:`iCalendar` object in an :term:`iCalendar stream`.
+
+        ..  seealso::
+
+            :rfc:`6321#section-3.2`
+
+    IC:component
+    IC:components
+        In xCal, an IC:component is an XML element representation of an :term:`iCalendar` :term:`component`.
+        Its name is the same as that in iCalendar, but lowercase.
+
+        ..  seealso::
+
+            :rfc:`6321#section-3.3`
+
+    IC:property
+    IC:properties
+        In xCal, an IC:property is an XML element representation of an :term:`iCalendar` :term:`property`.
+        Its name is the same as that in iCalendar, but lowercase.
+
+        ..  seealso::
+
+            :rfc:`6321#section-3.4`
+
+    IC:parameter
+    IC:parameters
+        In xCal, an IC:parameter is an XML element representation of an :term:`iCalendar` :term:`parameter`.
+        Its name is the same as that in iCalendar, but lowercase.
+
+        ..  seealso::
+
+            :rfc:`6321#section-3.5`
