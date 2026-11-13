@@ -1220,7 +1220,8 @@ class Component(CaselessDict):
             - :class:`bytes` if called with no arguments.
 
         Raises:
-            TypeError: If ``destination`` is neither an XML Element nor a file-like
+            TypeError: If ``destination`` is neither an XML
+                :class:`~xml.etree.ElementTree.Element` nor a file-like
                 object, or if ``indent`` is neither an integer nor a string.
             ~icalendar.error.InvalidCalendar: If an XML property cannot be written
                 to xCal. See :meth:`vXml.to_xcal() <icalendar.prop.xml.vXml.to_xcal>`.
