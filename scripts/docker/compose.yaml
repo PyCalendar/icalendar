@@ -23,4 +23,4 @@ services:
           | tar -C /tmp/icalendar -xf -
 
         cd /tmp/icalendar
-        tox -e alpine
+        tox -e alpine --override testenv.runner=virtualenv
