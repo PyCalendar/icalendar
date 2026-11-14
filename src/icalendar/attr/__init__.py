@@ -903,7 +903,8 @@ def validate_uid(value: str) -> None:
         value: The string form of the UID to validate.
 
     Raises:
-        InvalidCalendar: If ``value`` is not an RFC 5545 iana-token or is 255
+        InvalidCalendar: If ``value`` is not compliant with
+            :rfc:`5545#section-3.1` as an iana-token or is 255
             octets or longer.
     """
     octets = len(value.encode("utf-8"))
