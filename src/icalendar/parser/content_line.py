@@ -153,6 +153,7 @@ class Contentline(str):
 
         Raises:
             TypeError: If ``params`` is not type ``Parameters``.
+            ValueError: If the content line contains ``\r`` or ``\n``.
 
         """
         if not isinstance(params, Parameters):
@@ -170,12 +171,19 @@ class Contentline(str):
         # Convert back to unicode, after to_ical encoded it.
         name = to_unicode(name)
         values = to_unicode(values)
+        line = f"{name}:{values}"
         if params:
             params = to_unicode(params.to_ical(sorted=sorted))
             if params:
                 # some parameter values can be skipped during serialization
-                return cls(f"{name};{params}:{values}")
-        return cls(f"{name}:{values}")
+                line = f"{name};{params}:{values}"
+        # __new__ rejects "\n". "\r" is only rejected here, on serialization,
+        # because parsed content lines may still contain a lone "\r".
+        if "\r" in line:
+            raise ValueError(
+                "Content line can not contain unescaped new line characters."
+            )
+        return cls(line)
 
     def raw_parts(self) -> tuple[str, Parameters, str]:
         """Split the line into ``name``, ``parameters``, and raw ``values`` parts.
