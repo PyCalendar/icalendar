@@ -984,6 +984,21 @@ Format:
     digits and hyphens) shorter than 255 octets, as required by
     :rfc:`7986#section-5.3`. Values that do not conform raise
     :exc:`~icalendar.error.InvalidCalendar`.
+    """UID specifies the persistent, globally unique identifier for a component as a property.
+
+It's generated automatically when calling :meth:`Event.new
+<icalendar.cal.event.Event.new>`_, :meth:`Todo.new
+<icalendar.cal.todo.Todo.new>`_, or :meth:`Journal.new
+<icalendar.cal.journal.Journal.new>`_.
+
+To manually set, use :func:`uuid.uuid4` to generate new values, and the class's
+``uid`` method. When set, the value must be an :rfc:`5545` iana-token
+consisting of only ASCII letters, digits, and hyphens, and be shorter than 255
+octets, as required by :rfc:`7986#section-5.3`. Values that do not conform
+raise :exc:`~icalendar.error.InvalidCalendar`.
+
+Returns:
+    The value of the UID property as a string, or ``""`` if no value is set.
 
 Examples:
     The following is an example of such a property value:
@@ -991,7 +1006,7 @@ Examples:
 
     Set the UID of a calendar:
 
-    .. code-block:: pycon
+    ..  code-block:: pycon
 
         >>> from icalendar import Calendar
         >>> from uuid import uuid4
@@ -1004,7 +1019,7 @@ Examples:
 
     Set a new UUID4 as the UID (recommended):
 
-    .. code-block:: pycon
+    ..  code-block:: pycon
 
         >>> from icalendar import Event
         >>> from uuid import uuid4
@@ -1016,7 +1031,7 @@ Examples:
     Setting a valid token preserves its casing, while an invalid value raises
     an error:
 
-    .. code-block:: pycon
+    ..  code-block:: pycon
 
         >>> event.uid = "AbC-123"  # a valid token, casing is preserved
         >>> print(event.uid)
@@ -1026,6 +1041,13 @@ Examples:
           ...
         icalendar.error.InvalidCalendar: UID must be an RFC 5545 iana-token, got 'a b'
 
+See also:
+
+    -   :rfc:`4122#section-4.4`
+    -   :rfc:`4122#section-4.5`
+    -   :rfc:`5545`
+    -   :rfc:`7986#section-5.3`
+    -   :rfc:`9074`
 """,
     validate=validate_uid,
 )
