@@ -45,3 +45,19 @@ def test_pathological_input_parses_quickly(payload):
     # enough to never flake on slow CI while still catching a return of the
     # quadratic behaviour.
     assert time.perf_counter() - start < 5
+
+
+def test_escaped_quotes_in_parameter_value_parse_quickly():
+    """Each escaped quote in a quoted parameter value checks if it closes the
+    quoted section. Copying the rest of the line for this check made a value
+    with many escaped quotes quadratic.
+    """
+    ics = (
+        'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nX;X-P="'
+        + '\\"' * 200_000
+        + '":v\r\nEND:VCALENDAR\r\n'
+    )
+    start = time.perf_counter()
+    calendar = Calendar.from_ical(ics)
+    assert time.perf_counter() - start < 5
+    assert calendar["X"].params["X-P"] == '"' * 200_000
