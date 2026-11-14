@@ -6,10 +6,12 @@ import itertools
 from collections.abc import Sequence
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING, Literal, TypeAlias
+from uuid import UUID
 
 from icalendar.attr.property_list import PropertyListView
 from icalendar.enums import BUSYTYPE, CLASS, STATUS, TRANSP, StrEnum
 from icalendar.error import IncompleteComponent, InvalidCalendar
+from icalendar.parser.string import _RFC_5545_IANA_TOKEN_REGEX
 from icalendar.parser_tools import SEQUENCE_TYPES
 from icalendar.prop import (
     vBinary,
@@ -518,9 +520,25 @@ def single_utc_property(name: str, docs: str) -> property:
 
 
 def single_string_property(
-    name: str, docs: str, other_name: str | list[str] | None = None, default: str = ""
+    name: str,
+    docs: str,
+    other_name: str | list[str] | None = None,
+    default: str = "",
+    validate: Callable[[str], None] | None = None,
 ) -> property:
-    """Create a property to access a single string value."""
+    """Create a property to access a single string value.
+
+    Parameters:
+        docs: Required. Documentation string for the generated property.
+        name: Required. The iCalendar property name, such as UID.
+        default: Value returned when the property is not set.
+        other_name: One or more alias names to fall back on when the primary name
+            is not present in the component.
+        validate: Callable that receives the string form of the value and
+            raises an exception if it does not conform to the expected
+            format. It is called on set, before any existing value is
+            removed, and must not modify the value.
+    """
     other_names = (
         []
         if other_name is None
@@ -546,8 +564,14 @@ def single_string_property(
     def fset(self: Component, value: str | None):
         """Set the value.
 
-        Setting the value to None will delete it.
+        Setting the value to ``None`` will delete it.
         """
+        if value is not None:
+            if not isinstance(value, (str, UUID)):
+                raise TypeError(f"{name} must be a string or None, got {value!r}")
+            if validate is not None:
+                validate(str(value))
+
         fdel(self)
         if value is not None:
             self.add(name, value)
@@ -862,68 +886,53 @@ Examples:
 """,
 )
 
+
+#: Maximum UID length in octets, per :rfc:`7986#section-5.3`.
+_UID_MAX_OCTETS = 255
+
+
+def validate_uid(value: str) -> None:
+    """Validate the given value as a well-formed UID.
+
+    When set, the value must be an :rfc:`5545#section-3.1`
+    iana-token consisting of only ASCII letters, digits, and
+    hyphens, and shorter than 255 octets, as required by
+    :rfc:`7986#section-5.3`.
+
+    Parameters:
+        value: The string form of the UID to validate.
+
+    Raises:
+        InvalidCalendar: If ``value`` is not compliant with
+            :rfc:`5545#section-3.1` as an iana-token or is 255
+            octets or longer.
+    """
+    octets = len(value.encode("utf-8"))
+    if octets >= _UID_MAX_OCTETS:
+        raise InvalidCalendar(
+            f"UID must be shorter than {_UID_MAX_OCTETS} octets, got {octets}"
+        )
+    if _RFC_5545_IANA_TOKEN_REGEX.match(value) is None:
+        raise InvalidCalendar(f"UID must be an RFC 5545 iana-token, got {value!r}")
+
+
 uid_property = single_string_property(
     "UID",
     """UID specifies the persistent, globally unique identifier for a component.
 
-We recommend using :func:`uuid.uuid4` to generate new values.
+It's generated automatically when calling :meth:`Event.new
+<icalendar.cal.event.Event.new>`, :meth:`Todo.new
+<icalendar.cal.todo.Todo.new>`, or :meth:`Journal.new
+<icalendar.cal.journal.Journal.new>`.
+
+To manually set, use :func:`uuid.uuid4` to generate new values, and the class's
+``uid`` method. When set, the value must be an :rfc:`5545` iana-token
+consisting of only ASCII letters, digits, and hyphens, and be shorter than 255
+octets, as required by :rfc:`7986#section-5.3`. Values that do not conform
+raise :exc:`~icalendar.error.InvalidCalendar`.
 
 Returns:
-    The value of the UID property as a string or ``""`` if no value is set.
-
-Description:
-    The "UID" itself MUST be a globally unique identifier.
-    The generator of the identifier MUST guarantee that the identifier
-    is unique.
-
-    This is the method for correlating scheduling messages with the
-    referenced "VEVENT", "VTODO", or "VJOURNAL" calendar component.
-    The full range of calendar components specified by a recurrence
-    set is referenced by referring to just the "UID" property value
-    corresponding to the calendar component.  The "RECURRENCE-ID"
-    property allows the reference to an individual instance within the
-    recurrence set.
-
-    This property is an important method for group-scheduling
-    applications to match requests with later replies, modifications,
-    or deletion requests.  Calendaring and scheduling applications
-    MUST generate this property in "VEVENT", "VTODO", and "VJOURNAL"
-    calendar components to assure interoperability with other group-
-    scheduling applications.  This identifier is created by the
-    calendar system that generates an iCalendar object.
-
-    Implementations MUST be able to receive and persist values of at
-    least 255 octets for this property, but they MUST NOT truncate
-    values in the middle of a UTF-8 multi-octet sequence.
-
-    :rfc:`7986` states that UID can be used, for
-    example, to identify duplicate calendar streams that a client may
-    have been given access to.  It can be used in conjunction with the
-    "LAST-MODIFIED" property also specified on the "VCALENDAR" object
-    to identify the most recent version of a calendar.
-
-Conformance:
-    :rfc:`5545` states that the "UID" property can be specified on "VEVENT", "VTODO",
-    and "VJOURNAL" calendar components.
-    :rfc:`7986` modifies the definition of the "UID" property to
-    allow it to be defined in an iCalendar object.
-    :rfc:`9074`  adds a "UID" property to "VALARM" components to allow a unique
-    identifier to be specified. The value of this property can then be used
-    to refer uniquely to the "VALARM" component.
-
-    This property can be specified once only.
-
-Security:
-    :rfc:`7986` states that UID values MUST NOT include any data that
-    might identify a user, host, domain, or any other security- or
-    privacy-sensitive information.  It is RECOMMENDED that calendar user
-    agents now generate "UID" values that are hex-encoded random
-    Universally Unique Identifier (UUID) values as defined in
-    Sections 4.4 and 4.5 of :rfc:`4122`.
-    You can use the :mod:`uuid` module to generate new UUIDs.
-
-Compatibility:
-    For Alarms, ``X-ALARMUID`` is also considered.
+    The value of the UID property as a string, or ``""`` if no value is set.
 
 Examples:
     The following is an example of such a property value:
@@ -931,7 +940,7 @@ Examples:
 
     Set the UID of a calendar:
 
-    .. code-block:: pycon
+    ..  code-block:: pycon
 
         >>> from icalendar import Calendar
         >>> from uuid import uuid4
@@ -942,7 +951,39 @@ Examples:
         UID:d755cef5-2311-46ed-a0e1-6733c9e15c63
         END:VCALENDAR
 
+    Set a new UUID4 as the UID (recommended):
+
+    ..  code-block:: pycon
+
+        >>> from icalendar import Event
+        >>> from uuid import uuid4
+        >>> event = Event()
+        >>> event.uid = uuid4()
+        >>> event.uid  # doctest: +ELLIPSIS
+        vText(b'...')
+
+    Setting a valid token preserves its casing, while an invalid value raises
+    an error:
+
+    ..  code-block:: pycon
+
+        >>> event.uid = "AbC-123"  # a valid token, casing is preserved
+        >>> print(event.uid)
+        AbC-123
+        >>> event.uid = "a b"
+        Traceback (most recent call last):
+          ...
+        icalendar.error.InvalidCalendar: UID must be an RFC 5545 iana-token, got 'a b'
+
+See also:
+
+    -   :rfc:`4122#section-4.4`
+    -   :rfc:`4122#section-4.5`
+    -   :rfc:`5545`
+    -   :rfc:`7986#section-5.3`
+    -   :rfc:`9074`
 """,
+    validate=validate_uid,
 )
 
 summary_property = multi_language_text_property(
