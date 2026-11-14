@@ -918,7 +918,7 @@ def validate_uid(value: str) -> None:
 
 uid_property = single_string_property(
     "UID",
-    """UID specifies the persistent, globally unique identifier for a component as a property.
+    """UID specifies the persistent, globally unique identifier for a component.
 
 It's generated automatically when calling :meth:`Event.new
 <icalendar.cal.event.Event.new>`, :meth:`Todo.new
