@@ -33,7 +33,7 @@ def test_all_parameters(calendars, duplicate):
     """Check that all examples get decoded correctly."""
     cal: Calendar = duplicate(calendars.rfc_6868)
     param = cal["X-PARAM"].params["ALL"]
-    assert param == '^"\n'
+    assert param == '^"' + os.linesep
 
 
 @param_duplicate

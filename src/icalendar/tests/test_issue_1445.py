@@ -15,6 +15,8 @@ These tests pin down, in every direction:
   :class:`~icalendar.prop.text.vText`, but shares its plumbing.
 """
 
+import os
+
 import pytest
 
 from icalendar.cal import Component
@@ -158,12 +160,13 @@ def test_unrecognized_parameter_is_decoded_not_verbatim():
     assert str(prop) == "val;ue"
 
     # parameters: decoded, not verbatim
+    newline = os.linesep  # RFC 6868 ^n decodes to the platform newline
     assert prop.params["X-ROAST"] == "a,b;c"  # de-quoted
-    assert prop.params["X-NOTE"] == "line1\nline2"  # RFC 6868 ^n -> newline
+    assert prop.params["X-NOTE"] == f"line1{newline}line2"
 
     assert ev.to_jcal()[1][1] == [
         "x-foo",
-        {"x-roast": "a,b;c", "x-note": "line1\nline2"},
+        {"x-roast": "a,b;c", "x-note": f"line1{newline}line2"},
         "unknown",
         "val;ue",
     ]
