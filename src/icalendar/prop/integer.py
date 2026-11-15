@@ -244,7 +244,7 @@ class vNonNegativeInt(vInt):
 
 
 class vPositiveInt(vInt):
-    """This is an integer that is supposed to be at least 1."""
+    """This is an integer that is at least ``1``."""
 
     min: ClassVar[int] = 1
 
