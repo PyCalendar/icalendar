@@ -926,10 +926,11 @@ It's generated automatically when calling :meth:`Event.new
 <icalendar.cal.journal.Journal.new>`.
 
 To manually set, use :func:`uuid.uuid4` to generate new values, and the class's
-``uid`` method. When set, the value must be an :rfc:`5545` iana-token
+``uid`` property. When set, the value must be an :rfc:`5545` iana-token
 consisting of only ASCII letters, digits, and hyphens, and be shorter than 255
-octets, as required by :rfc:`7986#section-5.3`. Values that do not conform
-raise :exc:`~icalendar.error.InvalidCalendar`.
+octets, as required by :rfc:`7986#section-5.3`. To clear the value,
+set it to ``""`` or ``None``. Values that do not conform raise
+:exc:`~icalendar.error.InvalidCalendar`.
 
 Returns:
     The value of the UID property as a string, or ``""`` if no value is set.
