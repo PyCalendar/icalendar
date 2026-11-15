@@ -92,9 +92,10 @@ def test_parsing_invalid_interval_raises_value_error(value):
         vRecur.from_ical(f"FREQ=DAILY;INTERVAL={value}")
 
 
-def test_directly_assigned_non_positive_interval_raises_invalid_calendar():
+@pytest.mark.parametrize("stored", [0, -1])
+def test_directly_assigned_non_positive_interval_raises_invalid_calendar(stored):
     recur = vRecur.from_ical("FREQ=DAILY")
-    recur["INTERVAL"] = [-1]
+    recur["INTERVAL"] = [stored]
     with pytest.raises(InvalidCalendar, match="INTERVAL must be >= 1"):
         recur.interval
 
