@@ -299,7 +299,9 @@ def test_negative_interval_raises_xcal_error():
     xml = list2xml(["recur", ["interval", "-1"]])
     with pytest.raises(XCalParsingError) as exc_info:
         vRecur.from_xcal(xml)
-    assert exc_info.value.message == "Expected xsd:positiveInteger, got '-1' in /recur/interval[1]."
+    assert exc_info.value.message == (
+        "Expected xsd:positiveInteger, got '-1' in /recur/interval[1]."
+    )
 
 
 def test_weekday_becomes_uppercase():
