@@ -1,6 +1,7 @@
 """parsing and generation of content lines"""
 
 import re
+import sys
 
 from icalendar.parser.parameter import Parameters, closes_quoted_section
 from icalendar.parser.property import unescape_backslash, unescape_list_or_string
@@ -19,10 +20,26 @@ from icalendar.parser_tools import DEFAULT_ENCODING, ICAL_TYPE, to_unicode
 # full rescan, while matching exactly the same strings.
 UFOLD = re.compile(r"(?:(?<!\n)\r\n|(?<![\r\n])\n)(?:\r?\n)*[ \t]")
 NEWLINE_BYTES = re.compile(rb"\r?\n")
-# a legacy CHARSET parameter declares the encoding of one property value
-CHARSET_PARAM_BYTES = re.compile(
+# a legacy CHARSET parameter declares the encoding of one property value.
+# RFC 5545 §3.1.4 defines no property parameter to declare a charset
+# ("There is not a property parameter to declare the charset used in a
+# property value.  The default charset for an iCalendar stream is UTF-8"),
+# so this exists only to tolerate files from pre-RFC 5545 producers
+# that kept the vCard-style CHARSET parameter (issue #2078).
+# The character class excludes the delimiters, so both regexes below match
+# the same strings; Python 3.10 has no possessive quantifiers, so it uses
+# the simpler regex.
+_CHARSET_PARAM_BYTES_PY310 = re.compile(
     rb";[ \t]*CHARSET[ \t]*=[ \t]*([^;:\r\n]+)", re.IGNORECASE
 )
+if sys.version_info >= (3, 11):
+    # the possessive quantifier never gives matched characters back,
+    # keeping the match linear
+    CHARSET_PARAM_BYTES = re.compile(
+        rb";[ \t]*CHARSET[ \t]*=[ \t]*([^;:\r\n]++)", re.IGNORECASE
+    )
+else:
+    CHARSET_PARAM_BYTES = _CHARSET_PARAM_BYTES_PY310
 NEWLINE = re.compile(r"\r?\n")
 
 OWS = " \t"

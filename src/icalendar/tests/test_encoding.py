@@ -1,8 +1,10 @@
 import datetime
+import sys
 
 import pytest
 
 from icalendar import Calendar
+from icalendar.parser import content_line
 
 
 @pytest.mark.parametrize(
@@ -100,7 +102,9 @@ def test_apple_xlocation(calendars):
         assert len(event.errors) == 0, "Got too many errors"
 
 
-def test_charset_parameter_decodes_legacy_non_utf8_value_issue_2078():
+def test_charset_parameter_decodes_legacy_non_utf8_value_issue_2078(
+    charset_param_regex,
+):
     """A legacy CHARSET parameter declares the encoding of the property
     value: latin-1 bytes decode with the declared charset instead of
     coming back as U+FFFD replacement characters (issue #2078).
@@ -115,7 +119,7 @@ def test_charset_parameter_decodes_legacy_non_utf8_value_issue_2078():
     assert str(event["SUMMARY"]) == "Caf\u00e9 Meeting"
 
 
-def test_unknown_charset_falls_back_gracefully_issue_2078():
+def test_unknown_charset_falls_back_gracefully_issue_2078(charset_param_regex):
     """An unknown CHARSET must not raise; the value degrades exactly as
     it did before the CHARSET parameter was honored (issue #2078)."""
     ics = (
@@ -128,9 +132,39 @@ def test_unknown_charset_falls_back_gracefully_issue_2078():
     assert "Meeting" in str(event["SUMMARY"])
 
 
-def test_charset_text_inside_quoted_param_value_is_not_a_directive_issue_2078():
+@pytest.fixture(params=["py311", "py310"])
+def charset_param_regex(request, monkeypatch):
+    """Run with the CHARSET regex of Python 3.11+ and of Python 3.10.
+
+    Python 3.10 has no possessive quantifiers, so it uses a simpler regex.
+    Both are tested where they can be compiled.
+    """
+    if request.param == "py310":
+        monkeypatch.setattr(
+            content_line,
+            "CHARSET_PARAM_BYTES",
+            content_line._CHARSET_PARAM_BYTES_PY310,
+        )
+    elif sys.version_info < (3, 11):
+        pytest.skip("Possessive quantifiers need Python 3.11 or later.")
+
+
+def test_charset_text_inside_quoted_param_value_is_not_a_directive_issue_2078(
+    charset_param_regex,
+):
     """UTF-8 text with a quoted parameter value mentioning CHARSET= must
-    still decode as UTF-8, not as the encoding named in the quotes."""
+    still decode as UTF-8, not as the encoding named in the quotes.
+
+    RFC 5545 §3.1.4 states that there is no property parameter to declare
+    the charset of a value (iCalendar text is UTF-8), so CHARSET is not a
+    conforming parameter at all — an unquoted top-level ``CHARSET=`` is only
+    tolerated as a legacy marker of pre-RFC 5545 producers (issue #2078).
+    Inside a quoted parameter value it is plain data: RFC 5545 §3.1 defines
+    ``quoted-string = DQUOTE *QSAFE-CHAR DQUOTE`` with QSAFE-CHAR being any
+    character except CONTROL and DQUOTE, so ";" and "=" (and thus the text
+    ``;CHARSET=ISO-8859-1``) may occur inside the quotes without forming a
+    second parameter.
+    """
     summary = "Caf\u00e9 Meeting"
     ics = (
         b"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\n"
