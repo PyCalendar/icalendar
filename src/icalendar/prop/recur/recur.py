@@ -429,13 +429,12 @@ class vRecur(CaselessDict):
         including all values in a multi-value entry.
 
         Raises:
+            ValueError: when parsing an RRULE whose INTERVAL is not a positive
+                integer.
             InvalidCalendar: if a directly stored value cannot be read as an
                 :class:`int` or is less than ``1``, or when setting a value
                 less than ``1``.
             TypeError: when setting a value that is not an :class:`int`.
-
-        Parsing an invalid iCalendar RRULE value raises ``ValueError`` before
-        the accessor can be read.
 
         Example:
             ..  code-block:: pycon
