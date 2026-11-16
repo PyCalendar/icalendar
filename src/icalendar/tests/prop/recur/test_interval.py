@@ -93,7 +93,7 @@ def test_parsing_invalid_interval_raises_value_error(value):
 
 
 @pytest.mark.parametrize("stored", [0, -1])
-def test_directly_assigned_non_positive_interval_raises_invalid_calendar(stored):
+def test_dictionary_access_non_positive_interval_raises_invalid_calendar(stored):
     recur = vRecur.from_ical("FREQ=DAILY")
     recur["INTERVAL"] = [stored]
     with pytest.raises(InvalidCalendar, match="INTERVAL must be >= 1"):
@@ -101,10 +101,13 @@ def test_directly_assigned_non_positive_interval_raises_invalid_calendar(stored)
 
 
 @pytest.mark.parametrize("stored", ["abc", "", ["abc"], True])
-def test_directly_assigned_unreadable_interval_raises_invalid_calendar(stored):
+def test_dictionary_access_unreadable_interval_raises_invalid_calendar(stored):
     recur = vRecur.from_ical("FREQ=DAILY")
     recur["INTERVAL"] = stored
-    with pytest.raises(InvalidCalendar, match="INTERVAL must be"):
+    with pytest.raises(
+        InvalidCalendar,
+        match=f"INTERVAL must be an int, got {type(stored).__name__}",
+    ):
         recur.interval
 
 
