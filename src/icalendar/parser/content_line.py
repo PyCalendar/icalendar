@@ -146,12 +146,19 @@ def _strip_ows_around_delimiters(st: str, delimiters: str = ";=") -> str:
 def _decode_with_charset(value: bytes) -> str:
     """Decode content lines, honoring a legacy ``CHARSET`` parameter.
 
-    When the input is not valid UTF-8 as a whole, decode each content
-    line with the charset its ``CHARSET`` parameter declares, so a value
-    that names its encoding does not come back as U+FFFD. Lines without
-    a ``CHARSET`` parameter (or with an unknown one) keep the previous
-    best-effort UTF-8 decoding.
+    Input that is valid UTF-8 — a conforming :rfc:`5545` stream — is
+    decoded exactly as before this parameter was honored, so a vestigial
+    ``CHARSET`` parameter in a file that actually uses UTF-8 cannot
+    override it. Only when the input is not valid UTF-8 as a whole is
+    each content line decoded with the charset its ``CHARSET`` parameter
+    declares, so a value that names its encoding does not come back as
+    U+FFFD. Lines without a ``CHARSET`` parameter (or with an unknown
+    one) keep the previous best-effort UTF-8 decoding.
     """
+    try:
+        return value.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
     lines = []
     for line in NEWLINE_BYTES.split(value):
         # the parameters end at the first colon: a parameter VALUE quoting

@@ -164,12 +164,47 @@ def test_charset_text_inside_quoted_param_value_is_not_a_directive_issue_2078(
     character except CONTROL and DQUOTE, so ";" and "=" (and thus the text
     ``;CHARSET=ISO-8859-1``) may occur inside the quotes without forming a
     second parameter.
+
+    The ``DESCRIPTION`` line makes the whole file invalid UTF-8, so the
+    per-line CHARSET scan runs: the ``SUMMARY`` line is valid UTF-8 but
+    must still not be decoded with the charset named inside its quoted
+    parameter value, while the real directive on ``DESCRIPTION`` is
+    honored.
+    """
+    summary = "Caf\u00e9 Meeting"
+    description = "Caf\u00e9 R\u00e9sum\u00e9"  # latin-1 bytes below
+    ics = (
+        b"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\n"
+        b"BEGIN:VEVENT\r\nUID:1\r\n"
+        b'SUMMARY;ALTREP="cid:x;CHARSET=ISO-8859-1":'
+        + summary.encode("utf-8")
+        + b"\r\nDESCRIPTION;CHARSET=ISO-8859-1:"
+        + description.encode("iso-8859-1")
+        + b"\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+    )
+    event = Calendar.from_ical(ics).walk("VEVENT")[0]
+    assert str(event["SUMMARY"]) == summary
+    assert str(event["DESCRIPTION"]) == description
+
+
+def test_vestigial_charset_in_valid_utf8_does_not_override_issue_2078(
+    charset_param_regex,
+):
+    """A file that is valid UTF-8 parses as UTF-8 even if it still
+    carries a vestigial legacy ``CHARSET`` parameter.
+
+    Re-encoded migrations of legacy files can keep the old ``CHARSET``
+    parameter while the bytes are already UTF-8. RFC 5545 §3.1.4 makes
+    UTF-8 the charset of a conforming stream, so valid UTF-8 input must
+    parse exactly as it did before this parameter was honored: the
+    declared charset must not turn the UTF-8 text into mojibake
+    (issue #2078).
     """
     summary = "Caf\u00e9 Meeting"
     ics = (
         b"BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//t//EN\r\n"
         b"BEGIN:VEVENT\r\nUID:1\r\n"
-        b'SUMMARY;ALTREP="cid:x;CHARSET=ISO-8859-1":'
+        b"SUMMARY;CHARSET=ISO-8859-1:"
         + summary.encode("utf-8")
         + b"\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
     )
