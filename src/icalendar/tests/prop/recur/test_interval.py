@@ -100,13 +100,18 @@ def test_dictionary_access_non_positive_interval_raises_invalid_calendar(stored)
         recur.interval
 
 
-@pytest.mark.parametrize("stored", ["abc", "", ["abc"], True])
-def test_dictionary_access_unreadable_interval_raises_invalid_calendar(stored):
+@pytest.mark.parametrize(
+    ("stored", "value_type"),
+    [("abc", "str"), ("", "str"), (["abc"], "str"), (True, "bool")],
+)
+def test_dictionary_access_unreadable_interval_raises_invalid_calendar(
+    stored, value_type
+):
     recur = vRecur.from_ical("FREQ=DAILY")
     recur["INTERVAL"] = stored
     with pytest.raises(
         InvalidCalendar,
-        match=f"INTERVAL must be an int, got {type(stored).__name__}",
+        match=f"INTERVAL must be an int, got {value_type}",
     ):
         recur.interval
 
