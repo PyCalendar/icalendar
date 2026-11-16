@@ -117,3 +117,10 @@ Glossary
         ..  seealso::
 
             :rfc:`6321#section-3.5`
+
+    XSD
+    XML Schema Definition
+    XML Schema Definition Language
+        The `XML Schema Definition Language <https://www.w3.org/TR/xmlschema11-2/>`__ (XSD) defines facilities for defining datatypes to be used in XML Schemas as well as other XML specifications.
+        The names of datatypes typically begin with either ``xs:`` or ``xsd:``.
+        The xCal specification :rfc:`6321` uses the latter, and, therefore, so does icalendar.
