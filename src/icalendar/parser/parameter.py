@@ -649,7 +649,8 @@ class Parameters(CaselessDict[str | list[str]]):
         in the element.
 
         Parameters:
-            element: Required. The parameters are added to this element as the first child.
+            element: Required. The parameters are added to this element as the
+                first child.
         """
         if not self or (len(element) >= 1 and element[0].tag == "parameters"):
             return  # exit quickly

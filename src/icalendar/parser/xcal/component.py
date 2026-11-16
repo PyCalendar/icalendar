@@ -18,7 +18,8 @@ if TYPE_CHECKING:
 
 
 class XCalComponentsParser(XCalParser):
-    """A parser of an :term:`iCalendar stream` which contains xCal components that yields :class:`~icalendar.cal.component.Component`\ s.
+    r"""A parser of an :term:`iCalendar stream` which contains xCal components that
+    yields :class:`~icalendar.cal.component.Component`\ s.
 
     Parameters:
         component_factory: The component factory to use.
@@ -38,8 +39,8 @@ class XCalComponentsParser(XCalParser):
               </vcalendar>
             </icalendar>
 
-        Components can contain other components inside the :term:`IC:components` XML element.
-        The parameter ``element`` can be such an IC:components XML element.
+        Components can contain other components inside the :term:`IC:components` XML
+        element. The parameter ``element`` can be such an IC:components XML element.
 
         .. code-block:: xml
 
