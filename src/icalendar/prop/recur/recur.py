@@ -431,7 +431,8 @@ class vRecur(CaselessDict):
         Raises:
             ValueError: when parsing an RRULE whose INTERVAL is not a positive
                 integer.
-            InvalidCalendar: if a directly stored value cannot be read as an
+            InvalidCalendar: after using :ref:`dictionary-access`, if a stored
+                value cannot be read through :ref:`property-access` as an
                 :class:`int` or is less than ``1``, or when setting a value
                 less than ``1``.
             TypeError: when setting a value that is not an :class:`int`.
@@ -452,13 +453,17 @@ class vRecur(CaselessDict):
             return None
         value = values[0] if isinstance(values, SEQUENCE_TYPES) else values
         if isinstance(value, bool):
-            raise InvalidCalendar("INTERVAL must be an int")
+            raise InvalidCalendar(
+                f"INTERVAL must be an int, got {type(value).__name__}"
+            )
         try:
             interval = int(value)
         except (TypeError, ValueError) as e:
-            raise InvalidCalendar("INTERVAL must be an int") from e
+            raise InvalidCalendar(
+                f"INTERVAL must be an int, got {type(value).__name__}"
+            ) from e
         if interval < 1:
-            raise InvalidCalendar(f"INTERVAL must be >= 1, got {interval}")
+            raise InvalidCalendar(f"INTERVAL must be >= 1, got {interval}.")
         return interval
 
     @interval.setter
