@@ -101,7 +101,7 @@ def tzid_from_dt(dt: datetime | time) -> str | None:
 _EQUIVALENT_IDS: dict[str, set[str]] = defaultdict(set)
 
 
-def _add_equivalent_ids(value: tuple | dict | set):
+def _add_equivalent_ids(value: tuple | dict | set) -> None:
     """This adds equivalent ids/
 
     As soon as one timezone implementation used claims their equivalence,
