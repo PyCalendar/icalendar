@@ -612,12 +612,12 @@ def _get_value(self: VPROPERTY) -> str:
     return self.default_value if value is None else value
 
 
-def _set_value(self: VPROPERTY, value: str | None):
+def _set_value(self: VPROPERTY, value: str | None) -> None:
     """Set the VALUE parameter."""
     self.params.value = value
 
 
-def _del_value(self: VPROPERTY):
+def _del_value(self: VPROPERTY) -> None:
     """Delete the VALUE parameter."""
     del self.params.value
 

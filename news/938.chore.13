@@ -1,0 +1,1 @@
+Added return type hints to _add_equivalent_ids, _set_value, and _del_value. I used GPT-6 to identify the untyped functions and verify the correct hints against their usage. @YTLim-1206
