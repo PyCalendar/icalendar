@@ -11,7 +11,6 @@ from collections import defaultdict
 from datetime import date, time, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING
-from zoneinfo import available_timezones
 
 from dateutil.tz import tz
 
@@ -32,6 +31,13 @@ DATEUTIL_UTC_PATH: str | None = getattr(DATEUTIL_UTC, "_filename", None)
 DATEUTIL_ZONEINFO_PATH = (
     None if DATEUTIL_UTC_PATH is None else Path(DATEUTIL_UTC_PATH).parent
 )
+
+
+def _get_available_timezones() -> set:
+    """Get timezone IDs through the zoneinfo provider's shared cache."""
+    from .zoneinfo import ZONEINFO  # noqa: PLC0415
+
+    return ZONEINFO()._available_timezones  # noqa: SLF001
 
 
 def tzids_from_tzinfo(tzinfo: tzinfo | None) -> tuple[str]:
@@ -64,14 +70,15 @@ def tzids_from_tzinfo(tzinfo: tzinfo | None) -> tuple[str]:
         if olson is not None:
             return _get_equivalent_tzids(olson)
         return _get_equivalent_tzids(tzinfo._name)  # noqa: SLF001
-    if hasattr(tzinfo, "_filename"):  # dateutil.tz.tzfile  # noqa: SIM102
+    if hasattr(tzinfo, "_filename"):  # dateutil.tz.tzfile
         path = Path(tzinfo._filename)  # noqa: SLF001
+        known_tzids = _get_available_timezones()
         # dateutil can retain a relative TZID (notably when using the tzdata
         # package), or an absolute path into a system zoneinfo directory.
         # Resolve the latter against the known directory when possible.
         if not path.is_absolute():
             tzid = path.as_posix()
-            if tzid in available_timezones():
+            if tzid in known_tzids:
                 return _get_equivalent_tzids(tzid)
             return ()
         if DATEUTIL_ZONEINFO_PATH is not None:
@@ -80,12 +87,11 @@ def tzids_from_tzinfo(tzinfo: tzinfo | None) -> tuple[str]:
             except ValueError:
                 pass
             else:
-                if tzid in available_timezones():
+                if tzid in known_tzids:
                     return _get_equivalent_tzids(tzid)
         # Some dateutil builds do not expose the zoneinfo root. Find a valid
         # TZID suffix in the absolute path, independent of path separators.
         parts = path.parts
-        known_tzids = available_timezones()
         for index in range(1, len(parts)):
             tzid = "/".join(parts[index:])
             if tzid in known_tzids:

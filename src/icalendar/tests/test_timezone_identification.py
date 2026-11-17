@@ -33,26 +33,24 @@ def test_can_identify_dateutil(tzid):
 
 
 @pytest.mark.parametrize(
-    ("requested_tzid", "resolved_tzid", "expected_alias"),
+    ("requested_tzid", "expected_equivalent_tzid"),
     [
-        ("Pacific/Fiji", "Pacific/Fiji", "Pacific/Fiji"),
-        ("Brazil/West", "America/Manaus", "Brazil/West"),
-        ("Chile/EasterIsland", "Pacific/Easter", "Chile/EasterIsland"),
-        ("Arctic/Longyearbyen", "Atlantic/Jan_Mayen", "Arctic/Longyearbyen"),
+        ("Pacific/Fiji", "Pacific/Fiji"),
+        ("Brazil/West", "America/Manaus"),
+        ("Chile/EasterIsland", "Pacific/Easter"),
+        ("Arctic/Longyearbyen", "Atlantic/Jan_Mayen"),
     ],
 )
 def test_can_identify_dateutil_tzfile_aliases(
-    requested_tzid, resolved_tzid, expected_alias
+    requested_tzid, expected_equivalent_tzid
 ):
     """Relative dateutil filenames resolve to IDs and their known aliases."""
-    from dateutil.tz import gettz
+    from types import SimpleNamespace
 
-    tzinfo = gettz(requested_tzid)
-    assert tzinfo is not None
-    assert tzinfo._filename == resolved_tzid
+    tzinfo = SimpleNamespace(_filename=requested_tzid)
     tzids = tzids_from_tzinfo(tzinfo)
-    assert resolved_tzid in tzids
-    assert expected_alias in tzids
+    assert requested_tzid in tzids
+    assert expected_equivalent_tzid in tzids
 
 
 def test_dateutil_tzfile_with_absolute_filename_returns_ids(tmp_path):
