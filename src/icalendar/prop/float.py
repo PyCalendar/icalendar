@@ -1,6 +1,7 @@
 """FLOAT values from :rfc:`5545`."""
 
 import math
+from decimal import Decimal
 from typing import Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -10,6 +11,20 @@ from icalendar.parser import Parameters
 from icalendar.parser.xcal.base import XCalParser
 from icalendar.parser.xcal.string import xsd_float_to_string
 from icalendar.parser.xcal.wrapper import from_xcal_wrapper
+
+
+def to_ical_float(value: float) -> str:
+    """Render a number as a FLOAT value of :rfc:`5545#section-3.3.7`.
+
+    FLOAT has no exponent notation, but ``str()`` on a float switches to it
+    below ``1e-04`` and from ``1e16`` on, which other iCalendar parsers reject.
+    ``Decimal`` renders the shortest round-tripping decimal of the float in
+    plain notation, so ``1e-05`` becomes ``0.00001`` and ``1e16`` becomes
+    ``10000000000000000``.
+    """
+    if not math.isfinite(value):
+        return str(value)
+    return format(Decimal(repr(float(value))), "f")
 
 
 class vFloat(float):
@@ -69,7 +84,7 @@ class vFloat(float):
         return self
 
     def to_ical(self) -> bytes:
-        return str(self).encode("utf-8")
+        return to_ical_float(self).encode("utf-8")
 
     @classmethod
     def from_ical(cls, ical: str | float) -> Self:
@@ -140,4 +155,4 @@ class vFloat(float):
         element.text = xsd_float_to_string(self)
 
 
-__all__ = ["vFloat"]
+__all__ = ["to_ical_float", "vFloat"]

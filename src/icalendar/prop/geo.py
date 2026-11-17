@@ -10,6 +10,7 @@ from icalendar.error import JCalParsingError
 from icalendar.parser import Parameters
 from icalendar.parser.xcal.string import xsd_float_to_string
 from icalendar.parser.xcal.wrapper import from_xcal_wrapper
+from icalendar.prop.float import to_ical_float
 
 if TYPE_CHECKING:
     from icalendar.compatibility import Self
@@ -108,7 +109,7 @@ class vGeo:
         self.params = Parameters(params)
 
     def to_ical(self) -> str:
-        return f"{self.latitude};{self.longitude}"
+        return f"{to_ical_float(self.latitude)};{to_ical_float(self.longitude)}"
 
     @property
     def ical_value(self) -> tuple[float, float]:

@@ -1,0 +1,1 @@
+FLOAT and GEO values are written without an exponent, as RFC 5545 3.3.7 requires: a latitude of 0.00001 is written as ``GEO:0.00001;...`` instead of ``GEO:1e-05;...``.
