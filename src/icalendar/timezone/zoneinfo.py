@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 
 from dateutil.rrule import rrule, rruleset
 from dateutil.tz import tzical
-from dateutil.tz.tz import _tzicalvtz
+from dateutil.tz.tz import _tzicalvtz, _tzicalvtzcomp
 
 from icalendar.tools import is_date, to_datetime
 
@@ -123,7 +123,7 @@ class ZONEINFO(TZProvider):
         return True
 
 
-def pickle_tzicalvtz(tzicalvtz: _tzicalvtz):
+def pickle_tzicalvtz(tzicalvtz: _tzicalvtz) -> tuple[type[_tzicalvtz], tuple[str, list[_tzicalvtzcomp]]]:
     """Because we use dateutil.tzical, we need to make it pickle-able."""
     return _tzicalvtz, (tzicalvtz._tzid, tzicalvtz._comps)  # noqa: SLF001
 
@@ -164,7 +164,7 @@ def pickle_rruleset_with_cache(rs: rruleset):
     )
 
 
-def unpickle_rruleset_with_cache(rrule, rdate, exrule, exdate, cache):
+def unpickle_rruleset_with_cache(rrule: list[rrule], rdate: list[datetime], exrule: list[rrule], exdate: list[datetime], cache: bool) -> rruleset:
     """unpickling the rruleset."""
     rs = rruleset(cache)
     for o in rrule:
