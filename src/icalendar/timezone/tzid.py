@@ -35,7 +35,7 @@ DATEUTIL_ZONEINFO_PATH = (
 
 def _get_available_timezones() -> set:
     """Get timezone IDs through the zoneinfo provider's shared cache."""
-    from .zoneinfo import ZONEINFO  # noqa: PLC0415
+    from .zoneinfo import ZONEINFO
 
     return ZONEINFO()._available_timezones  # noqa: SLF001
 

@@ -41,9 +41,7 @@ def test_can_identify_dateutil(tzid):
         ("Arctic/Longyearbyen", "Atlantic/Jan_Mayen"),
     ],
 )
-def test_can_identify_dateutil_tzfile_aliases(
-    requested_tzid, expected_equivalent_tzid
-):
+def test_can_identify_dateutil_tzfile_aliases(requested_tzid, expected_equivalent_tzid):
     """Relative dateutil filenames resolve to IDs and their known aliases."""
     from types import SimpleNamespace
 
