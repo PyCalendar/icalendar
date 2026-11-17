@@ -123,7 +123,9 @@ class ZONEINFO(TZProvider):
         return True
 
 
-def pickle_tzicalvtz(tzicalvtz: _tzicalvtz) -> tuple[type[_tzicalvtz], tuple[str, list[_tzicalvtzcomp]]]:
+def pickle_tzicalvtz(
+    tzicalvtz: _tzicalvtz,
+) -> tuple[type[_tzicalvtz], tuple[str, list[_tzicalvtzcomp]]]:
     """Because we use dateutil.tzical, we need to make it pickle-able."""
     return _tzicalvtz, (tzicalvtz._tzid, tzicalvtz._comps)  # noqa: SLF001
 
@@ -164,7 +166,13 @@ def pickle_rruleset_with_cache(rs: rruleset):
     )
 
 
-def unpickle_rruleset_with_cache(rrule: list[rrule], rdate: list[datetime], exrule: list[rrule], exdate: list[datetime], cache: bool) -> rruleset:
+def unpickle_rruleset_with_cache(
+    rrule: list[rrule],
+    rdate: list[datetime],
+    exrule: list[rrule],
+    exdate: list[datetime],
+    cache: bool,
+) -> rruleset:
     """unpickling the rruleset."""
     rs = rruleset(cache)
     for o in rrule:

@@ -1,1 +1,0 @@
-Added a return type hint to _add_equivalent_ids. I used GPT-6 to identify the untyped function and verify the correct hint against its usage. @YTLim-1206
