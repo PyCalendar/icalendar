@@ -162,8 +162,9 @@ def closes_quoted_section(text: str, quote_index: int) -> bool:
     section. A DQUOTE followed by other text is an escaped quote inside
     the value instead.
     """
-    # index instead of slicing: a slice copies the rest of the line on every
-    # call, which is quadratic for a value with many escaped quotes
+    # Parsers call this for every DQUOTE in a quoted value, so only look at
+    # the characters right after the quote. Slicing ``text`` here would copy
+    # the rest of the line on each call.
     for index in range(quote_index + 1, len(text)):
         ch = text[index]
         if ch in " \t":
