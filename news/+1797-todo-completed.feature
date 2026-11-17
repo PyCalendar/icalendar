@@ -1,0 +1,1 @@
+Added :attr:`COMPLETED <icalendar.cal.todo.Todo.COMPLETED>` and :attr:`completed <icalendar.cal.todo.Todo.completed>` to access the :rfc:`5545#section-3.8.2.1` ``COMPLETED`` property of :class:`~icalendar.cal.todo.Todo`. @RishabhIIITD
