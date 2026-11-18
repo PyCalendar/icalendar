@@ -29,7 +29,7 @@ class XCalPropertiesParser(XCalParser):
 
     Example:
 
-        The parameter ``element`` can be a ``<properties>`` element as shown below:
+        The parameter ``element`` can be a <properties> element as shown below:
 
         .. code-block:: xml
 
@@ -166,7 +166,7 @@ class XCalPropertyParser(XCalParameterParser):
 
     Examples:
 
-        The parameter ``element`` can be a ``<prodid>`` element with a single
+        The parameter ``element`` can be a <prodid> element with a single
         ``text`` value, as shown below:
 
         .. code-block:: xml
@@ -175,7 +175,7 @@ class XCalPropertyParser(XCalParameterParser):
                 <text>-//Example Inc.//Example Client//EN</text>
             </prodid>
 
-        Some elements, such as ``<rdate>`` and ``<categories>``, can contain
+        Some elements, such as <rdate> and <categories>, can contain
         multiple values. This is illustrated in the example below:
 
         .. code-block:: xml
@@ -187,7 +187,7 @@ class XCalPropertyParser(XCalParameterParser):
 
         Within an element, a property can contain parameters.
         These parameters apply to all values.
-        The example below shows a ``<date-time>`` value in the timezone
+        The example below shows a <date-time> value in the timezone
         ``US/Eastern``.
 
         .. code-block:: xml
@@ -219,7 +219,7 @@ class XCalPropertyParser(XCalParameterParser):
         """Parse the parameters, if present.
 
         Parameters need to be parsed only once.
-        This method parses the ``<parameters>`` element inside the property.
+        This method parses the <parameters> element inside the property.
 
         Returns:
             If there are parameters, they are returned as parsed.
@@ -259,7 +259,7 @@ class XCalPropertyParser(XCalParameterParser):
 
         Example:
 
-            The example below shows a ``<text>`` element that this method
+            The example below shows a <text> element that this method
             can parse into a :class:`~icalendar.prop.text.vText`.
 
             .. code-block:: xml
