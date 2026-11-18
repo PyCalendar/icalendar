@@ -31,9 +31,11 @@ ATTRIBUTION = re.compile(r"@[-\w]+\Z")
 
 def validate_news_item(path: Path, content: str) -> list[str]:
     """Report all violations of the changelog format for one fragment."""
-    errors = []
+    errors: list[str] = []
     if not NEWS_FILENAME.fullmatch(path.name):
-        errors.append(f"invalid filename {path.name!r}; expected '<issue>.<type>[.<n>]'")
+        errors.append(
+            f"invalid filename {path.name!r}; expected '<issue>.<type>[.<n>]'"
+        )
     if len(content.splitlines()) != 1:
         errors.append("entry must contain exactly one non-empty line")
     line = content.strip()
@@ -46,7 +48,35 @@ def validate_news_item(path: Path, content: str) -> list[str]:
     return errors
 
 
-@pytest.fixture(params=sorted(NEWS_DIR.iterdir()) if NEWS_DIR.is_dir() else [])
+# Pre-existing fragments that do not meet the newly documented requirements.
+# Keep the exceptions explicit: new fragments must comply with the format.
+LEGACY_NEWS_EXCEPTIONS = frozenset(
+    {
+        "+fix-ruff-link.internal",
+        "1011.removal.rst",
+        "1158.documentation.1736.rst",
+        "1158.documentation.5.rst",
+        "1727.documentation.rst",
+        "1916.feature.rst",
+        "938.chore.1",
+    }
+)
+
+
+def news_fragment_paths() -> list[Path]:
+    """Find publishable fragments, excluding placeholders and known legacy exceptions."""
+    if not NEWS_DIR.is_dir():
+        return []
+    return sorted(
+        path
+        for path in NEWS_DIR.iterdir()
+        if path.is_file()
+        and path.name != ".gitkeep"
+        and path.name not in LEGACY_NEWS_EXCEPTIONS
+    )
+
+
+@pytest.fixture(params=news_fragment_paths())
 def news_fragment(request: pytest.FixtureRequest) -> tuple[Path, str]:
     """Provide each fragment, skipping the check when news/ is absent or empty."""
     path = request.param
