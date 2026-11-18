@@ -183,10 +183,14 @@ class vUnknown(str):
         """Parse xCal from :rfc:`6321`.
 
         Parameters:
-            xml: The XML to parse or a parser.
+            parser: The xCal parser containing the UNKNOWN value.
+            params: The property parameters to update with the UNKNOWN value type.
+
+        Returns:
+            The parsed UNKNOWN property value.
 
         Raises:
-            ~error.XCalParsingError: If the provided xCal is invalid.
+            ~icalendar.error.XCalParsingError: If the provided xCal is invalid.
         """
         element = parser.parse_tag(cls.default_value)
         params.value = cls.default_value  # UNKNOWN is never the default type
@@ -200,10 +204,14 @@ class vUnknown(str):
         This class is used as a fallback if no other type can parse this.
 
         Parameters:
-            xml: The XML to parse or a parser.
+            parser: The xCal parser containing the UNKNOWN value.
+            params: The property parameters to update with the UNKNOWN value type.
+
+        Returns:
+            The parsed UNKNOWN property value.
 
         Raises:
-            ~error.XCalParsingError: If the provided xCal is invalid.
+            ~icalendar.error.XCalParsingError: If the provided xCal is invalid.
         """
         element = parser.parse_tag()
         params.value = element.tag.upper()  # set the VALUE parameter
