@@ -20,10 +20,10 @@ jobs:
         with:
           persist-credentials: false
       - name: Run zizmor
-        # The action's `latest` only knows releases current at its own release
-        # (v0.8.0 -> zizmor 1.31.1, which predates lockfile support), so pin
-        # the lockfile-aware zizmor explicitly. Sync with pyproject.toml.
-        uses: zizmorcore/zizmor-action@v0.8.0
+        # v0.8.1 is the first action release whose default zizmor (1.32.0)
+        # reads the actions lockfile; pin the zizmor version explicitly to
+        # stay lockfile-aware. Sync with pyproject.toml.
+        uses: zizmorcore/zizmor-action@v0.8.1
         with:
           version: 1.32.0
 
