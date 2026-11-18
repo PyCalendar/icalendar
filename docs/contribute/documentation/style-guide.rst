@@ -256,7 +256,7 @@ In narrative documentation, use double backticks (``````) around Python paramete
 
 If the same Python object appears multiple times throughout a paragraph or section, it's better to apply a cross-reference to the first object only and use inline literals for the rest for better legibility.
 
-Although RFCs often quote RFC component or property names with double quotation marks such as "VCALENDAR", don't quote them in icalendar documentation.
+Although RFCs often quote RFC component or property names with double quotation marks such as "VCALENDAR" don't quote them in icalendar documentation.
 Avoid using double backticks for RFC component or property names to represent them as inline literals.
 This reduces visual distractions and improves legibility for the reader.
 
