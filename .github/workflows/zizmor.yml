@@ -20,7 +20,12 @@ jobs:
         with:
           persist-credentials: false
       - name: Run zizmor
-        uses: zizmorcore/zizmor-action@v0.8.0  # default `latest` zizmor reads the actions lockfile
+        # The action's `latest` only knows releases current at its own release
+        # (v0.8.0 -> zizmor 1.31.1, which predates lockfile support), so pin
+        # the lockfile-aware zizmor explicitly. Sync with pyproject.toml.
+        uses: zizmorcore/zizmor-action@v0.8.0
+        with:
+          version: 1.32.0
 
   # Fails when .github/workflows/actions.lock is out of sync with the
   # workflows or a locked pin no longer verifies upstream.
