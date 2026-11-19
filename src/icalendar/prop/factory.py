@@ -318,8 +318,19 @@ class TypesFactory(CaselessDict):
         return self[internal].default_value.lower()
 
     def to_ical(self, name, value):
-        """Encodes a named value from a primitive python type to an icalendar
-        encoded string.
+        """Encode a named value from a Python object into iCalendar bytes.
+
+        Looks up the value type for ``name`` with :meth:`for_property` and
+        returns that type's iCalendar encoding of ``value``.
+
+        Parameters:
+            name: The iCalendar property or parameter name, for example
+                ``"SUMMARY"`` or ``"DURATION"``.
+            value: A Python value accepted by the corresponding value type,
+                for example a :class:`str` or :class:`~datetime.timedelta`.
+
+        Returns:
+            The iCalendar-encoded value as :class:`bytes`.
         """
         type_class = self.for_property(name)
         return type_class(value).to_ical()
