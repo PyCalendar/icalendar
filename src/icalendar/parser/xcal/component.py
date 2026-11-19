@@ -80,11 +80,14 @@ class XCalComponentsParser(XCalParser):
 
         Example:
 
-            The XML below shows the structure of one :term:`IC:component`
+            The XML below shows the structure of one :term:`component element`
             element that gets parsed by this method.
-            ``vcalendar`` is the name of the IC:component.
-            Each IC:component can contain an :term:`IC:properties` and
-            an IC:components element with more components.
+            ``vcalendar`` is the name of the component element.
+            The XML below shows the structure of one :term:`component element`
+            that gets parsed by this method.
+            ``vcalendar`` is the name of the component element.
+            Each component element can contain an :term:`IC:properties` and
+            an :term:`IC:components` element with more components.
 
             .. code-block:: xml
 

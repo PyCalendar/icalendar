@@ -76,6 +76,10 @@ Glossary
     iCalendar stream
         At the top level of the iCalendar object model is an iCalendar stream.
         An iCalendar stream can contain one or more iCalendar objects.
+        
+        ..  seealso::
+        
+            :term:`IC:icalendar`
 
     IC:icalendar
         In xCal, an IC:icalendar XML element representation of an :term:`iCalendar stream`.
@@ -91,16 +95,21 @@ Glossary
 
             :rfc:`6321#section-3.2`
 
-    IC:component
     IC:components
-        In xCal, an IC:component is an XML element representation of an :term:`iCalendar` :term:`component`.
+        In :term:`xCal`, an IC:components element is an XML element that contains zero or more :term:`component element`\ s.
+
+        ..  seealso::
+
+            :rfc:`6321#section-3.2`
+
+    component element
+        In :term:`xCal`, a component element represents the :term:`iCalendar` :term:`component`.
         Its name is the same as that in iCalendar, but lowercase.
 
         ..  seealso::
 
             :rfc:`6321#section-3.3`
 
-    IC:property
     IC:properties
         In xCal, an IC:property is an XML element representation of an :term:`iCalendar` :term:`property`.
         Its name is the same as that in iCalendar, but lowercase.
@@ -109,7 +118,6 @@ Glossary
 
             :rfc:`6321#section-3.4`
 
-    IC:parameter
     IC:parameters
         In xCal, an IC:parameter is an XML element representation of an :term:`iCalendar` :term:`parameter`.
         Its name is the same as that in iCalendar, but lowercase.
