@@ -1,0 +1,1 @@
+Preserve the timezone when parsing jCal TIME properties with a TZID, including through component parsing and serialization. Codex (GPT-6) assisted with reproduction, implementation, and regression tests.
