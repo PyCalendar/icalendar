@@ -334,6 +334,20 @@ The following would be a poor change log entry.
 
     Fix #123456 by chaning config of file [did_not_read_this_guide]
 
+..  _check-change-log:
+
+Check change log
+````````````````
+
+..  include:: ../_include/rtd-preview-navigate.inc
+
+Once you're in the pull request preview:
+
+-   Navigate to :menuselection:`Reference guides --> Change log`.
+-   Search for your username for the rendered change log entry, and inspect it for accuracy and functional links.
+
+Read the Docs' `visual diff <https://docs.readthedocs.com/platform/stable/visual-diff.html>`_ feature might help find what you've changed.
+
 
 Set up for development
 ----------------------
