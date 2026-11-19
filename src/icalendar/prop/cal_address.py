@@ -201,6 +201,15 @@ class vCalAddress(str):
         else:
             self.EMAIL = self._remove_mailto(value)
 
+    @email.setter
+    def email(self, value: str | None) -> None:
+        """Set or remove the RFC 7986 ``EMAIL`` parameter.
+
+        If ``value`` is ``None``, the ``EMAIL`` parameter is removed.
+        Otherwise, any leading ``mailto:`` prefix (case-insensitive) is stripped
+        before storing the email address.
+        """
+
     @email.deleter
     def email(self) -> None:
         """Remove the RFC 7986 ``EMAIL`` parameter."""
