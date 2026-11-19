@@ -1,1 +1,1 @@
-Improved :issue:`1916` by adding the :class:`~icalendar.prop.cal_address.vCalAddress` ``uri``, ``address``, ``email``, and ``has_email`` interfaces. Prepared with AI assistance (Claude); reviewed and tested locally. @brenolois
+Improved :issue:`1916` by adding the :class:`~icalendar.prop.cal_address.vCalAddress` ``uri``, ``address``, ``email``, and ``has_email`` interfaces. Reviewed and tested locally. @brenolois
