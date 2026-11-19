@@ -252,7 +252,18 @@ The above example will render as shown.
 Python and RFC objects
 ''''''''''''''''''''''
 
-In narrative documentation, use double backticks (``````) around Python parameter names, :ref:`internal-use-only` Python methods, literal arguments and values, and other Python objects that can't be displayed as a link via a cross-reference to indicate it as an inline literal.
+In Sphinx, the role `literal <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#roles>`_ represents inline code.
+In narrative documentation, use double backticks (``````) around Python parameter names, :ref:`internal-use-only` Python methods, literal arguments and values, and other Python objects that can't be displayed as a link via a cross-reference.
+
+The example below shows how to display a Python string as an inline literal:
+
+..  code-block:: rst
+
+    My program outputs ``"Hello World!"``.
+
+Which renders as shown below.
+
+My program outputs ``"Hello World!"``.
 
 If the same Python object appears multiple times throughout a paragraph or section, it's better to apply a cross-reference to the first object only and use inline literals for the rest for better legibility.
 
