@@ -153,7 +153,6 @@ class Journal(Component):
     @property
     def duration(self) -> timedelta:
         """The journal has no duration.
-        
         Returns:
             ``timedelta(0)``
         """
