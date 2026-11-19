@@ -92,7 +92,10 @@ class vEmpty(vUnknown):
         return cls(params=params)
 
     def __repr__(self) -> str:
-        """The text representation."""
+        """The text representation.
+
+        :meta private:
+        """
         return f"{self.__class__.__name__}()"
 
 
