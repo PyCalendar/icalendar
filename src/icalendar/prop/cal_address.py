@@ -193,7 +193,6 @@ class vCalAddress(str):
             return self._remove_mailto(email)
         return self.address
 
-
     @email.setter
     def email(self, value: str | None) -> None:
         """Set or remove the RFC 7986 ``EMAIL`` parameter.
