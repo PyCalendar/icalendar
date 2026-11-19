@@ -201,6 +201,7 @@ class vCalAddress(str):
         Otherwise, any leading ``mailto:`` prefix (case-insensitive) is stripped
         before storing the email address.
         """
+        self.EMAIL = None if value is None else self._remove_mailto(value)
 
     @email.deleter
     def email(self) -> None:
