@@ -110,7 +110,8 @@ def _add_equivalent_ids(value: tuple | dict | set):
     they are considered equivalent.
 
     See also:
-         :mod:`timezone.equivalent_timezone_ids <icalendar.timezone.equivalent_timezone_ids>`
+        :mod:`timezone.equivalent_timezone_ids
+         <icalendar.timezone.equivalent_timezone_ids>`
     """
     if isinstance(value, set):
         for tzid in value:

@@ -249,7 +249,8 @@ def _set_exdates(self: Component, value) -> None:
 
     Parameters:
         value:  A list, as returned by :attr:`exdates`, where each item is a date
-            or a datetime. Setting an empty list or :obj:`None` removes the EXDATE property.
+            or a datetime. Setting an empty list or :obj:`None` removes the EXDATE
+            property.
     """
     _del_exdates(self)
     if value:
