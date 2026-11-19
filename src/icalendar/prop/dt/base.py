@@ -37,6 +37,8 @@ class TimeBase:
     def __hash__(self) -> int:
         return hash(self.dt)
 
+    from icalendar.param import RANGE, RELATED, TZID
+
     def __repr__(self) -> str:
         """String representation.
 
