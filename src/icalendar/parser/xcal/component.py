@@ -18,8 +18,9 @@ if TYPE_CHECKING:
 
 
 class XCalComponentsParser(XCalParser):
-    r"""A parser of an :term:`iCalendar stream` or :term:`IC:components` which contain :term:`component element`\ s that
-    yields :class:`~icalendar.cal.component.Component`\ s.
+    r"""A parser of an :term:`iCalendar stream` or :term:`IC:components`
+    which contain :term:`component element`\ s that yields
+    :class:`~icalendar.cal.component.Component`\ s.
 
     Parameters:
         component_factory: The component factory to use.
