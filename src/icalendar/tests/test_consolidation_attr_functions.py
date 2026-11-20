@@ -300,7 +300,8 @@ class TestConsolidatedPropertyGetters:
         assert duration is None
 
     def test_duration_and_end_do_not_match(self) -> None:
-        """Prefer DURATION when DTEND and DURATION specify different end times.
+        """If DTEND and DURATION describe different end times, the
+        calendar is ambiguous and validation must still fail.
 
         See https://github.com/collective/icalendar/issues/1796.
         """
@@ -310,17 +311,13 @@ class TestConsolidatedPropertyGetters:
         event.add("DTEND", datetime(2026, 1, 1, 15, 0))
         event.add("DURATION", timedelta(hours=2))
 
-        start, end, duration = get_start_end_duration_with_validation(
-            event,
-            "DTSTART",
-            "DTEND",
-            "VEVENT",
-        )
-
-        assert start == datetime(2026, 1, 1, 12, 0)
-        assert end is None
-        assert duration == timedelta(hours=2)
-        assert event.end == datetime(2026, 1, 1, 14, 0)
+        with pytest.raises(InvalidCalendar, match="different end times"):
+            get_start_end_duration_with_validation(
+                event,
+                "DTSTART",
+                "DTEND",
+                "VEVENT",
+            )
 
     def test_negative_duration_uses_valid_explicit_end(self) -> None:
         """A negative DURATION must not override a valid DTEND after DTSTART."""
