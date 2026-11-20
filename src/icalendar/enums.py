@@ -20,7 +20,16 @@ class Enum(_Enum):
 
 
 class StrEnum(str, Enum):
-    """Enum for strings."""
+    """Enum for strings.
+
+    Values are looked up ignoring case because these values are not
+    enclosed in double quotes and are therefore case-insensitive as of
+    :rfc:`5545`, section 3.1::
+
+        >>> from icalendar.enums import PARTSTAT
+        >>> PARTSTAT("needs-action") is PARTSTAT.NEEDS_ACTION
+        True
+    """
 
     _value_: str
 
@@ -76,6 +85,22 @@ class StrEnum(str, Enum):
             return cls(value.upper())
         except ValueError:
             return default
+
+    @classmethod
+    def _missing_(cls, value):
+        """Look up a member by its value, ignoring case.
+
+        :class:`enum.Enum` calls this whenever a lookup by value finds no
+        exact match. Only the lookup is relaxed here, the values keep the
+        spelling that they are defined with.
+        """
+        if not isinstance(value, str):
+            return None
+        value = value.casefold()
+        for member in cls:
+            if member.value.casefold() == value:
+                return member
+        return None
 
 
 class ACTION(StrEnum):
