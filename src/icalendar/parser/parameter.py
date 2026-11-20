@@ -20,7 +20,7 @@ from icalendar.parser_tools import (
 from icalendar.timezone.tzid import tzid_from_dt
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, KeysView, Sequence
+    from collections.abc import Callable, Sequence
 
     from icalendar.enums import VALUE
     from icalendar.parser.xcal.adapter import ElementAdapter
@@ -369,12 +369,6 @@ class Parameters(CaselessDict[str | list[str]]):
         # This is escaped in the RFC
         "CN": " '",
     }
-
-    def params(self) -> KeysView[str]:
-        """In RFC 5545 keys are called parameters, so this is to be consitent
-        with the naming conventions.
-        """
-        return self.keys()
 
     def to_ical(self, sorted: bool = True) -> bytes:  # noqa: A002
         """Returns an :rfc:`5545` representation of the parameters.
