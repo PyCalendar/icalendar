@@ -95,6 +95,7 @@ def generate_matrix(git_ref, review, event_name=""):
     matrix.append(
         {
             "python_version": f"3.{PYTHON_MINOR_VERSION_MIN}",
+            "runner": "windows-latest",
             "skip": run_no_jobs,
         }
     )
@@ -102,8 +103,9 @@ def generate_matrix(git_ref, review, event_name=""):
     matrix.append(
         {
             "test_command": "uv run tox -e nopytz",
-            "test_name": f"3.{PYTHON_MINOR_VERSION_MIN} (nopytz)",
+            "qualifier": "nopytz",
             "python_version": f"3.{PYTHON_MINOR_VERSION_MIN}",
+            "runner": "macos-latest",
             "skip": run_no_jobs,
         }
     )
@@ -111,6 +113,7 @@ def generate_matrix(git_ref, review, event_name=""):
     matrix.append(
         {
             "python_version": f"3.{PYTHON_MINOR_VERSION_MAX}",
+            "runner": "ubuntu-latest",
             "skip": run_no_jobs,
         }
     )
@@ -125,16 +128,40 @@ def generate_matrix(git_ref, review, event_name=""):
         matrix.append(
             {
                 "python_version": f"3.{minor_python_version}",
+                "runner": "ubuntu-latest",
                 "skip": not run_all_jobs,
             }
         )
+
+    matrix.append(
+        {
+            "python_version": f"3.{PYTHON_MINOR_VERSION_MIN}",
+            "runner": "ubuntu-latest",
+            "skip": not run_all_jobs,
+        }
+    )
+    matrix.append(
+        {
+            "python_version": f"3.{PYTHON_MINOR_VERSION_MAX}",
+            "runner": "windows-latest",
+            "skip": not run_all_jobs,
+        }
+    )
+    matrix.append(
+        {
+            "python_version": f"3.{PYTHON_MINOR_VERSION_MAX}",
+            "runner": "macos-latest",
+            "skip": not run_all_jobs,
+        }
+    )
 
     # pypy is slow but good to test
     matrix.insert(
         0,
         {
+            "label": "pypy3",
             "python_version": "pypy3.11",
-            "test_name": "pypy3",
+            "runner": "ubuntu-latest",
             "skip": not runs_pypy,
         },
     )
@@ -148,8 +175,14 @@ def generate_matrix(git_ref, review, event_name=""):
     #
 
     for run in matrix:
-        run.setdefault("test_name", run["python_version"])
         run.setdefault("test_command", COMMAND_TEST)
+        label = run.pop("label", run["python_version"])
+        details = filter(None, (run.pop("qualifier", ""), run["runner"]))
+        run["test_name"] = f"{label} ({', '.join(details)})"
+        if run["skip"]:
+            # A skipped job still starts a runner. Keep it on Ubuntu so only
+            # real runs spend macOS or Windows minutes.
+            run["runner"] = "ubuntu-latest"
 
     include = list(matrix)
     skipped = [run["test_name"] for run in matrix if run["skip"]]
