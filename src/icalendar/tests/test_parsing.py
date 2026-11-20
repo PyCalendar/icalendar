@@ -5,7 +5,7 @@ from datetime import datetime
 
 import pytest
 
-from icalendar import vBinary, vRecur
+from icalendar import vBinary
 from icalendar.cal.calendar import Calendar
 from icalendar.cal.component_factory import ComponentFactory
 from icalendar.cal.event import Event
@@ -108,8 +108,7 @@ def test_issue_157_removes_trailing_semicolon(events):
     https://github.com/PyCalendar/icalendar/pull/157
     """
     recur = events.issue_157_removes_trailing_semicolon.decoded("RRULE")
-    assert isinstance(recur, vRecur)
-    assert recur.to_ical() == b"FREQ=YEARLY;BYDAY=1SU;BYMONTH=11"
+    assert recur == {"FREQ": ["YEARLY"], "BYDAY": ["1SU"], "BYMONTH": [11]}
 
 
 @pytest.mark.parametrize(
@@ -135,8 +134,11 @@ def test_decode_rrule_attribute_error_issue_70(events):
     # Issue #70 - e.decode("RRULE") causes Attribute Error
     # see https://github.com/PyCalendar/icalendar/issues/70
     recur = events.issue_70_rrule_causes_attribute_error.decoded("RRULE")
-    assert isinstance(recur, vRecur)
-    assert recur.to_ical() == b"FREQ=WEEKLY;UNTIL=20070619T225959;INTERVAL=1"
+    assert recur == {
+        "FREQ": ["WEEKLY"],
+        "UNTIL": [datetime(2007, 6, 19, 22, 59, 59)],
+        "INTERVAL": [1],
+    }
 
 
 def test_description_parsed_properly_issue_53(events):
