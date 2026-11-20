@@ -182,6 +182,16 @@ class vXml(vText):
         """
         return self.element
 
+    @property
+    def bytes(self) -> bytes:
+        """The XML text encoded as UTF-8 bytes.
+
+        This provides a consistent interface with :attr:`~icalendar.prop.binary.vBinary.bytes`.
+
+        .. versionadded:: 0.0.0
+        """
+        return self.encode("utf-8")
+
     @classmethod
     def from_xcal(cls, xcal: XCalParser | ElementAdapter | Element) -> Self:
         """Parse xCal from :rfc:`6321`.
