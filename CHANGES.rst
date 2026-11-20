@@ -11,6 +11,15 @@ Change log
 
 .. towncrier release notes start
 
+7.3.2 (2026-11-20)
+------------------
+
+Internal changes
+~~~~~~~~~~~~~~~~
+
+- Switched ``deploy-tag-to-pypi`` to PyPI Trusted Publishing on the ``7.x`` branch. @SashankBhamidi
+
+
 7.3.1 (2026-11-20)
 ------------------
 
