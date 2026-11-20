@@ -1,0 +1,1 @@
+Add ``bysetpos`` property accessor to :class:`icalendar.prop.vRecur` according to :rfc:`5545#section-3.3.10` - by :user:`RishabhIIITD`.
