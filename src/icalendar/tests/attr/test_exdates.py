@@ -31,7 +31,7 @@ def c_exdate(request) -> C_EXDATE:
         lambda tzp: tzp.localize(datetime(1984, 1, 13, 13, 1), "Europe/Athens"),
     ]
 )
-def exdate(request, tzp):
+def exdate(request, tzp) -> date | datetime:
     """Possible values for an exdate."""
     return request.param(tzp)
 
