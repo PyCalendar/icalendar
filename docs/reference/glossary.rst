@@ -73,6 +73,12 @@ Glossary
 
             :rfc:`5545#section-3.6`
 
+    iCalendar object
+        As defined by :rfc:`5545#section-3.4`, an iCalendar object consists of a pair of delimiter strings—one defining its start (``BEGIN:VCALENDAR``) and the other its end (``END:VCALENDAR``), with both having trailing ``CRLF``\ s—and a body consisting of a sequence of calendar properties and one or more calendar components.
+
+        Typically, an :term:`iCalendar stream` contains a single iCalendar object.
+        However, multiple iCalendar objects can be sequentially grouped together in an iCalendar stream.
+
     iCalendar stream
         At the top level of the iCalendar object model is an iCalendar stream.
         An iCalendar stream can contain one or more iCalendar objects.
