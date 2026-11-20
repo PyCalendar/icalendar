@@ -132,12 +132,17 @@ class Timezone(Component):
         return is_dst, transitions
 
     @staticmethod
-    def _make_unique_tzname(tzname: str, tznames: set[str]) -> str:
+    def _make_unique_tzname(tzname: str, tznames: dict[str, int]) -> str:
         """Make a unique tzname and add it to ``tznames``.
+
+        A name that is already in use gets the next free numeric suffix.
+        ``tznames`` remembers the next suffix to try for each name,
+        so that many equal names take linear time.
 
         Parameters:
             tzname: The candidate timezone name.
-            tznames: The timezone names already in use.
+            tznames: The timezone names already in use,
+                mapped to the next suffix to try for them.
 
         Returns:
             The unique timezone name.
@@ -146,18 +151,21 @@ class Timezone(Component):
             .. code-block:: pycon
 
                 >>> from icalendar import Timezone
-                >>> names = {"EST"}
+                >>> names = {"EST": 1}
                 >>> Timezone._make_unique_tzname("EST", names)
                 'EST_1'
                 >>> Timezone._make_unique_tzname("EST", names)
-                'EST_1_1'
+                'EST_2'
                 >>> sorted(names)
-                ['EST', 'EST_1', 'EST_1_1']
+                ['EST', 'EST_1', 'EST_2']
         """
-        # TODO better way of making sure tznames are unique
-        while tzname in tznames:
-            tzname += "_1"
-        tznames.add(tzname)
+        if tzname in tznames:
+            suffix = tznames[tzname]
+            while f"{tzname}_{suffix}" in tznames:
+                suffix += 1
+            tznames[tzname] = suffix + 1
+            tzname = f"{tzname}_{suffix}"
+        tznames[tzname] = 1
         return tzname
 
     def to_tz(self, tzp: TZP = tzp, lookup_tzid: bool = True):
@@ -204,7 +212,7 @@ class Timezone(Component):
         zone = self.tz_name
         transitions = []
         dst = {}
-        tznames = set()
+        tznames: dict[str, int] = {}
         for component in self.walk():
             if isinstance(component, Timezone):
                 continue
