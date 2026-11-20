@@ -11,6 +11,15 @@ Change log
 
 .. towncrier release notes start
 
+7.3.1 (2026-11-20)
+------------------
+
+Removals and deprecations
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- Passing a file path as a ``str`` to :meth:`~icalendar.cal.component.Component.from_ical` no longer reads that file implicitly. ``str`` and ``bytes`` are always parsed as iCalendar data; use :class:`pathlib.Path` to read from a file. This hardens parsing of untrusted input against unintended local file reads. @uwezkhan (`Issue #1362 <https://github.com/collective/icalendar/issues/1362>`_)
+
+
 7.3.0 (2026-08-19)
 ------------------
 
