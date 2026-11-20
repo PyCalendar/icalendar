@@ -1,0 +1,1 @@
+Removed the unused ``Parameters.params()`` method, an undocumented alias for ``Parameters.keys()`` with no callers in the codebase. I used SWE-2 to assist with this change. :user:`Seyamalam`
