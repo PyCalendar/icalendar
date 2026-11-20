@@ -1,6 +1,7 @@
 """parsing and generation of content lines"""
 
 import re
+import sys
 
 from icalendar.parser.parameter import Parameters, closes_quoted_section
 from icalendar.parser.property import unescape_backslash, unescape_list_or_string
@@ -18,6 +19,27 @@ from icalendar.parser_tools import DEFAULT_ENCODING, ICAL_TYPE, to_unicode
 # to the first line break of a run, making a failed attempt O(1) instead of a
 # full rescan, while matching exactly the same strings.
 UFOLD = re.compile(r"(?:(?<!\n)\r\n|(?<![\r\n])\n)(?:\r?\n)*[ \t]")
+NEWLINE_BYTES = re.compile(rb"\r?\n")
+# a legacy CHARSET parameter declares the encoding of one property value.
+# RFC 5545 §3.1.4 defines no property parameter to declare a charset
+# ("There is not a property parameter to declare the charset used in a
+# property value.  The default charset for an iCalendar stream is UTF-8"),
+# so this exists only to tolerate files from pre-RFC 5545 producers
+# that kept the vCard-style CHARSET parameter (issue #2078).
+# The character class excludes the delimiters, so both regexes below match
+# the same strings; Python 3.10 has no possessive quantifiers, so it uses
+# the simpler regex.
+_CHARSET_PARAM_BYTES_PY310 = re.compile(
+    rb";[ \t]*CHARSET[ \t]*=[ \t]*([^;:\r\n]+)", re.IGNORECASE
+)
+if sys.version_info >= (3, 11):
+    # the possessive quantifier never gives matched characters back,
+    # keeping the match linear
+    CHARSET_PARAM_BYTES = re.compile(
+        rb";[ \t]*CHARSET[ \t]*=[ \t]*([^;:\r\n]++)", re.IGNORECASE
+    )
+else:
+    CHARSET_PARAM_BYTES = _CHARSET_PARAM_BYTES_PY310
 NEWLINE = re.compile(r"\r?\n")
 
 OWS = " \t"
@@ -119,6 +141,39 @@ def _strip_ows_around_delimiters(st: str, delimiters: str = ";=") -> str:
         out.extend(pending_ws)
 
     return "".join(out).strip()
+
+
+def _decode_with_charset(value: bytes) -> str:
+    """Decode content lines, honoring a legacy ``CHARSET`` parameter.
+
+    Input that is valid UTF-8 — a conforming :rfc:`5545` stream — is
+    decoded exactly as before this parameter was honored, so a vestigial
+    ``CHARSET`` parameter in a file that actually uses UTF-8 cannot
+    override it. Only when the input is not valid UTF-8 as a whole is
+    each content line decoded with the charset its ``CHARSET`` parameter
+    declares, so a value that names its encoding does not come back as
+    U+FFFD. Lines without a ``CHARSET`` parameter (or with an unknown
+    one) keep the previous best-effort UTF-8 decoding.
+    """
+    try:
+        return value.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
+    lines = []
+    for line in NEWLINE_BYTES.split(value):
+        # the parameters end at the first colon: a parameter VALUE quoting
+        # the text "CHARSET=..." must not select an encoding
+        head, _sep, _tail = line.partition(b":")
+        match = CHARSET_PARAM_BYTES.search(head)
+        if match:
+            charset = match.group(1).decode("ascii", "replace").strip().strip('"')
+            try:
+                lines.append(line.decode(charset))
+                continue
+            except (LookupError, UnicodeDecodeError):
+                pass
+        lines.append(to_unicode(line))
+    return "\r\n".join(lines)
 
 
 class Contentline(str):
@@ -318,7 +373,9 @@ class Contentline(str):
     @classmethod
     def from_ical(cls, ical, strict=False):
         """Unfold the content lines in an iCalendar into long content lines."""
-        ical = to_unicode(ical)
+        ical = (
+            _decode_with_charset(ical) if isinstance(ical, bytes) else to_unicode(ical)
+        )
         # a fold is carriage return followed by either a space or a tab
         return cls(UFOLD.sub("", ical), strict=strict)
 
@@ -342,7 +399,7 @@ class Contentlines(list[Contentline]):
     @classmethod
     def from_ical(cls, st):
         """Parses a string into content lines."""
-        st = to_unicode(st)
+        st = _decode_with_charset(st) if isinstance(st, bytes) else to_unicode(st)
         try:
             # a fold is carriage return followed by either a space or a tab
             unfolded = UFOLD.sub("", st)
