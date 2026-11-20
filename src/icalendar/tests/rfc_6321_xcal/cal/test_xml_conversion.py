@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-    from icalendar.cal.calendar import Calendar
+    from icalendar.cal import Calendar
 
 # BEGIN:VCALENDAR
 # VERSION:2.0

@@ -32,9 +32,7 @@ from icalendar.tools import is_date
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from icalendar.cal import Component
-    from icalendar.cal.event import Event
-    from icalendar.cal.todo import Todo
+    from icalendar.cal import Component, Event, Todo
 
 
 def _get_rdates(
