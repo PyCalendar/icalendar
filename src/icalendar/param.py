@@ -838,12 +838,27 @@ def _del_GAP(prop):  # noqa: N802
 
 GAP = property(_get_GAP, _set_GAP, _del_GAP)
 
+DERIVED = boolean_parameter("DERIVED", False)
+"""Indicate that a property's value is derived from other property values.
+
+Conformance:
+    This property parameter is specified in :rfc:`9073#section-5.3`.
+
+    This parameter MAY be specified on any property whose value can be
+    derived from the value of one or more other properties. When set to
+    ``TRUE``, clients MUST NOT update the property's value directly, since
+    it is expected to be recomputed from the properties it derives from.
+    The default, when absent, is ``FALSE``.
+"""
+
+
 __all__ = [
     "ALTREP",
     "CN",
     "CUTYPE",
     "DELEGATED_FROM",
     "DELEGATED_TO",
+    "DERIVED",
     "DIR",
     "EMAIL",
     "FBTYPE",
