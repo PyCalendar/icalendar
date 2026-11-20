@@ -24,17 +24,17 @@ def test_no_dtstamp(dtstamp_comp):
     assert dtstamp_comp.DTSTAMP is None
 
 
-def set_dtstamp_attribute(component: Component, value: date):
+def set_dtstamp_attribute(component: Component, value: date) -> None:
     """Use the setter."""
     component.DTSTAMP = value
 
 
-def set_dtstamp_item(component: Component, value: date):
+def set_dtstamp_item(component: Component, value: date) -> None:
     """Use setitem."""
     component["DTSTAMP"] = vDDDTypes(value)
 
 
-def set_dtstamp_add(component: Component, value: date):
+def set_dtstamp_add(component: Component, value: date) -> None:
     """Use add."""
     component.add("DTSTAMP", value)
 
