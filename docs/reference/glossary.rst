@@ -89,7 +89,7 @@ Glossary
             :rfc:`6321#section-3.2`
 
     IC:vcalendar
-        In xCal, an IC:vcalendar XML element representation of a single :term:`iCalendar` object in an :term:`iCalendar stream`.
+        In xCal, an IC:vcalendar XML element representation of a single :term:`iCalendar object` in an :term:`iCalendar stream`.
 
         ..  seealso::
 
