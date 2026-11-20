@@ -373,8 +373,14 @@ class Parameters(CaselessDict[str | list[str]]):
     def params(self) -> KeysView[str]:
         """In RFC 5545 keys are called parameters, so this is to be consitent
         with the naming conventions.
+
+        .. deprecated::
+            Use ``self.keys()`` instead. This method is deprecated and will be
+            removed in icalendar 9.
         """
         return self.keys()
+
+    params = deprecate_for_version_9(params)
 
     def to_ical(self, sorted: bool = True) -> bytes:  # noqa: A002
         """Returns an :rfc:`5545` representation of the parameters.
