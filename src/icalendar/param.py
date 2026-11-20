@@ -463,6 +463,21 @@ Example:
     -   :attr:`Todo.attendees <icalendar.cal.todo.Todo.attendees>`
 """
 
+SCHEMA = string_parameter(
+    "SCHEMA",
+    """Identify the schema that a STRUCTURED-DATA value conforms to.
+
+Conformance:
+    This property parameter is specified in :rfc:`9073#section-5.2`.
+
+    This parameter SHOULD be specified on the STRUCTURED-DATA property.
+    Its value is a URI identifying the schema the structured data
+    follows. It supplements the media type given by the FMTTYPE
+    parameter, which alone may not be specific enough to interpret the
+    value (for example, which JSON-LD vocabulary a payload uses).
+""",
+)
+
 SENT_BY = string_parameter(
     "SENT-BY",
     """Specify the calendar user that is acting on behalf of the calendar user specified by the property.
@@ -858,6 +873,7 @@ __all__ = [
     "RELATED",
     "ROLE",
     "RSVP",
+    "SCHEMA",
     "SENT_BY",
     "TZID",
     "VALUE",
