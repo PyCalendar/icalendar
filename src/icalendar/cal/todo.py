@@ -44,6 +44,7 @@ from icalendar.attr import (
     set_duration_with_locking,
     set_end_with_locking,
     set_start_with_locking,
+    single_utc_property,
     status_property,
     summary_property,
     uid_property,
@@ -172,6 +173,28 @@ class Todo(Component):
         property_del_duration,
         property_doc_duration_template.format(component="VTODO"),
     )
+    COMPLETED = single_utc_property(
+        "COMPLETED",
+        """The UTC datetime when this todo was completed, per :rfc:`5545#section-3.8.2.1`.
+
+    This property defines the date and time that a to-do was actually completed.
+    This property is optional.
+    The value is always in UTC. It can also be accessed as :attr:`completed`.
+
+    Example:
+        .. code-block:: pycon
+
+            >>> from datetime import timezone, datetime
+            >>> from icalendar import Todo
+            >>> todo = Todo()
+            >>> todo.COMPLETED = datetime(2024, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
+            >>> todo.COMPLETED
+            datetime.datetime(2024, 6, 1, 12, 0, tzinfo=ZoneInfo(key='UTC'))
+
+    See also:
+        :attr:`completed`, :attr:`status`, :attr:`percent_complete`
+    """,
+    )
 
     def _get_start_end_duration(self):
         """Verify the calendar validity and return the right attributes."""
@@ -239,6 +262,27 @@ class Todo(Component):
             :attr:`start`, :attr:`duration`
         """
         self.DUE = end
+
+    @property
+    def completed(self) -> datetime | None:
+        """The UTC datetime when this todo was completed, as a :class:`~datetime.datetime`.
+
+        This is the lowercase property counterpart to, and accessor for, :attr:`COMPLETED`.
+        """
+        return self.COMPLETED
+
+    @completed.setter
+    def completed(self, completed: date | datetime | None):
+        """Set the completion datetime of the VTODO.
+
+        Sets the ``COMPLETED`` property. Pass ``None`` to remove it.
+        """
+        self.COMPLETED = completed
+
+    @completed.deleter
+    def completed(self):
+        """Delete the ``COMPLETED`` property from the VTODO."""
+        del self.COMPLETED
 
     @property
     def duration(self) -> timedelta:
@@ -356,6 +400,7 @@ class Todo(Component):
         classification: CLASS | None = None,
         color: str | None = None,
         comments: list[str] | str | None = None,
+        completed: date | datetime | None = None,
         concepts: CONCEPTS_TYPE_SETTER = None,
         contacts: list[str] | str | None = None,
         conferences: list[Conference] | None = None,
@@ -392,6 +437,7 @@ class Todo(Component):
             classification: The :attr:`classification` of the todo.
             color: The :attr:`color` of the todo.
             comments: The :attr:`~icalendar.cal.component.Component.comments` of the todo.
+            completed: The :attr:`completed` of the todo.
             concepts: The :attr:`~icalendar.cal.component.Component.concepts` of the todo.
             contacts: The :attr:`contacts` of the todo.
             conferences: The :attr:`conferences` of the todo.
@@ -443,6 +489,7 @@ class Todo(Component):
         todo.uid = uid if uid is not None else uuid.uuid4()
         todo.start = start
         todo.end = end
+        todo.completed = completed
         todo.color = color
         todo.categories = categories
         todo.sequence = sequence
