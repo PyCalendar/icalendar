@@ -97,7 +97,7 @@ def test_last_modified(dtstamp_comp, tzp):
 
 
 @pytest.fixture(params=["last_modified", "created"])
-def attr_depending_on_dtstamp(request):
+def attr_depending_on_dtstamp(request) -> str:
     """These parameters default to the DTSTAMP attribute."""
     return request.param
 
