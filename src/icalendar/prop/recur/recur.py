@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -477,6 +478,88 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def byweekno(self) -> tuple[int, ...]:
+        """The BYWEEKNO part of the recurrence rule.
+
+        This specifies a list of week numbers of the year for the recurrence,
+        per :rfc:`5545#section-3.3.10`. Valid values are integers from 1 to 53
+        or from -53 to -1. The value 0 is not allowed.
+
+        Returns:
+            A tuple of integer week numbers, or an empty tuple if ``BYWEEKNO`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to int, is 0,
+                or is outside the valid ranges of -53 to -1 or 1 to 53.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=YEARLY;BYWEEKNO=1,20,53").byweekno
+                (1, 20, 53)
+                >>> vRecur.from_ical("FREQ=YEARLY;BYWEEKNO=-1").byweekno
+                (-1,)
+                >>> vRecur.from_ical("FREQ=YEARLY").byweekno
+                ()
+        """
+        values = self.get("BYWEEKNO")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[int] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(f"BYWEEKNO values must be integers, got {val!r}")
+            try:
+                week = int(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYWEEKNO values must be integers, got {val!r}"
+                ) from e
+            if week == 0 or not -53 <= week <= 53:
+                raise InvalidCalendar(
+                    "BYWEEKNO values must be between -53 and -1 or 1 and 53, "
+                    f"got {week}"
+                )
+            result.append(week)
+        return tuple(result)
+
+    @byweekno.setter
+    def byweekno(self, value: int | Iterable[int] | None) -> None:
+        """Set the BYWEEKNO part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.byweekno
+            return
+        if isinstance(value, int) and not isinstance(value, bool):
+            weeks = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            weeks = list(value)
+        else:
+            raise TypeError(
+                f"byweekno must be an int or an iterable of ints, got {value!r}"
+            )
+        if not weeks:
+            del self.byweekno
+            return
+        validated: list[vInt] = []
+        for w in weeks:
+            if not isinstance(w, int) or isinstance(w, bool):
+                raise TypeError(f"byweekno items must be integers, got {w!r}")
+            if w == 0 or not -53 <= w <= 53:
+                raise InvalidCalendar(
+                    f"BYWEEKNO values must be between -53 and -1 or 1 and 53, got {w}"
+                )
+            validated.append(vInt(w))
+        self["BYWEEKNO"] = validated
+
+    @byweekno.deleter
+    def byweekno(self) -> None:
+        """Delete the BYWEEKNO part of the recurrence rule."""
+        self.pop("BYWEEKNO", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other"""
