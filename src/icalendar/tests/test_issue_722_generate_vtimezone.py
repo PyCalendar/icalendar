@@ -361,8 +361,10 @@ def test_dateutil_timezone_is_matched_with_tzname(tzname):
     event.start = datetime(2024, 11, 12, tzinfo=gettz(tzname))
     print(dir(event.start.tzinfo))
     cal.add_component(event)
-    assert cal.get_missing_tzids() == {tzname}
+    stored_tzid = event["DTSTART"].params["TZID"]
+    assert cal.get_missing_tzids() == {stored_tzid}
     cal.add_missing_timezones()
+    assert [timezone.tz_name for timezone in cal.timezones] == [stored_tzid]
     assert cal.get_missing_tzids() == set()
 
 
