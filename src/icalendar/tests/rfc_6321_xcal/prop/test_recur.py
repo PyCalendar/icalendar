@@ -257,7 +257,7 @@ for key in POSITIVE_INTS:
         (
             key,
             "asd",
-            f"Expected xsd:nonNegativeInteger, got 'asd' in /recur/{key.lower()}[1].",
+            f"Expected xsd:{'positiveInteger' if key == 'INTERVAL' else 'nonNegativeInteger'}, got 'asd' in /recur/{key.lower()}[1].",
         )
     )
 
@@ -282,7 +282,7 @@ def test_invalid_values_raise_xcal_error(key, xml, message):
     assert e.value.message == message
 
 
-@pytest.mark.parametrize("key", POSITIVE_INTS)
+@pytest.mark.parametrize("key", [key for key in POSITIVE_INTS if key != "INTERVAL"])
 def test_negative_integer_still_parses(key):
     """We still want to preserve invalid values because
     - we might just want to convert a calendar
@@ -292,6 +292,16 @@ def test_negative_integer_still_parses(key):
     result = vRecur.from_xcal(xml)
     assert result[key] == [-1]
     assert result[key][0].min == 0
+
+
+def test_negative_interval_raises_xcal_error():
+    """INTERVAL is an xsd:positiveInteger and cannot be negative."""
+    xml = list2xml(["recur", ["interval", "-1"]])
+    with pytest.raises(XCalParsingError) as exc_info:
+        vRecur.from_xcal(xml)
+    assert exc_info.value.message == (
+        "Expected xsd:positiveInteger, got '-1' in /recur/interval[1]."
+    )
 
 
 def test_weekday_becomes_uppercase():
