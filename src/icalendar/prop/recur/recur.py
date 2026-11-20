@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -477,6 +478,86 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def byminute(self) -> tuple[int, ...]:
+        """The BYMINUTE part of the recurrence rule.
+
+        This specifies a list of minutes of the hour for the recurrence, per
+        :rfc:`5545#section-3.3.10`. Valid values are integers from 0 to 59.
+
+        Returns:
+            A tuple of integer minutes, or an empty tuple if ``BYMINUTE`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to int or is
+                outside the valid range of 0 to 59.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=HOURLY;BYMINUTE=0,15,30,45").byminute
+                (0, 15, 30, 45)
+                >>> vRecur.from_ical("FREQ=HOURLY;BYMINUTE=0").byminute
+                (0,)
+                >>> vRecur.from_ical("FREQ=HOURLY").byminute
+                ()
+        """
+        values = self.get("BYMINUTE")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[int] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(f"BYMINUTE values must be integers, got {val!r}")
+            try:
+                minute = int(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYMINUTE values must be integers, got {val!r}"
+                ) from e
+            if not 0 <= minute <= 59:
+                raise InvalidCalendar(
+                    f"BYMINUTE values must be between 0 and 59, got {minute}"
+                )
+            result.append(minute)
+        return tuple(result)
+
+    @byminute.setter
+    def byminute(self, value: int | Iterable[int] | None) -> None:
+        """Set the BYMINUTE part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.byminute
+            return
+        if isinstance(value, int) and not isinstance(value, bool):
+            minutes = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            minutes = list(value)
+        else:
+            raise TypeError(
+                f"byminute must be an int or an iterable of ints, got {value!r}"
+            )
+        if not minutes:
+            del self.byminute
+            return
+        validated: list[vNonNegativeInt] = []
+        for m in minutes:
+            if not isinstance(m, int) or isinstance(m, bool):
+                raise TypeError(f"byminute items must be integers, got {m!r}")
+            if not 0 <= m <= 59:
+                raise InvalidCalendar(
+                    f"BYMINUTE values must be between 0 and 59, got {m}"
+                )
+            validated.append(vNonNegativeInt(m))
+        self["BYMINUTE"] = validated
+
+    @byminute.deleter
+    def byminute(self) -> None:
+        """Delete the BYMINUTE part of the recurrence rule."""
+        self.pop("BYMINUTE", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other"""
