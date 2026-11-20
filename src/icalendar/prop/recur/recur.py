@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -477,6 +478,94 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def bymonth(self) -> tuple[vMonth, ...]:
+        """The BYMONTH part of the recurrence rule.
+
+        This specifies a list of months of the year for the recurrence, per
+        :rfc:`5545#section-3.3.10` and :rfc:`7529`. Valid values are integers
+        from 1 to 12 (or leap months such as ``5L``).
+
+        Returns:
+            A tuple of :class:`~icalendar.prop.recur.month.vMonth` objects, or an
+            empty tuple if ``BYMONTH`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to a month
+                or is outside the valid range of 1 to 12.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=YEARLY;BYMONTH=1,6,12").bymonth
+                (vMonth('1'), vMonth('6'), vMonth('12'))
+                >>> vRecur.from_ical("FREQ=YEARLY;BYMONTH=1").bymonth
+                (vMonth('1'),)
+                >>> vRecur.from_ical("FREQ=YEARLY").bymonth
+                ()
+        """
+        values = self.get("BYMONTH")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[vMonth] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(f"BYMONTH values must be months, got {val!r}")
+            try:
+                m = val if isinstance(val, vMonth) else vMonth(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYMONTH values must be months, got {val!r}"
+                ) from e
+            if not 1 <= int(m) <= 12:
+                raise InvalidCalendar(
+                    f"BYMONTH values must be between 1 and 12, got {int(m)}"
+                )
+            result.append(m)
+        return tuple(result)
+
+    @bymonth.setter
+    def bymonth(
+        self, value: int | str | vMonth | Iterable[int | str | vMonth] | None
+    ) -> None:
+        """Set the BYMONTH part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.bymonth
+            return
+        if isinstance(value, (int, str, vMonth)) and not isinstance(value, bool):
+            months = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            months = list(value)
+        else:
+            raise TypeError(
+                f"bymonth must be an int, str, vMonth, or an iterable of them, got {value!r}"
+            )
+        if not months:
+            del self.bymonth
+            return
+        validated: list[vMonth] = []
+        for m in months:
+            if isinstance(m, bool) or not isinstance(m, (int, str, vMonth)):
+                raise TypeError(f"bymonth items must be int, str, or vMonth, got {m!r}")
+            try:
+                vm = m if isinstance(m, vMonth) else vMonth(m)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(f"Invalid BYMONTH value: {m!r}") from e
+            if not 1 <= int(vm) <= 12:
+                raise InvalidCalendar(
+                    f"BYMONTH values must be between 1 and 12, got {int(vm)}"
+                )
+            validated.append(vm)
+        self["BYMONTH"] = validated
+
+    @bymonth.deleter
+    def bymonth(self) -> None:
+        """Delete the BYMONTH part of the recurrence rule."""
+        self.pop("BYMONTH", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other"""
