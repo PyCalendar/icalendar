@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -477,6 +478,104 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def byday(self) -> tuple[vWeekday, ...]:
+        """The BYDAY part of the recurrence rule.
+
+        This specifies a list of days of the week on which the event recurs,
+        per :rfc:`5545#section-3.3.10`. Each day is one of ``MO``, ``TU``,
+        ``WE``, ``TH``, ``FR``, ``SA``, or ``SU``, optionally preceded by a
+        positive or negative integer (e.g. ``+1MO`` or ``-2FR``) to indicate
+        the nth occurrence within a monthly or yearly rule.
+
+        Returns:
+            A tuple of :class:`~icalendar.prop.recur.weekday.vWeekday` instances,
+            or an empty tuple if ``BYDAY`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to a weekday.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur("FREQ=MONTHLY;BYDAY=+1MO,-2FR").byday
+                (vWeekday('+1MO'), vWeekday('-2FR'))
+                >>> vRecur("FREQ=DAILY").byday
+                ()
+        """
+        values = self.get("BYDAY")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[vWeekday] = []
+        for val in values:
+            if isinstance(val, vWeekday):
+                result.append(val)
+            else:
+                try:
+                    result.append(vWeekday(val))
+                except (TypeError, ValueError) as e:
+                    raise InvalidCalendar(
+                        f"BYDAY must be a weekday abbreviation or vWeekday, got {val!r}"
+                    ) from e
+        return tuple(result)
+
+    @byday.setter
+    def byday(self, value: str | vWeekday | Iterable[str | vWeekday] | None) -> None:
+        """Set the BYDAY part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.byday
+            return
+        if isinstance(value, (str, bytes, vWeekday)):
+            items = [value]
+        elif isinstance(value, Iterable):
+            items = list(value)
+        else:
+            raise TypeError(
+                f"byday must be a str, vWeekday, or an iterable of them, got {value!r}"
+            )
+        if not items:
+            del self.byday
+            return
+        validated: list[vWeekday] = []
+        for item in items:
+            if isinstance(item, vWeekday):
+                validated.append(item)
+            elif isinstance(item, (str, bytes)):
+                try:
+                    val_str = item if isinstance(item, str) else item.decode()
+                    validated.append(vWeekday.from_ical(val_str))
+                except (ValueError, TypeError) as e:
+                    raise InvalidCalendar(f"Invalid BYDAY weekday {item!r}: {e}") from e
+            else:
+                raise TypeError(f"byday items must be str or vWeekday, got {item!r}")
+        self["BYDAY"] = validated
+
+    @byday.deleter
+    def byday(self) -> None:
+        """Delete the BYDAY part of the recurrence rule."""
+        self.pop("BYDAY", None)
+        self.pop("BYWEEKDAY", None)
+
+    @property
+    def byweekday(self) -> tuple[vWeekday, ...]:
+        """Alias for :attr:`byday` per :rfc:`5545` and issue #1851."""
+        return self.byday
+
+    @byweekday.setter
+    def byweekday(
+        self, value: str | vWeekday | Iterable[str | vWeekday] | None
+    ) -> None:
+        """Alias for :attr:`byday` setter."""
+        self.byday = value
+
+    @byweekday.deleter
+    def byweekday(self) -> None:
+        """Alias for :attr:`byday` deleter."""
+        del self.byday
 
     def __eq__(self, other: object) -> bool:
         """self == other"""
