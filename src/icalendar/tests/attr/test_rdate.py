@@ -9,15 +9,16 @@ from typing import TYPE_CHECKING
 import pytest
 
 from icalendar import vDDDLists, vDDDTypes
-from icalendar.cal.event import Event
-from icalendar.cal.journal import Journal
-from icalendar.cal.timezone import TimezoneDaylight, TimezoneStandard
-from icalendar.cal.todo import Todo
+from icalendar.cal import (
+    Event,
+    Journal,
+    TimezoneDaylight,
+    TimezoneStandard,
+    Todo,
+)
 
 if TYPE_CHECKING:
-    from icalendar.cal.calendar import (
-        Calendar,
-    )
+    from icalendar.cal import Calendar
 
 C_RDATE = Event | Todo | Journal | TimezoneDaylight | TimezoneStandard
 

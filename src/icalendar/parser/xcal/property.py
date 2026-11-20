@@ -13,7 +13,7 @@ from icalendar.prop.unknown import vUnknown
 if TYPE_CHECKING:
     from xml.etree.ElementTree import Element
 
-    from icalendar.cal.component import Component
+    from icalendar.cal import Component
     from icalendar.parser.xcal.adapter import ElementAdapter
     from icalendar.prop import VPROPERTY
     from icalendar.prop.factory import TypesFactory

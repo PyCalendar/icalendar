@@ -12,8 +12,7 @@ from icalendar.parser.xcal.property import XCalPropertiesParser
 if TYPE_CHECKING:
     from xml.etree.ElementTree import Element
 
-    from icalendar.cal.component import Component
-    from icalendar.cal.component_factory import ComponentFactory
+    from icalendar.cal import Component, ComponentFactory
     from icalendar.prop.factory import TypesFactory
 
 

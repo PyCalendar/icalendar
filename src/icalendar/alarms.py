@@ -16,8 +16,7 @@ from __future__ import annotations
 from datetime import date, timedelta, tzinfo
 from typing import TYPE_CHECKING, overload
 
-from icalendar.cal.event import Event
-from icalendar.cal.todo import Todo
+from icalendar.cal import Event, Todo
 from icalendar.error import (
     ComponentEndMissing,
     ComponentStartMissing,
@@ -31,7 +30,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
     from datetime import datetime
 
-    from icalendar.cal.alarm import Alarm
+    from icalendar.cal import Alarm
     from icalendar.enums import ACTION
     from icalendar.prop import vBinary, vUri
 

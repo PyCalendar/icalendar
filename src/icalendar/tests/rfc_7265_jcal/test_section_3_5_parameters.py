@@ -13,7 +13,7 @@ from icalendar import PARTSTAT, ROLE, VPROPERTY, Event, vCalAddress
 from icalendar.parser import Parameters
 
 if TYPE_CHECKING:
-    from icalendar.cal.calendar import Calendar
+    from icalendar.cal import Calendar
 
 
 def test_vCalAddressExample():

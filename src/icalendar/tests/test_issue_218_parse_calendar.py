@@ -16,7 +16,7 @@ from icalendar.timezone.tzid import tzid_from_dt
 if TYPE_CHECKING:
     from calendar import Calendar
 
-    from icalendar.cal.event import Event
+    from icalendar.cal import Event
 
 
 @pytest.fixture
