@@ -1,7 +1,7 @@
 [
     {
         "version": "dev",
-        "url": "https://icalendar-stevepiercy.readthedocs.io/en/latest/"
+        "url": "https://icalendar.readthedocs.io/en/latest/"
     },
     {
         "name": "7.x (stable)",
@@ -11,14 +11,14 @@
     },
     {
         "version": "6.x",
-        "url": "https://icalendar-stevepiercy.readthedocs.io/en/6.x/"
+        "url": "https://icalendar.readthedocs.io/en/6.x/"
     },
     {
         "version": "5.x",
-        "url": "https://icalendar-stevepiercy.readthedocs.io/en/5.x/"
+        "url": "https://icalendar.readthedocs.io/en/5.x/"
     },
     {
         "version": "4.x",
-        "url": "https://icalendar-stevepiercy.readthedocs.io/en/4.x/"
+        "url": "https://icalendar.readthedocs.io/en/4.x/"
     }
 ]
