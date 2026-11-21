@@ -27,7 +27,7 @@ from icalendar.prop import (
 from icalendar.prop.conference import Conference
 from icalendar.prop.image import Image
 from icalendar.timezone import tzp
-from icalendar.tools import is_date
+from icalendar.tools import is_date, normalize_pytz
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -1840,16 +1840,7 @@ def get_start_end_duration_with_validation(
     end = getattr(component, end_property, None)
     duration = component.DURATION
 
-    # RFC 5545: Only one of end property and DURATION may be present
-    if duration is not None and end is not None:
-        end_name = "DTEND" if end_property == "DTEND" else "DUE"
-        msg = (
-            f"Only one of {end_name} and DURATION "
-            f"may be in a {component_name}, not both."
-        )
-        raise InvalidCalendar(msg)
-
-    # RFC 5545: When DTSTART is a date, DURATION must be of days or weeks
+    # RFC 5545: When DTSTART is a date, DURATION must be of days or weeks.
     if (
         start is not None
         and is_date(start)
@@ -1859,13 +1850,30 @@ def get_start_end_duration_with_validation(
         msg = "When DTSTART is a date, DURATION must be of days or weeks."
         raise InvalidCalendar(msg)
 
-    # RFC 5545: DTSTART and end property must be of the same type
+    # RFC 5545: DTSTART and end property must be of the same type.
     if start is not None and end is not None and is_date(start) != is_date(end):
         end_name = "DTEND" if end_property == "DTEND" else "DUE"
         msg = (
             f"DTSTART and {end_name} must be of the same type, either date or datetime."
         )
         raise InvalidCalendar(msg)
+
+    # Issue #1796: real-world VEVENTs can contain DTSTART, DTEND, and DURATION.
+    # Prefer a non-negative DURATION; when it is negative but DTEND is valid
+    # (DTEND >= DTSTART), retain DTEND. Reject conflicting non-negative values.
+    if duration is not None and end is not None:
+        end_name = "DTEND" if end_property == "DTEND" else "DUE"
+        if duration < timedelta(0) and start is not None and end >= start:
+            duration = None
+        elif start is None:
+            msg = f"Cannot validate both {end_name} and DURATION without DTSTART."
+            raise InvalidCalendar(msg)
+        else:
+            expected_end = normalize_pytz(start + duration)
+            if end != expected_end:
+                msg = f"{end_name} and DURATION specify different end times."
+                raise InvalidCalendar(msg)
+            end = None
 
     return start, end, duration
 
