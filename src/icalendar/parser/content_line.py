@@ -6,17 +6,26 @@ from icalendar.parser.parameter import Parameters
 from icalendar.parser.property import unescape_backslash, unescape_list_or_string
 from icalendar.parser.string import (
     _escape_string,
+    _foldline,
     _unescape_string,
-    foldline,
     validate_token,
 )
 from icalendar.parser_tools import DEFAULT_ENCODING, ICAL_TYPE, to_unicode
 
-UFOLD = re.compile("(\r?\n)+[ \t]")
+# Equivalent to the natural ``(\r?\n)+[ \t]`` but without its quadratic cost:
+# the greedy run is re-tried at every line break of a long unfoldable block, so
+# a megabyte of bare newlines takes seconds. The leading lookbehinds pin a match
+# to the first line break of a run, making a failed attempt O(1) instead of a
+# full rescan, while matching exactly the same strings.
+UFOLD = re.compile(r"(?:(?<!\n)\r\n|(?<![\r\n])\n)(?:\r?\n)*[ \t]")
 NEWLINE = re.compile(r"\r?\n")
 
 OWS = " \t"
-OWS_AROUND_DELIMITERS_RE = re.compile(r"[ \t]*([;=])[ \t]*")
+# ``[ \t]*([;=])[ \t]*`` in one pass rescans a long whitespace run at every
+# position. Splitting it into two anchored passes (leading then trailing) keeps
+# the result identical but removes the quadratic blow-up.
+OWS_BEFORE_DELIMITER_RE = re.compile(r"(?<![ \t])[ \t]+([;=])")
+OWS_AFTER_DELIMITER_RE = re.compile(r"([;=])[ \t]+")
 
 
 def _strip_ows_around_delimiters(st: str, delimiters: str = ";=") -> str:
@@ -37,7 +46,8 @@ def _strip_ows_around_delimiters(st: str, delimiters: str = ";=") -> str:
 
     # Fast regex-based path for simple parameter sections without quoting/escaping.
     if delimiters == ";=" and '"' not in st and "\\" not in st:
-        return OWS_AROUND_DELIMITERS_RE.sub(r"\1", st).strip()
+        st = OWS_BEFORE_DELIMITER_RE.sub(r"\1", st)
+        return OWS_AFTER_DELIMITER_RE.sub(r"\1", st).strip()
 
     out: list[str] = []
     pending_ws: list[str] = []
@@ -150,23 +160,15 @@ class Contentline(str):
                 return cls(f"{name};{params}:{values}")
         return cls(f"{name}:{values}")
 
-    def parts(self) -> tuple[str, Parameters, str]:
-        """Split the content line into ``name``, ``parameters``, and ``values`` parts.
+    def raw_parts(self) -> tuple[str, Parameters, str]:
+        """Split the line into ``name``, ``parameters``, and raw ``values`` parts.
 
-        Properly handles escaping with backslashes and double-quote sections
-        to avoid corrupting URL-encoded characters in values.
+        This is :meth:`parts` without the unescaping: the values are returned
+        verbatim, preserving both backslash sequences and URL encoding. It is
+        used for :rfc:`7265` ``UNKNOWN`` values, whose real value type—and
+        therefore whose escaping rules—are not known.
 
-        Example with parameter:
-
-        .. code-block:: ics
-
-            DESCRIPTION;ALTREP="cid:part1.0001@example.org":The Fall'98 Wild
-
-        Example without parameters:
-
-        .. code-block:: ics
-
-            DESCRIPTION:The Fall'98 Wild
+        See :meth:`parts` for the parts themselves and for examples.
         """
         try:
             name_split: int | None = None
@@ -216,13 +218,61 @@ class Contentline(str):
                 (_unescape_string(key), unescape_list_or_string(value))
                 for key, value in iter(params.items())
             )
-            # Unescape backslash sequences in values but preserve URL encoding
-            values = unescape_backslash(self[value_split + 1 :])
+            values = self[value_split + 1 :]
         except ValueError as exc:
             raise ValueError(
                 f"Content line could not be parsed into parts: '{self}': {exc}"
             ) from exc
         return (name, params, values)
+
+    def parts(self) -> tuple[str, Parameters, str]:
+        """Split the line into ``name``, ``parameters``, and unescaped ``values`` parts.
+
+        Properly handles escaping with backslashes and double-quote sections
+        to avoid corrupting URL-encoded characters in values.
+
+        The backslash sequences in the values are unescaped, as for the values
+        of ``TEXT`` properties, while URL encoding is preserved. Use
+        :meth:`raw_parts` to get the values verbatim instead.
+
+        Examples:
+
+            With parameter:
+
+            ..  code-block:: ics
+
+                DESCRIPTION;ALTREP="cid:part1.0001@example.org":The Fall'98 Wild
+
+            Without parameters:
+
+            ..  code-block:: ics
+
+                DESCRIPTION:The Fall'98 Wild
+        """
+        name, params, values = self.raw_parts()
+        return (name, params, unescape_backslash(values))
+
+    def value_separator_index(self) -> int:
+        r"""Return the index of the colon that separates the value.
+
+        This is the first colon that is not inside a quoted parameter section.
+        A colon inside a quoted parameter value (for example
+        ``ALTREP="http://x"``) is skipped, and a colon that belongs to the
+        value (``TEXT`` does not escape ``:``) is not mistaken for the
+        separator. Backslash has no special meaning in the parameter grammar
+        (:rfc:`5545#section-3.1`), so it is treated as an ordinary character.
+
+        Returns:
+            An integer representing the index position of the separator,
+            or ``-1`` if there is none.
+        """
+        in_quotes = False
+        for i, ch in enumerate(self):
+            if ch == '"':
+                in_quotes = not in_quotes
+            elif ch == ":" and not in_quotes:
+                return i
+        return -1
 
     @classmethod
     def from_ical(cls, ical, strict=False):
@@ -235,7 +285,7 @@ class Contentline(str):
         """Long content lines are folded so they are less than 75 characters
         wide.
         """
-        return foldline(self).encode(DEFAULT_ENCODING)
+        return _foldline(self).encode(DEFAULT_ENCODING)
 
 
 class Contentlines(list[Contentline]):

@@ -51,7 +51,7 @@ class AlarmTime:
         acknowledged_until: datetime | None = None,
         snoozed_until: datetime | None = None,
         parent: Parent | None = None,
-    ):
+    ) -> None:
         """Create an instance of ``AlarmTime`` with any of its parameters.
 
         Parameters:
@@ -86,6 +86,14 @@ class AlarmTime:
     def alarm(self) -> Alarm:
         """The alarm component."""
         return self._alarm
+
+    @property
+    def action(self) -> str:
+        """The action invoked when this alarm triggers.
+
+        This delegates to :attr:`Alarm.ACTION <icalendar.cal.alarm.Alarm.ACTION>`.
+        """
+        return self.alarm.ACTION
 
     @property
     def parent(self) -> Parent | None:
@@ -175,7 +183,7 @@ class Alarms:
     This is not implemented yet.
     """
 
-    def __init__(self, component: Alarm | Event | Todo | None = None):
+    def __init__(self, component: Alarm | Event | Todo | None = None) -> None:
         """Start computing alarm times."""
         self._absolute_alarms: list[Alarm] = []
         self._start_alarms: list[Alarm] = []
@@ -190,7 +198,7 @@ class Alarms:
         if component is not None:
             self.add_component(component)
 
-    def add_component(self, component: Alarm | Parent):
+    def add_component(self, component: Alarm | Parent) -> None:
         """Add a component.
 
         If this is an alarm, it is added.
@@ -235,7 +243,7 @@ class Alarms:
         """Set the start of the component.
 
         If you have only absolute alarms, this is not required.
-        If you have alarms relative to the start of a compoment, set the start here.
+        If you have alarms relative to the start of a component, set the start here.
         """
         self._start = dt
 
@@ -243,7 +251,7 @@ class Alarms:
         """Set the end of the component.
 
         If you have only absolute alarms, this is not required.
-        If you have alarms relative to the end of a compoment, set the end here.
+        If you have alarms relative to the end of a component, set the end here.
         """
         self._end = dt
 
@@ -286,7 +294,8 @@ class Alarms:
         alarms without timezone are considered local.
 
         Some computations work without setting this, others don't.
-        If they need this information, expect a LocalTimezoneMissing exception
+        If they need this information, expect a
+        :exc:`~icalendar.error.LocalTimezoneMissing` exception
         somewhere down the line.
         """
         self._local_tzinfo = tzp.timezone(tzinfo) if isinstance(tzinfo, str) else tzinfo
@@ -296,7 +305,7 @@ class Alarms:
         """Compute and return the times of the alarms given.
 
         If the information for calculation is incomplete, this will raise a
-        IncompleteAlarmInformation exception.
+        :exc:`~icalendar.error.IncompleteAlarmInformation` exception.
 
         Please make sure to set all the required parameters before calculating.
         If you forget to set the acknowledged times, that is not problem.
@@ -310,7 +319,7 @@ class Alarms:
     def _repeat(self, first: datetime, alarm: Alarm) -> Generator[datetime]:
         """The times when the alarm is triggered relative to start."""
         yield first  # we trigger at the start
-        repeat = alarm.REPEAT
+        repeat = alarm.repeat
         duration = alarm.DURATION
         if repeat and duration:
             for i in range(1, repeat + 1):
@@ -346,7 +355,7 @@ class Alarms:
         ]
 
     def _get_end_alarm_times(self) -> list[AlarmTime]:
-        """Return a list of alarm times relative to the start of the component."""
+        """Return a list of alarm times relative to the end of the component."""
         if self._end is None and self._end_alarms:
             raise ComponentEndMissing(
                 "Use Alarms.set_end because at least one alarm is relative to the end "
@@ -366,7 +375,8 @@ class Alarms:
 
         Alarms can be in local time (without a timezone).
         To calculate if the alarm really happened, we need it to be in a timezone.
-        If a timezone is required but not given, we throw an IncompleteAlarmInformation.
+        If a timezone is required but not given, we throw an
+        :exc:`~icalendar.error.IncompleteAlarmInformation`.
         """
         return [alarm_time for alarm_time in self.times if alarm_time.is_active()]
 

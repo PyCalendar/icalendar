@@ -56,8 +56,22 @@ When you commit code to icalendar with ``git commit``, pre-commit runs the follo
     Runs the Ruff linter on Python files and fixes issues according to the configuration in :file:`pyproject.toml`.
 `ruff format <https://docs.astral.sh/ruff/formatter/#ruff-format>`_
     Runs the Ruff formatter on Python files and fixes issues according to the configuration in :file:`pyproject.toml`.
+:program:`ai-prompt-auto-commit`
+    Automatically records AI prompts and appends them to your commit messages.
 
 The configuration file for pre-commit, :file:`.pre-commit-config.yaml`, is located at the root of the repository.
+
+.. _pre-commit-ai-prompts:
+
+AI prompt automation
+''''''''''''''''''''
+
+To comply with the :ref:`artificial-intelligence-policy`, you must include AI prompts in your commit messages.
+You can automate this by using the :program:`ai-prompt-auto-commit` hooks.
+
+If you use :program:`Claude Code`, recording is automatic, once the repository is prepared.
+For other AI tools, you may need to manually record prompts or instruct the AI to do so.
+Consider adding support for your AI tool in the `project repository <https://github.com/pycalendar/ai-prompt-auto-commit>`_.
 
 Contributors to icalendar are encouraged to use pre-commit.
 Any issues that would be caught by pre-commit shall be caught by GitHub workflows when you push commits to a pull request for icalendar.
@@ -116,6 +130,38 @@ You can run the following command to automatically format the code.
     make format
 
 
+.. _make-zizmor:
+
+Run zizmor
+----------
+
+`zizmor <https://docs.zizmor.sh/>`_ is a static analysis tool for the security of GitHub Actions workflows.
+The command ``make zizmor`` runs the same analysis as the ``zizmor static analysis`` GitHub Actions workflow.
+
+..  code-block:: shell
+
+    make zizmor
+
+Pass options to zizmor in the ``ZIZMOROPTS`` environment variable.
+In the following example, generate a SARIF report of the results.
+
+..  code-block:: shell
+
+    make zizmor ZIZMOROPTS="--format sarif"
+
+The command ``make zizmor`` automatically installs zizmor into your Python virtual environment when you invoke it the first time.
+If your virtual environment already exists, update it with the following command.
+
+..  code-block:: shell
+
+    make dev
+
+.. seealso::
+
+    -   :file:`.github/workflows/zizmor.yml`
+    -   zizmor's `documentation <https://docs.zizmor.sh/>`_
+
+
 Code conventions
 ----------------
 
@@ -134,6 +180,8 @@ These are implementation details that may change without notice.
 In addition, "internal use only" objects are not displayed in the documentation.
 Their docstrings, of course, remain in the Python source code.
 
+
+.. _type-hints:
 
 Type hints
 ''''''''''

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from icalendar.caselessdict import CaselessDict
 from icalendar.prop.adr import vAdr
@@ -50,7 +50,7 @@ class TypesFactory(CaselessDict):
             TypesFactory._instance = TypesFactory()
         return TypesFactory._instance
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         """Set keys to upper for initial dict"""
         super().__init__(*args, **kwargs)
         self.all_types = (
@@ -166,6 +166,7 @@ class TypesFactory(CaselessDict):
             "related-to": "text",
             "url": "uri",
             "conference": "uri",  # RFC 7986
+            "image": "unknown",  # RFC 7986 has no default value type
             "source": "uri",
             "uid": "text",
             # Recurrence Component Properties
@@ -178,6 +179,7 @@ class TypesFactory(CaselessDict):
             "repeat": "integer",
             "trigger": "duration",
             "acknowledged": "date-time",
+            "proximity": "text",  # RFC 9074
             # Change Management Component Properties
             "created": "date-time",
             "dtstamp": "date-time",
@@ -235,15 +237,60 @@ class TypesFactory(CaselessDict):
         if value_param and name in self.types_map and value_param in self:
             return self[value_param]
 
-        if name.upper() == "IMAGE":
-            return self[
-                "unknown"
-            ]  # IMAGE is always unknown, even if VALUE is URI or BINARY
-
         if value_param and (value_param in self) and value_param != "IMAGE":
             return self[value_param]
 
         return self[self.types_map.get(name, "unknown")]
+
+    #: jCal value types defined by :rfc:`7265` that are used verbatim as the
+    #: type field. Internal type keys outside of this set (for example
+    #: ``"categories"`` or ``"date-time-list"``) are mapped to their concrete
+    #: jCal type via the value class.
+    _jcal_value_types = frozenset(
+        {
+            "binary",
+            "boolean",
+            "cal-address",
+            "date",
+            "date-time",
+            "duration",
+            "float",
+            "integer",
+            "period",
+            "recur",
+            "text",
+            "time",
+            "uri",
+            "utc-offset",
+            "unknown",
+        }
+    )
+
+    def default_value_type(self, name: str) -> str:
+        """Return the default jCal value type for a property.
+
+        The result is a lowercase :rfc:`7265` value type, for example
+        ``"date-time"`` for ``DTSTART`` or ``"duration"`` for ``TRIGGER``.
+        This is the value type a property uses when no explicit ``VALUE``
+        parameter is given, so it tells :func:`Component.from_jcal` whether a
+        ``VALUE`` parameter has to be restored from the jCal type field.
+
+        Parameters:
+            name: Property name.
+
+        Returns:
+            The default jCal value type as a lowercase string.
+        """
+        internal = self.types_map.get(name.lower(), "unknown")
+        if internal in self._jcal_value_types:
+            return internal
+        # Internal keys such as ``categories`` or ``date-time-list`` are not
+        # jCal value types themselves; ask the value class for the type it
+        # actually serialises to.
+        try:
+            return self[internal].examples()[0].VALUE.lower()
+        except (KeyError, IndexError, AttributeError):
+            return "unknown"
 
     def to_ical(self, name, value):
         """Encodes a named value from a primitive python type to an icalendar
