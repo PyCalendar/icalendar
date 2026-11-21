@@ -1794,8 +1794,9 @@ def get_start_end_duration_with_validation(
         )
         raise InvalidCalendar(msg)
 
-    # Issue #1796: accept both properties only when they describe the same end.
-    # A negative DURATION is ignored when the explicit end is valid.
+    # Issue #1796: real-world VEVENTs can contain DTSTART, DTEND, and DURATION.
+    # Prefer a non-negative DURATION; when it is negative but DTEND is valid
+    # (DTEND >= DTSTART), retain DTEND. Reject conflicting non-negative values.
     if duration is not None and end is not None:
         end_name = "DTEND" if end_property == "DTEND" else "DUE"
         if duration < timedelta(0) and start is not None and end >= start:
