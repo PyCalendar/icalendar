@@ -2,7 +2,7 @@
 
 import pytest
 
-from icalendar import Event, vRequestStatus, vText
+from icalendar import Calendar, Event, vRequestStatus, vText
 from icalendar.error import InvalidCalendar, JCalParsingError
 from icalendar.tests.rfc_6321_xcal.common import list2xml, to_xcal_list
 
@@ -299,3 +299,83 @@ def test_from_xcal_preserves_invalid_code():
     r = vRequestStatus.from_xcal(xml)
     assert r.code == ()
     assert r.description == ""
+
+
+def _event_with_request_status(value: str) -> str:
+    """Return an .ics string of an event with one REQUEST-STATUS line."""
+    return (
+        "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:test\r\n"
+        "BEGIN:VEVENT\r\nDTSTAMP:20250101T000000Z\r\nUID:1\r\n"
+        f"REQUEST-STATUS:{value}\r\n"
+        "END:VEVENT\r\nEND:VCALENDAR\r\n"
+    )
+
+
+def _unfold(ics: bytes) -> str:
+    """Undo the line folding of long content lines."""
+    return ics.decode().replace("\r\n ", "")
+
+
+@mark_examples
+def test_serialization_does_not_escape_separators(
+    text, code, description, data, text_serialized
+):
+    """The ``;`` between the fields are separators and must not be escaped.
+
+    RFC 5545: rstatus = statcode ";" statdesc [";" extdata]
+    """
+    event = Event()
+    event.add("REQUEST-STATUS", vRequestStatus.new(code, description, data))
+    assert f"REQUEST-STATUS:{text}\r\n" in _unfold(event.to_ical())
+
+
+@mark_examples
+def test_parse_from_calendar(text, code, description, data, text_serialized):
+    """Escaped characters inside a field do not split the field when parsing."""
+    calendar = Calendar.from_ical(_event_with_request_status(text))
+    request_status = calendar.events[0]["REQUEST-STATUS"]
+    assert request_status.code == code
+    assert request_status.description == description
+    assert request_status.data == data
+
+
+@mark_examples
+def test_parse_and_serialize_is_unchanged(
+    text, code, description, data, text_serialized
+):
+    """A valid REQUEST-STATUS line is written back exactly as it was read."""
+    ics = _event_with_request_status(text)
+    assert _unfold(Calendar.from_ical(ics).to_ical()) == ics
+
+
+@pytest.mark.parametrize(
+    ("legacy_value", "code", "description", "data"),
+    [
+        (r"2.0\;Success", (2, 0), "Success", None),
+        (
+            r"3.1\;Invalid property value\;DTSTART:96-Apr-01",
+            (3, 1),
+            "Invalid property value",
+            "DTSTART:96-Apr-01",
+        ),
+        (r"2.0\;Success\\\; with note\;x\\\,y", (2, 0), "Success; with note", "x,y"),
+    ],
+)
+def test_read_values_written_by_older_versions(legacy_value, code, description, data):
+    """Older versions of icalendar escaped the separators. We can still read them."""
+    calendar = Calendar.from_ical(_event_with_request_status(legacy_value))
+    request_status = calendar.events[0]["REQUEST-STATUS"]
+    assert request_status.code == code
+    assert request_status.description == description
+    assert request_status.data == data
+
+
+def test_newline_in_description_is_escaped():
+    """A newline must not break the content line."""
+    request_status = vRequestStatus.new("2.0", "line1\nline2", "a\nb")
+    assert request_status.to_ical() == rb"2.0;line1\nline2;a\nb"
+    event = Event()
+    event.add("REQUEST-STATUS", request_status)
+    parsed = Event.from_ical(event.to_ical())["REQUEST-STATUS"]
+    assert parsed.description == "line1\nline2"
+    assert parsed.data == "a\nb"

@@ -8,12 +8,14 @@ from xml.etree.ElementTree import Element, SubElement
 
 from icalendar.error import InvalidCalendar, JCalParsingError
 from icalendar.parser.parameter import Parameters
+from icalendar.parser.property import unescape_backslash
 from icalendar.parser.xcal.wrapper import from_xcal_wrapper
 
 from .text import vText
 
 if TYPE_CHECKING:
     from icalendar.compatibility import Self
+    from icalendar.parser.content_line import Contentline
     from icalendar.parser.xcal.base import XCalParser
 
 CODE_REGEX = r"^[0-9]\.[0-9](?:\.[0-9])?$"
@@ -27,6 +29,15 @@ REQUEST_STATUS_GRAMMAR = re.compile(
 )
 UNESCAPE = re.compile(r"\\(.)")
 ESCAPE = re.compile(r"([\\,;])")
+NEWLINE = re.compile(r"\r\n|\r|\n")
+# icalendar 7.3.0 up to this fix escaped the field separators on output,
+# for example ``2.0\;Success``. See :meth:`vRequestStatus.get_value_from_content_line`.
+LEGACY_ESCAPED_SEPARATOR = re.compile(r"^[0-9]\.[0-9](?:\.[0-9])?\\;")
+
+
+def _escape_field(text: str) -> str:
+    """Escape one field of a request status according to :rfc:`5545`."""
+    return NEWLINE.sub(r"\\n", ESCAPE.sub(r"\\\1", text))
 
 
 class vRequestStatus(vText):
@@ -102,7 +113,43 @@ class vRequestStatus(vText):
 
     def _unescape(self, string: str):
         """Unescape a string."""
-        return UNESCAPE.sub(r"\1", string)
+        return UNESCAPE.sub(
+            lambda m: "\n" if m.group(1) in "nN" else m.group(1), string
+        )
+
+    def to_ical(self) -> bytes:
+        r"""Serialize the request status according to :rfc:`5545#section-3.8.8.3`.
+
+        The value already holds the escaped fields, separated by ``;``.
+        The separators must not be escaped again.
+
+        .. code-block:: pycon
+
+            >>> from icalendar.prop import vRequestStatus
+            >>> vRequestStatus.new("3.1", "Invalid property value", "DTSTART:96-Apr-01").to_ical()
+            b'3.1;Invalid property value;DTSTART:96-Apr-01'
+            >>> vRequestStatus.new("2.0", "Success; done").to_ical()
+            b'2.0;Success\\; done'
+        """
+        return NEWLINE.sub(r"\\n", self).encode(self.encoding)
+
+    @classmethod
+    def get_value_from_content_line(cls, line: Contentline) -> str:
+        r"""Return the value of a REQUEST-STATUS content line, still escaped.
+
+        The fields of a request status are separated by ``;``,
+        and a ``;`` inside a field is escaped as ``\;``.
+        Unescaping the whole value before splitting it into fields
+        would lose that difference, so the value is taken verbatim.
+
+        Older versions of icalendar wrote the separators escaped,
+        for example ``REQUEST-STATUS:2.0\;Success``.
+        Such values are unescaped once, so they are still read correctly.
+        """
+        value = line.raw_parts()[2]
+        if LEGACY_ESCAPED_SEPARATOR.match(value):
+            return unescape_backslash(value)
+        return value
 
     @property
     def description(self) -> str:
@@ -179,10 +226,10 @@ class vRequestStatus(vText):
             code_string = f"{code[0]}.{code[1]}"
             if len(code) == 3:
                 code_string += f".{code[2]}"
-        description = ESCAPE.sub(r"\\\1", description)
+        description = _escape_field(description)
         request_status = f"{code_string};{description}"
         if data is not None:
-            data = ESCAPE.sub(r"\\\1", data)
+            data = _escape_field(data)
             request_status += f";{data}"
         return cls(request_status, params=params)
 
