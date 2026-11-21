@@ -1,0 +1,1 @@
+Fixed the quadratic run time of :meth:`Component.from_xcal <icalendar.cal.component.Component.from_xcal>` for xCal documents with many properties, parameters, values, or components. I used Claude Fable 5.1 to find the issue and to write the fix and the test. @shamsManna
