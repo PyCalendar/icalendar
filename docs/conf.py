@@ -41,7 +41,7 @@ copyright = f"{this_year}, Plone Foundation"  # noqa: A001
 templates_path = ["_templates"]
 
 # Define the json_url for our version switcher.
-json_url = "https://icalendar-stevepiercy.readthedocs.io/en/latest/_static/version-switcher.json"
+json_url = "https://icalendar.readthedocs.io/en/latest/_static/version-switcher.json"
 
 # Define the version we use for matching in the version switcher.
 version_match = os.environ.get("READTHEDOCS_VERSION")
@@ -100,7 +100,7 @@ html_theme_options = {
     "secondary_sidebar_items": ["edit-this-page", "page-toc", "sourcelink"],
     "show_nav_level": 2,
     "show_toc_level": 2,
-    "show_version_warning_banner": True,
+    "show_version_warning_banner": False,
     "switcher": {
         "json_url": json_url,
         "version_match": version_match,
