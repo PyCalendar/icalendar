@@ -1,6 +1,8 @@
 """Functions for manipulating strings and bytes."""
 
 import re
+from collections.abc import Mapping
+from typing import cast
 
 from icalendar.error import InvalidToken
 from icalendar.parser_tools import DEFAULT_ENCODING, to_unicode
@@ -55,15 +57,20 @@ def _escape_char(text: str | bytes) -> str:
     )
 
 
-# The order of the alternatives is irrelevant: the substitution scans the
-# text once, left to right, so an escaped backslash ("\\\\") is consumed as
-# a pair before the character after it can be mistaken for an escape. This is
+# The replacement maps are the single source of truth for unescaping: the
+# patterns below are derived from the map keys, sorted longest-first and
+# re.escape'd, so no hand-maintained list of literals can drift from the
+# maps. Longest-first guarantees a key that is a prefix of another key (like
+# "\r\n" over a shorter key starting with "\r") is never shadowed by it,
+# even if the maps change.
+#
+# The substitution scans the text once, left to right, so an escaped backslash
+# ("\\\\") is consumed as a pair before the character after it can be
+# mistaken for an escape. This is
 # what makes a literal backslash followed by "n" or "N" survive -- the
 # sequential str.replace chain did not, and a serialized "C:\\\\numbers"
 # (the _escape_char form of "C:\\numbers") came back as "C:\\" + a newline
 # + "umbers" instead of "C:\\numbers".
-_UNESCAPE_CHAR_REGEX = re.compile(r"\r\n|\\N|\\n|\\\\|\\,|\\;")
-_UNESCAPE_CHAR_BYTES_REGEX = re.compile(rb"\r\n|\\N|\\n|\\\\|\\,|\\;")
 _UNESCAPE_CHAR_REPLACEMENTS = {
     "\r\n": "\n",
     "\\N": "\n",
@@ -80,6 +87,27 @@ _UNESCAPE_CHAR_BYTES_REPLACEMENTS = {
     b"\\,": b",",
     b"\\;": b";",
 }
+
+
+def _unescape_char_pattern(
+    replacements: Mapping[str, str] | Mapping[bytes, bytes],
+) -> re.Pattern:
+    r"""Compile an alternation that matches exactly the keys of ``replacements``.
+
+    The keys are sorted longest-first (see the maps above) and joined with
+    ``|`` after ``re.escape`` renders each of them as a literal, so the
+    pattern can only consume text that has a replacement.
+    """
+    keys = sorted(replacements, key=len, reverse=True)
+    if keys and isinstance(keys[0], bytes):
+        byte_keys = cast("list[bytes]", keys)
+        return re.compile(b"|".join(re.escape(key) for key in byte_keys))
+    str_keys = cast("list[str]", keys)
+    return re.compile("|".join(re.escape(key) for key in str_keys))
+
+
+_UNESCAPE_CHAR_REGEX = _unescape_char_pattern(_UNESCAPE_CHAR_REPLACEMENTS)
+_UNESCAPE_CHAR_BYTES_REGEX = _unescape_char_pattern(_UNESCAPE_CHAR_BYTES_REPLACEMENTS)
 
 
 def _unescape_char(text: str | bytes) -> str | bytes:

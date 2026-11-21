@@ -434,6 +434,70 @@ def test_unescape_char_str_and_bytes_replacements_are_consistent():
 
 
 @pytest.mark.parametrize(
+    ("regex", "replacements"),
+    [
+        pytest.param(
+            _UNESCAPE_CHAR_REGEX,
+            _UNESCAPE_CHAR_REPLACEMENTS,
+            id="str",
+        ),
+        pytest.param(
+            _UNESCAPE_CHAR_BYTES_REGEX,
+            _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+            id="bytes",
+        ),
+    ],
+)
+def test_unescape_char_pattern_is_derived_from_the_map(regex, replacements):
+    r"""The alternation must list exactly the map keys, longest first.
+
+    The pattern is built from the keys of the replacement map, so hand
+    editing one without the other fails here.
+    """
+    options = _unescape_regex_options(regex)
+    assert set(options) == set(replacements)
+    option_lengths = [len(option) for option in options]
+    assert option_lengths == sorted(option_lengths, reverse=True)
+
+
+@pytest.mark.parametrize(
+    ("regex", "replacements"),
+    [
+        pytest.param(
+            _UNESCAPE_CHAR_REGEX,
+            _UNESCAPE_CHAR_REPLACEMENTS,
+            id="str",
+        ),
+        pytest.param(
+            _UNESCAPE_CHAR_BYTES_REGEX,
+            _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+            id="bytes",
+        ),
+    ],
+)
+def test_unescape_char_regex_matches_nothing_besides_the_map_keys(regex, replacements):
+    r"""Only the map keys fully match: prefixes and unlisted escapes must not."""
+    is_bytes = isinstance(regex.pattern, bytes)
+
+    def encode(value: str) -> str | bytes:
+        return value.encode() if is_bytes else value
+
+    for key in replacements:
+        for end in range(1, len(key)):
+            prefix = key[:end]
+            assert not regex.fullmatch(prefix), (
+                f"{regex.pattern!r} fully matches the key prefix {prefix!r}"
+            )
+    for char in "NnTtXx7;,":
+        escape = encode("\\" + char)
+        if escape in replacements:
+            continue
+        assert not regex.fullmatch(escape), (
+            f"{regex.pattern!r} fully matches {escape!r} without a replacement"
+        )
+
+
+@pytest.mark.parametrize(
     ("value", "expected"),
     [
         ("a\rb", r"a\nb"),
