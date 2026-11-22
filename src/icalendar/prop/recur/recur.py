@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -274,6 +275,44 @@ class vRecur(CaselessDict):
             raise
         except Exception as e:
             raise ValueError(f"Error in recurrence rule: {ical}") from e
+
+    @property
+    def ical_value(self) -> dict[str, list[Any]]:
+        """The rule parts as a plain :class:`dict` of native Python values.
+
+        Each key is the name of a rule part, for example ``FREQ`` or ``BYDAY``.
+        Each value is a list of native Python values, such as :class:`str`,
+        :class:`int`, :class:`~datetime.date` or :class:`~datetime.datetime`.
+        The result is a copy: changing it does not modify this recurrence.
+
+        .. code-block:: pycon
+
+            >>> from icalendar.prop import vRecur
+            >>> vRecur.from_ical("FREQ=WEEKLY;COUNT=3;BYDAY=MO,TU").ical_value
+            {'FREQ': ['WEEKLY'], 'COUNT': [3], 'BYDAY': ['MO', 'TU']}
+
+        See Also:
+
+            :rfc:`5545#section-3.3.10` for the ``RECUR`` value type.
+        """
+        return {
+            key: [
+                self._native_value(v)
+                for v in (values if isinstance(values, SEQUENCE_TYPES) else [values])
+            ]
+            for key, values in self.items()
+        }
+
+    @staticmethod
+    def _native_value(value: Any) -> Any:
+        """Return the native Python value of one rule part value."""
+        if isinstance(value, Enum):
+            return str(value.value)
+        if hasattr(value, "ical_value"):
+            return value.ical_value
+        if isinstance(value, int):
+            return int(value)
+        return value
 
     @classmethod
     def examples(cls) -> list[Self]:
