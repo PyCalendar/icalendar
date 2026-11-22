@@ -54,7 +54,7 @@ class vAdr:
     Parameters:
         fields: Required. Either an :class:`AdrFields`, a tuple or list of seven strings, one per field,
                 or a vCard format string with semicolon-separated fields.
-        params: Optional property parameters.
+        params: Property parameters.
 
     Examples:
         .. code-block:: pycon

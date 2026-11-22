@@ -46,8 +46,8 @@ class vN:
 
     Parameters:
         fields: Required. Either an :class:`NFields`, a tuple or list of five strings, one per field,
-                or a vCard format string with semicolon-separated fields
-        params: Optional property parameters
+                or a vCard format string with semicolon-separated fields.
+        params: Property parameters.
 
     Examples:
 
