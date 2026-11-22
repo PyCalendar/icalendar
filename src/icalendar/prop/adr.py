@@ -52,7 +52,7 @@ class vAdr:
     Commas and backslashes within field values ARE escaped per :rfc:`6350`.
 
     Parameters:
-        fields: Either an AdrFields, tuple, or list of seven strings, one per field,
+        fields: Required. Either an :class:`AdrFields`, a tuple or list of seven strings, one per field,
                 or a vCard format string with semicolon-separated fields.
         params: Optional property parameters.
 
