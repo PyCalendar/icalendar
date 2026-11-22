@@ -50,10 +50,10 @@ class AlarmTime:
     Parameters:
         alarm: Required. The underlying alarm component.
         trigger: Required. A date or datetime at which to trigger the alarm.
-        acknowledged_until: Optional datetime in UTC until which
+        acknowledged_until: Datetime in UTC until which
             the alarm has been acknowledged.
-        parent: Optional parent component to which the alarm refers.
-        snoozed_until: Optional datetime in UTC until which
+        parent: Parent component to which the alarm refers.
+        snoozed_until: Datetime in UTC until which
             the alarm has been snoozed.
     """
 
