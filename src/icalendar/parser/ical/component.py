@@ -23,10 +23,10 @@ class ComponentIcalParser:
     logic can be refined in subclasses.
 
     Parameters:
-        data: The raw iCalendar data to parse, either as bytes
+        component_factory: Required. The factory to use for creating components.
+        data: Required. The raw iCalendar data to parse, either as bytes
             or a list of content lines.
-        component_factory: The factory to use for creating components.
-        types_factory: The factory to use for creating property values.
+        types_factory: Required. The factory to use for creating property values.
 
     """
 
