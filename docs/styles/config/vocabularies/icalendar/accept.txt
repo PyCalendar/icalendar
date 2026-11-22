@@ -4,12 +4,12 @@ __new__
 Args
 backported
 contentline
+datatypes?
 (?i)datetime
 defusedxml
 dicts
 [Dd]ocstrings?
 fuzzer
-Hacktoberfest
 Hanoka
 icalendar(\.[a-z]+)+
 iCal

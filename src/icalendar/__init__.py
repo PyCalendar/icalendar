@@ -20,6 +20,7 @@ from icalendar.cal import (
     parse,
 )
 from icalendar.enums import (
+    ACTION,
     BUSYTYPE,
     CLASS,
     CUTYPE,
@@ -107,6 +108,7 @@ from icalendar.timezone import is_utc, use_pytz, use_zoneinfo
 from .version import __version__, __version_tuple__, version, version_tuple
 
 __all__ = [
+    "ACTION",
     "BUSYTYPE",
     "CLASS",
     "CUTYPE",
