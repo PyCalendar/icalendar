@@ -2,7 +2,7 @@
 
 import re
 from collections.abc import Mapping
-from typing import cast
+from typing import TypeVar
 
 from icalendar.error import InvalidToken
 from icalendar.parser_tools import DEFAULT_ENCODING, to_unicode
@@ -57,10 +57,7 @@ def _escape_char(text: str | bytes) -> str:
     )
 
 
-# The replacement maps are the single source of truth for unescaping: the
-# patterns below are derived from the map keys, sorted longest-first and
-# re.escape'd, so no hand-maintained list of literals can drift from the
-# maps. Longest-first guarantees a key that is a prefix of another key (like
+# Longest-first guarantees a key that is a prefix of another key (like
 # "\r\n" over a shorter key starting with "\r") is never shadowed by it,
 # even if the maps change.
 #
@@ -89,25 +86,25 @@ _UNESCAPE_CHAR_BYTES_REPLACEMENTS = {
 }
 
 
-def _unescape_char_pattern(
-    replacements: Mapping[str, str] | Mapping[bytes, bytes],
-) -> re.Pattern:
-    r"""Compile an alternation that matches exactly the keys of ``replacements``.
-
-    The keys are sorted longest-first (see the maps above) and joined with
-    ``|`` after ``re.escape`` renders each of them as a literal, so the
-    pattern can only consume text that has a replacement.
-    """
-    keys = sorted(replacements, key=len, reverse=True)
-    if keys and isinstance(keys[0], bytes):
-        byte_keys = cast("list[bytes]", keys)
-        return re.compile(b"|".join(re.escape(key) for key in byte_keys))
-    str_keys = cast("list[str]", keys)
-    return re.compile("|".join(re.escape(key) for key in str_keys))
+_Key = TypeVar("_Key", str, bytes)
 
 
-_UNESCAPE_CHAR_REGEX = _unescape_char_pattern(_UNESCAPE_CHAR_REPLACEMENTS)
-_UNESCAPE_CHAR_BYTES_REGEX = _unescape_char_pattern(_UNESCAPE_CHAR_BYTES_REPLACEMENTS)
+def _sorted_replacement_keys(replacements: Mapping[_Key, object]) -> list[_Key]:
+    r"""Sort the keys of ``replacements`` longest first (see the maps above)."""
+    return sorted(replacements, key=len, reverse=True)
+
+
+_UNESCAPE_CHAR_REGEX = re.compile(
+    "|".join(
+        re.escape(key) for key in _sorted_replacement_keys(_UNESCAPE_CHAR_REPLACEMENTS)
+    )
+)
+_UNESCAPE_CHAR_BYTES_REGEX = re.compile(
+    b"|".join(
+        re.escape(key)
+        for key in _sorted_replacement_keys(_UNESCAPE_CHAR_BYTES_REPLACEMENTS)
+    )
+)
 
 
 def _unescape_char(text: str | bytes) -> str | bytes:

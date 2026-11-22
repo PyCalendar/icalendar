@@ -448,7 +448,7 @@ def test_unescape_char_str_and_bytes_replacements_are_consistent():
         ),
     ],
 )
-def test_unescape_char_pattern_is_derived_from_the_map(regex, replacements):
+def test_unescape_char_regex_is_derived_from_the_map(regex, replacements):
     r"""The alternation must list exactly the map keys, longest first.
 
     The pattern is built from the keys of the replacement map, so hand
