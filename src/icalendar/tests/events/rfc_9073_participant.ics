@@ -1,0 +1,17 @@
+BEGIN:VEVENT
+SUMMARY:How to Parse Your Own Calendar Invite (and Why It Hurts)
+DTSTART:20261115T140000Z
+DTEND:20261115T150000Z
+UID:rfc9073-participant-test@example.com
+BEGIN:PARTICIPANT
+PARTICIPANT-TYPE:ACTIVE
+CALENDAR-ADDRESS:mailto:guido@pycon.example.com
+UID:rfc9073-participant-uid@example.com
+SUMMARY:Guido van Rossum Memorial Keynote Stand-In
+BEGIN:VLOCATION
+UID:rfc9073-vlocation-in-participant@example.com
+NAME:Main Stage (The Big One)
+LOCATION-TYPE:arena
+END:VLOCATION
+END:PARTICIPANT
+END:VEVENT

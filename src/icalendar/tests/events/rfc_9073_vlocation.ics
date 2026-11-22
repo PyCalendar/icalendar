@@ -1,0 +1,12 @@
+BEGIN:VEVENT
+SUMMARY:Astronomical Society Night: We Finally Looked Up
+DTSTART:20261121T210000Z
+DTEND:20261121T230000Z
+UID:rfc9073-vlocation-test@example.com
+BEGIN:VLOCATION
+UID:rfc9073-vlocation-uid@example.com
+NAME:Hydrogen Line Hackerspace Observatory
+LOCATION-TYPE:office
+GEO:40.4168;-3.7038
+END:VLOCATION
+END:VEVENT
