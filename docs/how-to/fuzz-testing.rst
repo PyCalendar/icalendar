@@ -129,9 +129,9 @@ Commit the test case and push it to a pull request, so that the error can be saf
 Reproduce fuzzing issues locally
 ================================
 
-To reproduce fuzzing issues locally, install `OSS-Fuzz`_ locally, following its `setup instructions <https://google.github.io/oss-fuzz/advanced-topics/reproducing/#reproduce-using-local-source-checkout>`_.
+To reproduce fuzzing issues locally, install `OSS-Fuzz`_, following its `setup instructions <https://google.github.io/oss-fuzz/advanced-topics/reproducing/#building-using-docker>`_.
 
-Then, you can run the script ``generate_python_test_cases_from_downloaded_clusterfuzz_test_cases.sh`` in ``scripts/`` to generate Python test cases from the downloaded fuzzer test cases.
+Then, run the script ``generate_python_test_cases_from_downloaded_clusterfuzz_test_cases.sh`` in ``scripts/`` to generate Python test cases from the downloaded fuzzer test cases.
 
 ..  code-block:: shell
 
