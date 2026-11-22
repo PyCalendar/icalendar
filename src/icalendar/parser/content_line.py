@@ -329,10 +329,12 @@ class Contentline(str):
             # character can be rejoined instead of being replaced; folds
             # cannot reappear during decoding, so the str unfold below is
             # unnecessary for bytes input
-            return cls(to_unicode(UFOLD_BYTES.sub(b"", ical)), strict=strict)
-        ical = to_unicode(ical)
-        # a fold is carriage return followed by either a space or a tab
-        return cls(UFOLD.sub("", ical), strict=strict)
+            unfolded = to_unicode(UFOLD_BYTES.sub(b"", ical))
+        else:
+            ical = to_unicode(ical)
+            # a fold is carriage return followed by either a space or a tab
+            unfolded = UFOLD.sub("", ical)
+        return cls(unfolded, strict=strict)
 
     def to_ical(self):
         """Long content lines are folded so they are less than 75 characters
@@ -359,8 +361,7 @@ class Contentlines(list[Contentline]):
             # character can be rejoined instead of being replaced; folds
             # cannot reappear during decoding, so the str unfold below is
             # unnecessary for bytes input
-            st = to_unicode(UFOLD_BYTES.sub(b"", st))
-            unfolded = st
+            unfolded = to_unicode(UFOLD_BYTES.sub(b"", st))
         else:
             st = to_unicode(st)
             # a fold is carriage return followed by either a space or a tab
