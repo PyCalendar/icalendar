@@ -124,9 +124,15 @@ Commit the test case and push it to a pull request, so that the error can be saf
 Reproduce fuzzing issues locally
 ================================
 
-To reproduce fuzzing issues locally, install `OSS-Fuzz`_, following its `setup instructions <https://google.github.io/oss-fuzz/advanced-topics/reproducing/#building-using-docker>`_.
+To reproduce fuzzing issues locally, first from your icalendar clone, change your working directory your user directory, clone `OSS-Fuzz`_ , then change your working directory back to icalendar.
 
-Then, run the script ``generate_python_test_cases_from_downloaded_clusterfuzz_test_cases.sh`` in ``scripts/`` to generate Python test cases from the downloaded fuzzer test cases.
+..  code-block:: shell
+
+    cd ~
+    git clone --depth=1 https://github.com/google/oss-fuzz.git
+    cd <path-to>/icalendar
+
+Then, run the script :program:`src/icalendar/tests/fuzzed/generate_python_test_cases_from_downloaded_clusterfuzz_test_cases.sh` to generate Python test cases from the downloaded fuzzer test cases.
 
 .. code-block:: shell
 
