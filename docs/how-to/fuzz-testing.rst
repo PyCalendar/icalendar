@@ -124,7 +124,7 @@ Commit the test case and push it to a pull request, so that the error can be saf
 Reproduce fuzzing issues locally
 ================================
 
-To reproduce fuzzing issues locally, first from your icalendar clone, change your working directory your user directory, clone `OSS-Fuzz`_ , then change your working directory back to icalendar.
+To reproduce fuzzing issues locally, first from your icalendar clone, change your working directory your user directory, clone `OSS-Fuzz`_, then change your working directory back to icalendar.
 
 ..  code-block:: shell
 
