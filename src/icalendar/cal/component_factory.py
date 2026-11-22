@@ -51,12 +51,15 @@ class ComponentFactory(CaselessDict):
         from icalendar.cal.event import Event
         from icalendar.cal.free_busy import FreeBusy
         from icalendar.cal.journal import Journal
+        from icalendar.cal.participant import Participant
         from icalendar.cal.timezone import (
             Timezone,
             TimezoneDaylight,
             TimezoneStandard,
         )
         from icalendar.cal.todo import Todo
+        from icalendar.cal.vlocation import VLocation
+        from icalendar.cal.vresource import VResource
 
         self.add_component_class(Calendar)
         self.add_component_class(Event)
@@ -69,6 +72,9 @@ class ComponentFactory(CaselessDict):
         self.add_component_class(Alarm)
         self.add_component_class(Available)
         self.add_component_class(Availability)
+        self.add_component_class(Participant)
+        self.add_component_class(VLocation)
+        self.add_component_class(VResource)
 
     def add_component_class(self, cls: type[Component]) -> None:
         """Add a component class to the factory.

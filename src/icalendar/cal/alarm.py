@@ -30,6 +30,7 @@ from icalendar.attr import (
 from icalendar.cal.component import Component
 from icalendar.cal.examples import get_example
 from icalendar.enums import ACTION as AlarmAction  # noqa: N811
+from icalendar.enums import PROXIMITY
 from icalendar.error import InvalidCalendar
 from icalendar.prop import vCalAddress
 
@@ -202,6 +203,22 @@ class Alarm(Component):
     See also:
         :attr:`TRIGGER`, the time at which the alarm fires.
     """,
+    )
+
+    proximity = single_string_enum_property(
+        "PROXIMITY",
+        PROXIMITY,
+        None,
+        """The type of location-based trigger for this alarm per :rfc:`9074#section-8.1`.
+
+        When set, a VLOCATION sub-component MUST also be present to identify
+        the location that triggers the alarm.
+
+        Returns a :class:`~icalendar.enums.PROXIMITY` member for known values
+        (``ARRIVE``, ``DEPART``, ``CONNECT``, ``DISCONNECT``), a plain
+        :class:`str` for unknown values, or ``None`` when absent.
+        """,
+        preserve_unknown=True,
     )
 
     TRIGGER = create_single_property(

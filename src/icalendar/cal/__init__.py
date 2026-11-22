@@ -14,8 +14,11 @@ from .event import Event
 from .free_busy import FreeBusy
 from .journal import Journal
 from .lazy import LazyCalendar
+from .participant import Participant
 from .timezone import Timezone, TimezoneDaylight, TimezoneStandard
 from .todo import Todo
+from .vlocation import VLocation
+from .vresource import VResource
 
 __all__ = [
     "Alarm",
@@ -28,8 +31,11 @@ __all__ = [
     "FreeBusy",
     "Journal",
     "LazyCalendar",
+    "Participant",
     "Timezone",
     "TimezoneDaylight",
     "TimezoneStandard",
     "Todo",
+    "VLocation",
+    "VResource",
 ]

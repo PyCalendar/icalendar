@@ -364,6 +364,7 @@ class RELTYPE(StrEnum):
     DEPENDS_ON = "DEPENDS-ON"
     REFID = "REFID"
     CONCEPT = "CONCEPT"
+    SNOOZE = "SNOOZE"
 
 
 class RANGE(StrEnum):
@@ -578,16 +579,94 @@ class TRANSP(StrEnum):
     TRANSPARENT = "TRANSPARENT"
 
 
+class PARTICIPANT_TYPE(StrEnum):  # noqa: N801
+    """Enum for PARTICIPANT-TYPE from :rfc:`9073#section-6.2`.
+
+    Identifies the type of participant represented by a PARTICIPANT
+    component. IANA-registered values are listed in :rfc:`9073#section-11.2.1`.
+    Unknown values are allowed (IANA-extensible).
+
+    Possible values are the following.
+
+    -   :attr:`ACTIVE`
+    -   :attr:`INACTIVE`
+    -   :attr:`SPONSOR`
+    -   :attr:`CONTACT`
+    -   :attr:`BOOKING_CONTACT`
+    -   :attr:`EMERGENCY_CONTACT`
+    -   :attr:`PUBLICITY_CONTACT`
+    -   :attr:`PLANNER_CONTACT`
+    -   :attr:`PERFORMER`
+    -   :attr:`SPEAKER`
+    """
+
+    ACTIVE = "ACTIVE"
+    INACTIVE = "INACTIVE"
+    SPONSOR = "SPONSOR"
+    CONTACT = "CONTACT"
+    BOOKING_CONTACT = "BOOKING-CONTACT"
+    EMERGENCY_CONTACT = "EMERGENCY-CONTACT"
+    PUBLICITY_CONTACT = "PUBLICITY-CONTACT"
+    PLANNER_CONTACT = "PLANNER-CONTACT"
+    PERFORMER = "PERFORMER"
+    SPEAKER = "SPEAKER"
+
+
+class RESOURCE_TYPE(StrEnum):  # noqa: N801
+    """Enum for RESOURCE-TYPE from :rfc:`9073#section-6.3`.
+
+    Identifies the type of resource represented by a VRESOURCE component.
+    IANA-registered values are listed in :rfc:`9073#section-11.2.2`.
+    Unknown values are allowed (IANA-extensible).
+
+    Possible values are the following.
+
+    -   :attr:`ROOM`
+    -   :attr:`PROJECTOR`
+    -   :attr:`REMOTE_CONFERENCE_AUDIO`
+    -   :attr:`REMOTE_CONFERENCE_VIDEO`
+    """
+
+    ROOM = "ROOM"
+    PROJECTOR = "PROJECTOR"
+    REMOTE_CONFERENCE_AUDIO = "REMOTE-CONFERENCE-AUDIO"
+    REMOTE_CONFERENCE_VIDEO = "REMOTE-CONFERENCE-VIDEO"
+
+
+class PROXIMITY(StrEnum):
+    """Enum for PROXIMITY from :rfc:`9074#section-8.1`.
+
+    Specifies the type of location-based trigger for a
+    :class:`~icalendar.cal.alarm.Alarm` component. When set, a VLOCATION
+    sub-component MUST be present to define the location.
+
+    Possible values are the following.
+
+    -   :attr:`ARRIVE`
+    -   :attr:`DEPART`
+    -   :attr:`CONNECT`
+    -   :attr:`DISCONNECT`
+    """
+
+    ARRIVE = "ARRIVE"
+    DEPART = "DEPART"
+    CONNECT = "CONNECT"
+    DISCONNECT = "DISCONNECT"
+
+
 __all__ = [
     "ACTION",
     "BUSYTYPE",
     "CLASS",
     "CUTYPE",
     "FBTYPE",
+    "PARTICIPANT_TYPE",
     "PARTSTAT",
+    "PROXIMITY",
     "RANGE",
     "RELATED",
     "RELTYPE",
+    "RESOURCE_TYPE",
     "ROLE",
     "STATUS",
     "TRANSP",

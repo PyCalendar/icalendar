@@ -187,6 +187,15 @@ class TypesFactory(CaselessDict):
             "exrule": "recur",
             "rdate": "date-time-list",
             "rrule": "recur",
+            # RFC 7986 properties
+            "name": "text",
+            # RFC 9073 properties
+            "location-type": "text",
+            "participant-type": "text",
+            "resource-type": "text",
+            "calendar-address": "cal-address",
+            "styled-description": "text",  # full VALUE dispatch in future
+            "structured-data": "unknown",  # full VALUE dispatch in future
             # Alarm Component Properties
             "action": "text",
             "repeat": "integer",

@@ -838,12 +838,74 @@ def _del_GAP(prop):  # noqa: N802
 
 GAP = property(_get_GAP, _set_GAP, _del_GAP)
 
+
+def _convert_order_read(value: str) -> int:
+    """Convert ORDER string to int on read."""
+    return int(value)
+
+
+def _convert_order_write(value) -> str:
+    """Validate and convert ORDER to string for storage."""
+    result = int(value)
+    if result < 1:
+        raise ValueError(f"ORDER must be a positive integer >= 1, got {result}")
+    return str(result)
+
+
+ORDER = string_parameter(
+    "ORDER",
+    """Indicate the relative ordering of a property amongst multiple properties
+of the same type.
+
+Conformance:
+    This property parameter is specified in :rfc:`9073#section-5.1`.
+
+    This parameter MAY be specified on any property that permits multiple
+    instances in a single component. The value is a positive integer
+    starting at 1; absent means the property is unordered among those without
+    an ORDER value. No duplicate ORDER values are allowed within the same
+    property name on a component.
+""",
+    convert=_convert_order_read,
+    convert_to=_convert_order_write,
+)
+
+SCHEMA = string_parameter(
+    "SCHEMA",
+    """Identify the schema that a STRUCTURED-DATA value conforms to.
+
+Conformance:
+    This property parameter is specified in :rfc:`9073#section-5.2`.
+
+    This parameter SHOULD be specified on the STRUCTURED-DATA property.
+    Its value is a URI identifying the schema the structured data
+    follows. It supplements the media type given by the FMTTYPE
+    parameter, which alone may not be specific enough to interpret the
+    value.
+""",
+)
+
+DERIVED = boolean_parameter("DERIVED", False)
+"""Indicate that a property's value is derived from other property values.
+
+Conformance:
+    This property parameter is specified in :rfc:`9073#section-5.3`.
+
+    This parameter MAY be specified on any property whose value can be
+    derived from the value of one or more other properties. When set to
+    ``TRUE``, clients MUST NOT update the property's value directly, since
+    it is expected to be recomputed from the properties it derives from.
+    The default, when absent, is ``FALSE``.
+"""
+
+
 __all__ = [
     "ALTREP",
     "CN",
     "CUTYPE",
     "DELEGATED_FROM",
     "DELEGATED_TO",
+    "DERIVED",
     "DIR",
     "EMAIL",
     "FBTYPE",
@@ -853,11 +915,13 @@ __all__ = [
     "LANGUAGE",
     "LINKREL",
     "MEMBER",
+    "ORDER",
     "PARTSTAT",
     "RANGE",
     "RELATED",
     "ROLE",
     "RSVP",
+    "SCHEMA",
     "SENT_BY",
     "TZID",
     "VALUE",

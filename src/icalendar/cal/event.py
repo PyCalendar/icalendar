@@ -261,6 +261,27 @@ class Event(Component):
     ignore_exceptions = True
 
     @property
+    def participants(self):
+        """All PARTICIPANT sub-components of this event per :rfc:`9073#section-7.1`."""
+        from icalendar.cal.participant import Participant
+
+        return self.walk(Participant.name)
+
+    @property
+    def locations(self):
+        """All VLOCATION sub-components of this event per :rfc:`9073#section-7.2`."""
+        from icalendar.cal.vlocation import VLocation
+
+        return self.walk(VLocation.name)
+
+    @property
+    def resources(self):
+        """All VRESOURCE sub-components of this event per :rfc:`9073#section-7.3`."""
+        from icalendar.cal.vresource import VResource
+
+        return self.walk(VResource.name)
+
+    @property
     def alarms(self) -> Alarms:
         """Compute the alarm times for this component.
 

@@ -182,6 +182,27 @@ class FreeBusy(Component):
             cls._validate_start_and_end(start, end)
         return free_busy
 
+    @property
+    def participants(self):
+        """All PARTICIPANT sub-components of this component per :rfc:`9073#section-7.1`."""
+        from icalendar.cal.participant import Participant
+
+        return self.walk(Participant.name)
+
+    @property
+    def locations(self):
+        """All VLOCATION sub-components of this component per :rfc:`9073#section-7.2`."""
+        from icalendar.cal.vlocation import VLocation
+
+        return self.walk(VLocation.name)
+
+    @property
+    def resources(self):
+        """All VRESOURCE sub-components of this component per :rfc:`9073#section-7.3`."""
+        from icalendar.cal.vresource import VResource
+
+        return self.walk(VResource.name)
+
     @classmethod
     def example(cls, name: str = "example") -> FreeBusy:
         """Return the FreeBusy example with the given name."""

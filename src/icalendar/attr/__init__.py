@@ -1327,17 +1327,18 @@ organizer_property = property(_get_organizer, _set_organizer, _del_organizer)
 def single_string_enum_property(
     name: str,
     enum: type[StrEnum],
-    default: StrEnum | str,
+    default: StrEnum | str | None,
     docs: str,
     preserve_unknown: bool = False,
 ) -> property:
     """Create a property to access a single string value and convert it to an enum."""
-    prop = single_string_property(name, docs, default=default)
+    _str_default = "" if default is None else default
+    prop = single_string_property(name, docs, default=_str_default)
 
-    def fget(self: Component) -> StrEnum | str:
+    def fget(self: Component) -> StrEnum | str | None:
         """Get the value."""
         value = prop.fget(self)
-        if value == default:
+        if value == _str_default:
             return default
         try:
             return enum(str(value))

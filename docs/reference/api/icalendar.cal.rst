@@ -18,8 +18,11 @@ Submodules
    icalendar.cal.free_busy
    icalendar.cal.journal
    icalendar.cal.lazy
+   icalendar.cal.participant
    icalendar.cal.timezone
    icalendar.cal.todo
+   icalendar.cal.vlocation
+   icalendar.cal.vresource
 
 Module contents
 ---------------
