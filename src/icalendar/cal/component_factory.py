@@ -52,15 +52,15 @@ class ComponentFactory(CaselessDict):
         from icalendar.cal.event import Event
         from icalendar.cal.free_busy import FreeBusy
         from icalendar.cal.journal import Journal
+        from icalendar.cal.location import Location
         from icalendar.cal.participant import Participant
+        from icalendar.cal.resource import Resource
         from icalendar.cal.timezone import (
             Timezone,
             TimezoneDaylight,
             TimezoneStandard,
         )
         from icalendar.cal.todo import Todo
-        from icalendar.cal.location import Location
-        from icalendar.cal.resource import Resource
 
         self.add_component_class(Calendar)
         self.add_component_class(Event)

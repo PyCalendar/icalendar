@@ -173,7 +173,7 @@ class vTime(TimeBase):
         return self.dt
 
     @staticmethod
-    def from_ical(ical: str, timezone: str | None | tzinfo = None) -> time:
+    def from_ical(ical: str, timezone: str | tzinfo | None = None) -> time:
         """Convert an ical string into a time.
 
         This parses the time forms defined in :rfc:`5545#section-3.3.12`:
