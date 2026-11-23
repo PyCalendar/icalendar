@@ -15,8 +15,6 @@ if TYPE_CHECKING:
 class ComponentFactory(CaselessDict):
     """Registered components from :rfc:`7953` and :rfc:`5545`.
 
-    On initialization, this class sets its keys to uppercase.
-
     To get a component, use this class as shown below.
 
     .. code-block:: pycon

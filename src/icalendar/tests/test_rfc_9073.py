@@ -119,6 +119,18 @@ def test_location_in_participant(events):
     assert isinstance(p.locations[0], Location)
 
 
+def test_event_locations_excludes_participant_locations(events):
+    """Event.locations returns only direct VLOCATION children, not those inside PARTICIPANT.
+
+    :rfc:`9073#section-7.2` defines VLOCATION as a property of the event itself.
+    A VLOCATION inside a PARTICIPANT describes the participant's location, not
+    the event's.
+    """
+    event = events.rfc_9073_participant
+    # This event has one VLOCATION inside its PARTICIPANT, but no direct VLOCATION.
+    assert len(event.locations) == 0
+
+
 def test_location_name_accessor(events):
     """Location.location_name returns the NAME property per :rfc:`9073#section-7.2`."""
     loc = events.rfc_9073_vlocation.locations[0]

@@ -308,21 +308,21 @@ class Journal(Component):
         """All PARTICIPANT sub-components of this journal per :rfc:`9073#section-7.1`."""
         from icalendar.cal.participant import Participant
 
-        return self.walk(Participant.name)
+        return self._typed_subcomponents(Participant)
 
     @property
     def locations(self):
         """All VLOCATION sub-components of this journal per :rfc:`9073#section-7.2`."""
         from icalendar.cal.location import Location
 
-        return self.walk(Location.name)
+        return self._typed_subcomponents(Location)
 
     @property
     def resources(self):
         """All VRESOURCE sub-components of this journal per :rfc:`9073#section-7.3`."""
         from icalendar.cal.resource import Resource
 
-        return self.walk(Resource.name)
+        return self._typed_subcomponents(Resource)
 
     @classmethod
     def example(cls, name: str = "example") -> Journal:

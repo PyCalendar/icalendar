@@ -76,8 +76,6 @@ class Component(CaselessDict):
     Component is the base object for calendar, Event and the other
     components defined in :rfc:`5545`. Normally you will not use this class
     directly, but rather one of the subclasses.
-
-    On initialization, this class sets its keys to upper case.
     """
 
     name: ClassVar[str | None] = None
@@ -491,6 +489,15 @@ class Component(CaselessDict):
     def add_component(self, component: Component) -> None:
         """Add a subcomponent to this component."""
         self.subcomponents.append(component)
+
+    def _typed_subcomponents(self, cls: type) -> list:
+        """Return direct subcomponents that are instances of cls.
+
+        Unlike :meth:`walk`, this does not recurse into nested subcomponents.
+
+        :meta private:
+        """
+        return [c for c in self.subcomponents if isinstance(c, cls)]
 
     def _walk(
         self, name: str | None, select: callable[[Component], bool]
@@ -952,13 +959,13 @@ class Component(CaselessDict):
 
     @staticmethod
     def _validate_start_and_end(start, end):
-        """This validates start and end.
+        """Validate start and end.
 
         :meta private:
 
         Parameters:
-            end: Required. The end of the calendar component.
             start: Required. The start of the calendar component.
+            end: Required. The end of the calendar component.
 
         Raises:
             ~icalendar.error.InvalidCalendar: If the information is not valid

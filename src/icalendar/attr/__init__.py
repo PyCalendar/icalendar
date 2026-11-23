@@ -827,7 +827,8 @@ def _set_attendees(self: Component, value: ATTENDEE_TYPE_SETTER):
     :meta private:
 
     Parameters:
-        value: Required. The attendee type to use when setting attendees.
+        value: One or more attendees as :class:`~icalendar.prop.cal_address.vCalAddress`
+            or :class:`str`, or ``None`` to remove all attendees.
     """
     _del_attendees(self)
     if value is None:

@@ -46,8 +46,6 @@ class Participant(Component):
         "SUMMARY",
         "UID",
     )
-    required = ("PARTICIPANT-TYPE",)
-
     participant_type = single_string_enum_property(
         "PARTICIPANT-TYPE",
         PARTICIPANT_TYPE,
@@ -85,14 +83,14 @@ class Participant(Component):
         """All VLOCATION sub-components of this participant per :rfc:`9073#section-7.2`."""
         from icalendar.cal.location import Location
 
-        return self.walk(Location.name)
+        return self._typed_subcomponents(Location)
 
     @property
     def resources(self) -> list:
         """All VRESOURCE sub-components of this participant per :rfc:`9073#section-7.3`."""
         from icalendar.cal.resource import Resource
 
-        return self.walk(Resource.name)
+        return self._typed_subcomponents(Resource)
 
 
 __all__ = ["Participant"]

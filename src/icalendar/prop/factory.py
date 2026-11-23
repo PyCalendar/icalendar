@@ -44,8 +44,6 @@ if TYPE_CHECKING:
 class TypesFactory(CaselessDict):
     """Factory for all value types defined in :rfc:`5545` and subsequent RFCs.
 
-    On initialization, this class sets its keys to uppercase.
-
     The value and parameter names don't overlap. So one factory is enough for
     both kinds.
     """
