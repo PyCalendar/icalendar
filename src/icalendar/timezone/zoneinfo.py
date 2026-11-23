@@ -87,7 +87,7 @@ class ZONEINFO(TZProvider):
             # zoninfo does not know any transition dates after 2038
             rrule._until = datetime(2038, 12, 31, tzinfo=self.utc)  # noqa: SLF001
 
-    def create_timezone(self, tz: Timezone.Timezone) -> tzinfo:
+    def create_timezone(self, tz: Timezone) -> tzinfo:
         """Create a timezone from the given information."""
         try:
             return self._create_timezone(tz)

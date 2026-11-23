@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from datetime import datetime, time
+from datetime import date, datetime, time, tzinfo
 from typing import TYPE_CHECKING, overload
 
 from icalendar.tools import to_datetime
@@ -66,7 +66,7 @@ class TZP:
         """Use the default timezone provider."""
         self.use(DEFAULT_TIMEZONE_PROVIDER)
 
-    def localize_utc(self, dt: datetime.date) -> datetime.datetime:
+    def localize_utc(self, dt: date) -> datetime:
         """Return the datetime in UTC.
 
         If the datetime has no timezone, set UTC as its timezone.
@@ -104,7 +104,7 @@ class TZP:
             return localized.timetz()
         return self.__provider.localize(to_datetime(dt), tz)
 
-    def cache_timezone_component(self, timezone_component: Timezone.Timezone) -> None:
+    def cache_timezone_component(self, timezone_component: Timezone) -> None:
         """Cache the timezone that is created from a timezone component
         if it is not already known.
 
@@ -124,7 +124,7 @@ class TZP:
         """Make sure the until value works."""
         self.__provider.fix_rrule_until(rrule, ical_rrule)
 
-    def create_timezone(self, timezone_component: Timezone.Timezone) -> datetime.tzinfo:
+    def create_timezone(self, timezone_component: Timezone) -> tzinfo:
         """Create a timezone from a timezone component.
 
         This component will not be cached.
