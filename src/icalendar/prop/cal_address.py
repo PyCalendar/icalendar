@@ -7,6 +7,7 @@ from icalendar.compatibility import Self
 from icalendar.error import JCalParsingError
 from icalendar.parser import Parameters
 from icalendar.parser.xcal.base import XCalParser
+from icalendar.parser.xcal.string import _to_valid_xml_string
 from icalendar.parser.xcal.wrapper import from_xcal_wrapper
 from icalendar.parser_tools import DEFAULT_ENCODING, to_unicode
 
@@ -91,6 +92,8 @@ class vCalAddress(str):
     def __eq__(self, other: object) -> bool:
         """Compare calendar addresses by email address.
 
+        :meta private:
+
         Two addresses are equal if their email addresses match
         case-insensitively. The ``mailto:`` prefix is optional on either
         side, so ``mailto:user@example.com`` equals ``user@example.com``.
@@ -127,6 +130,8 @@ class vCalAddress(str):
     def __ne__(self, other: object) -> bool:
         """Negation of :meth:`__eq__`.
 
+        :meta private:
+
         This method is required because :class:`vCalAddress` extends
         :class:`str`. Without it, ``!=`` would use :meth:`str.__ne__`
         using plain string comparison and could disagree with
@@ -139,7 +144,10 @@ class vCalAddress(str):
         return not result
 
     def __hash__(self) -> int:
-        """Hash of the lowercased email address, consistent with :meth:`__eq__`."""
+        """Hash of the lowercased email address, consistent with :meth:`__eq__`.
+
+        :meta private:
+        """
         return hash(self.email.lower())
 
     @property
@@ -261,6 +269,8 @@ class vCalAddress(str):
     @staticmethod
     def _get_email(email: str) -> str:
         """Extract email and add mailto: prefix if needed.
+
+        :meta private:
 
         Handles case-insensitive mailto: prefix checking.
 
@@ -392,10 +402,11 @@ class vCalAddress(str):
     @classmethod
     @from_xcal_wrapper
     def from_xcal(cls, parser: XCalParser, params: Parameters) -> Self:
-        """Parse xCal from :rfc:`6321`.
+        """Parse xCal according to :rfc:`6321`.
 
         Parameters:
-            xml: The XML to parse or a parser.
+            parser: Required. The xCal to parse or a parser.
+            params: Required. The parameters of the xCal element.
 
         Raises:
             ~error.XCalParsingError: If the provided xCal is invalid.
@@ -407,7 +418,7 @@ class vCalAddress(str):
         """The xCal representation of this property according to :rfc:`6321`."""
         self.params.to_xcal(element)
         element = SubElement(element, "cal-address")
-        element.text = self.ical_value
+        element.text = _to_valid_xml_string(self.ical_value)
 
 
 __all__ = ["vCalAddress"]
