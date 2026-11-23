@@ -17,8 +17,8 @@ from .lazy import LazyCalendar
 from .participant import Participant
 from .timezone import Timezone, TimezoneDaylight, TimezoneStandard
 from .todo import Todo
-from .vlocation import VLocation
-from .vresource import VResource
+from .location import Location
+from .resource import Resource
 
 __all__ = [
     "Alarm",
@@ -36,6 +36,6 @@ __all__ = [
     "TimezoneDaylight",
     "TimezoneStandard",
     "Todo",
-    "VLocation",
-    "VResource",
+    "Location",
+    "Resource",
 ]

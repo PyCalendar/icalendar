@@ -59,8 +59,8 @@ class ComponentFactory(CaselessDict):
             TimezoneStandard,
         )
         from icalendar.cal.todo import Todo
-        from icalendar.cal.vlocation import VLocation
-        from icalendar.cal.vresource import VResource
+        from icalendar.cal.location import Location
+        from icalendar.cal.resource import Resource
 
         self.add_component_class(Calendar)
         self.add_component_class(Event)
@@ -74,8 +74,8 @@ class ComponentFactory(CaselessDict):
         self.add_component_class(Available)
         self.add_component_class(Availability)
         self.add_component_class(Participant)
-        self.add_component_class(VLocation)
-        self.add_component_class(VResource)
+        self.add_component_class(Location)
+        self.add_component_class(Resource)
 
     def add_component_class(self, cls: type[Component]) -> None:
         """Add a component class to the factory.

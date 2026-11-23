@@ -211,12 +211,14 @@ class Alarm(Component):
         None,
         """The type of location-based trigger for this alarm per :rfc:`9074#section-8.1`.
 
-        When set, a VLOCATION sub-component MUST also be present to identify
-        the location that triggers the alarm.
+        Although the RFC says that when this sub-component is set, a VLOCATION
+        sub-component MUST also be present to identify the location that
+        triggers the alarm, icalendar does not enforce this requirement.
 
-        Returns a :class:`~icalendar.enums.PROXIMITY` member for known values
-        (``ARRIVE``, ``DEPART``, ``CONNECT``, ``DISCONNECT``), a plain
-        :class:`str` for unknown values, or ``None`` when absent.
+        Returns:
+            Either a :class:`~icalendar.enums.PROXIMITY` member for known values
+            (``ARRIVE``, ``DEPART``, ``CONNECT``, or ``DISCONNECT``), a plain
+            :class:`str` for unknown values, or ``None`` when absent.
         """,
         preserve_unknown=True,
     )

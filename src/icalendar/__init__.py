@@ -18,8 +18,8 @@ from icalendar.cal import (
     TimezoneDaylight,
     TimezoneStandard,
     Todo,
-    VLocation,
-    VResource,
+    Location,
+    Resource,
 )
 from icalendar.enums import (
     ACTION,
@@ -162,8 +162,8 @@ __all__ = [
     "TimezoneStandard",
     "Todo",
     "TypesFactory",
-    "VLocation",
-    "VResource",
+    "Location",
+    "Resource",
     "XCalParsingError",
     "__version__",
     "__version_tuple__",

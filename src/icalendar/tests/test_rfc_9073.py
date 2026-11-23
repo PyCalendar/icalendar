@@ -11,9 +11,9 @@ from icalendar import (
     PROXIMITY,
     RELTYPE,
     RESOURCE_TYPE,
+    Location,
     Participant,
-    VLocation,
-    VResource,
+    Resource,
     vCalAddress,
     vText,
     vUri,
@@ -27,8 +27,8 @@ from icalendar import (
         "RESOURCE_TYPE",
         "PROXIMITY",
         "Participant",
-        "VLocation",
-        "VResource",
+        "Location",
+        "Resource",
     ],
 )
 def test_public_names_importable(name):
@@ -86,17 +86,17 @@ def test_event_participants_accessor(events):
 
 
 def test_event_locations_accessor(events):
-    """Event.locations returns typed VLocation instances per :rfc:`9073#section-7.2`."""
+    """Event.locations returns typed Location instances per :rfc:`9073#section-7.2`."""
     event = events.rfc_9073_vlocation
     assert len(event.locations) == 1
-    assert isinstance(event.locations[0], VLocation)
+    assert isinstance(event.locations[0], Location)
 
 
 def test_event_resources_accessor(events):
-    """Event.resources returns typed VResource instances per :rfc:`9073#section-7.3`."""
+    """Event.resources returns typed Resource instances per :rfc:`9073#section-7.3`."""
     event = events.rfc_9073_vresource
     assert len(event.resources) == 1
-    assert isinstance(event.resources[0], VResource)
+    assert isinstance(event.resources[0], Resource)
 
 
 def test_participant_type_accessor(events):
@@ -112,21 +112,21 @@ def test_participant_calendar_address(events):
     assert "guido@pycon.example.com" in str(p.calendar_address)
 
 
-def test_vlocation_in_participant(events):
+def test_location_in_participant(events):
     """VLOCATION nested inside PARTICIPANT is parsed per :rfc:`9073#section-7.1`."""
     p = events.rfc_9073_participant.participants[0]
     assert len(p.locations) == 1
-    assert isinstance(p.locations[0], VLocation)
+    assert isinstance(p.locations[0], Location)
 
 
-def test_vlocation_name_accessor(events):
-    """VLocation.location_name returns the NAME property per :rfc:`9073#section-7.2`."""
+def test_location_name_accessor(events):
+    """Location.location_name returns the NAME property per :rfc:`9073#section-7.2`."""
     loc = events.rfc_9073_vlocation.locations[0]
     assert loc.location_name == "Hydrogen Line Hackerspace Observatory"
 
 
-def test_vresource_resource_type(events):
-    """VResource.resource_type returns RESOURCE_TYPE enum per :rfc:`9073#section-7.3`."""
+def test_resource_type_accessor(events):
+    """Resource.resource_type returns RESOURCE_TYPE enum per :rfc:`9073#section-7.3`."""
     res = events.rfc_9073_vresource.resources[0]
     assert res.resource_type == RESOURCE_TYPE.PROJECTOR
 
@@ -137,10 +137,10 @@ def test_alarm_proximity_typed(events):
     assert alarm.proximity == PROXIMITY.DEPART
 
 
-def test_vlocation_in_alarm_registered(events):
-    """VLOCATION inside VALARM parses as a VLocation instance per :rfc:`9074#section-8`."""
+def test_location_in_alarm_registered(events):
+    """VLOCATION inside VALARM parses as a Location instance per :rfc:`9074#section-8`."""
     alarm = events.rfc_9074_example_proximity.subcomponents[0]
-    assert isinstance(alarm.subcomponents[0], VLocation)
+    assert isinstance(alarm.subcomponents[0], Location)
 
 
 def test_order_round_trip(events):

@@ -587,75 +587,77 @@ class TRANSP(StrEnum):
 class PARTICIPANT_TYPE(StrEnum):  # noqa: N801
     """Enum for PARTICIPANT-TYPE from :rfc:`9073#section-6.2`.
 
-    Identifies the type of participant represented by a PARTICIPANT
-    component. IANA-registered values are listed in :rfc:`9073#section-11.2.1`.
-    Unknown values are allowed (IANA-extensible).
+    This parameter identifies the type of participant represented by a
+    PARTICIPANT component. IANA-registered values are listed in
+    :rfc:`9073#section-11.2.1`. Unknown values are allowed, that is, they
+    are IANA-extensible.
 
     Possible values are the following.
 
     -   :attr:`ACTIVE`
-    -   :attr:`INACTIVE`
-    -   :attr:`SPONSOR`
-    -   :attr:`CONTACT`
     -   :attr:`BOOKING_CONTACT`
+    -   :attr:`CONTACT`
     -   :attr:`EMERGENCY_CONTACT`
-    -   :attr:`PUBLICITY_CONTACT`
-    -   :attr:`PLANNER_CONTACT`
+    -   :attr:`INACTIVE`
     -   :attr:`PERFORMER`
+    -   :attr:`PLANNER_CONTACT`
+    -   :attr:`PUBLICITY_CONTACT`
     -   :attr:`SPEAKER`
+    -   :attr:`SPONSOR`
     """
 
     ACTIVE = "ACTIVE"
-    INACTIVE = "INACTIVE"
-    SPONSOR = "SPONSOR"
-    CONTACT = "CONTACT"
     BOOKING_CONTACT = "BOOKING-CONTACT"
+    CONTACT = "CONTACT"
     EMERGENCY_CONTACT = "EMERGENCY-CONTACT"
-    PUBLICITY_CONTACT = "PUBLICITY-CONTACT"
-    PLANNER_CONTACT = "PLANNER-CONTACT"
+    INACTIVE = "INACTIVE"
     PERFORMER = "PERFORMER"
+    PLANNER_CONTACT = "PLANNER-CONTACT"
+    PUBLICITY_CONTACT = "PUBLICITY-CONTACT"
     SPEAKER = "SPEAKER"
+    SPONSOR = "SPONSOR"
 
 
 class RESOURCE_TYPE(StrEnum):  # noqa: N801
     """Enum for RESOURCE-TYPE from :rfc:`9073#section-6.3`.
 
-    Identifies the type of resource represented by a VRESOURCE component.
-    IANA-registered values are listed in :rfc:`9073#section-11.2.2`.
-    Unknown values are allowed (IANA-extensible).
+    This parameter identifies the type of resource represented by a VRESOURCE
+    component. IANA-registered values are listed in :rfc:`9073#section-11.2.2`.
+    Unknown values are allowed, that is, they are IANA-extensible.
 
     Possible values are the following.
 
-    -   :attr:`ROOM`
     -   :attr:`PROJECTOR`
     -   :attr:`REMOTE_CONFERENCE_AUDIO`
     -   :attr:`REMOTE_CONFERENCE_VIDEO`
+    -   :attr:`ROOM`
     """
 
-    ROOM = "ROOM"
     PROJECTOR = "PROJECTOR"
     REMOTE_CONFERENCE_AUDIO = "REMOTE-CONFERENCE-AUDIO"
     REMOTE_CONFERENCE_VIDEO = "REMOTE-CONFERENCE-VIDEO"
+    ROOM = "ROOM"
 
 
 class PROXIMITY(StrEnum):
     """Enum for PROXIMITY from :rfc:`9074#section-8.1`.
 
-    Specifies the type of location-based trigger for a
-    :class:`~icalendar.cal.alarm.Alarm` component. When set, a VLOCATION
-    sub-component MUST be present to define the location.
+    This parameter specifies the type of location-based trigger for a
+    :class:`~icalendar.cal.alarm.Alarm` component. Although the RFC requires
+    that when PROXIMITY set, a VLOCATION sub-component must be present to
+    define the location, icalendar doesn't enforce that requirement.
 
     Possible values are the following.
 
     -   :attr:`ARRIVE`
-    -   :attr:`DEPART`
     -   :attr:`CONNECT`
+    -   :attr:`DEPART`
     -   :attr:`DISCONNECT`
     """
 
     ARRIVE = "ARRIVE"
-    DEPART = "DEPART"
     CONNECT = "CONNECT"
+    DEPART = "DEPART"
     DISCONNECT = "DISCONNECT"
 
 

@@ -1,4 +1,4 @@
-""":rfc:`9073` VRESOURCE component."""
+""":rfc:`9073` Resource component."""
 
 from __future__ import annotations
 
@@ -17,19 +17,23 @@ if TYPE_CHECKING:
     from icalendar.prop import vGeo
 
 
-class VResource(Component):
+class Resource(Component):
     """A VRESOURCE calendar component from :rfc:`9073#section-7.3`.
 
-    Provides structured resource information for a calendar component.
-    May appear inside VEVENT, VTODO, VJOURNAL, VFREEBUSY, or PARTICIPANT.
-    Multiple instances are allowed.
+    This component provides structured resource information for a calendar
+    component. It may appear inside :class:`~icalendar.cal.event.Event`,
+    :class:`~icalendar.cal.free_busy.FreeBusy`,
+    :class:`~icalendar.cal.journal.Journal`,
+    :class:`~icalendar.cal.participant.Participant`, or
+    :class:`~icalendar.cal.todo.Todo` per :rfc:`9074#section-8`. Multiple
+    instances are allowed.
 
     Example:
 
         .. code-block:: pycon
 
-            >>> from icalendar import VResource, RESOURCE_TYPE
-            >>> res = VResource()
+            >>> from icalendar import Resource, RESOURCE_TYPE
+            >>> res = Resource()
             >>> res.resource_name = "Projector"
             >>> res.resource_type = RESOURCE_TYPE.PROJECTOR
             >>> res.resource_type
@@ -43,7 +47,9 @@ class VResource(Component):
         "NAME",
         """The display name of this resource per :rfc:`7986#section-5.1`.
 
-        Returns the empty string when no NAME property is set.
+        Returns:
+            The value of the NAME property when set, or the empty string when
+            no NAME property is set.
         """,
     )
 
@@ -57,12 +63,15 @@ class VResource(Component):
         None,
         """The type of resource per :rfc:`9073#section-6.3`.
 
-        Returns a :class:`~icalendar.enums.RESOURCE_TYPE` member for IANA-registered
-        values, a plain :class:`str` for unknown values, or ``None`` when absent.
-
         IANA-registered values are defined in :rfc:`9073#section-11.2.2`:
-        ``ROOM``, ``PROJECTOR``, ``REMOTE-CONFERENCE-AUDIO``,
+        ``ROOM``, ``PROJECTOR``, ``REMOTE-CONFERENCE-AUDIO``, and
         ``REMOTE-CONFERENCE-VIDEO``.
+
+        Returns:
+            A :class:`~icalendar.enums.RESOURCE_TYPE` member for
+            IANA-registered values, a plain :class:`str` for unknown values, or
+            ``None`` when absent.
+
         """,
         preserve_unknown=True,
     )
@@ -71,10 +80,11 @@ class VResource(Component):
     def geo(self) -> vGeo | None:
         """The geographic position of this resource per :rfc:`5545#section-3.8.1.6`.
 
-        Returns a :class:`~icalendar.prop.geo.vGeo` instance or ``None`` when
-        no GEO property is set.
+        Returns:
+            A :class:`~icalendar.prop.geo.vGeo` instance, or ``None`` when
+            no GEO property is set.
         """
         return self.get("GEO")
 
 
-__all__ = ["VResource"]
+__all__ = ["Resource"]

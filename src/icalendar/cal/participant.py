@@ -20,9 +20,12 @@ if TYPE_CHECKING:
 class Participant(Component):
     """A PARTICIPANT calendar component from :rfc:`9073#section-7.1`.
 
-    Provides structured participant information for a calendar component.
-    May appear inside VEVENT, VTODO, VJOURNAL, or VFREEBUSY.
-    Multiple instances are allowed. PARTICIPANT-TYPE is required.
+    This component provides structured participant information for a calendar
+    component. It may appear inside :class:`~icalendar.cal.event.Event`,
+    :class:`~icalendar.cal.free_busy.FreeBusy`,
+    :class:`~icalendar.cal.journal.Journal`, or
+    :class:`~icalendar.cal.todo.Todo` per :rfc:`9074#section-8`. Multiple
+    instances are allowed.
 
     Example:
 
@@ -51,10 +54,10 @@ class Participant(Component):
         None,
         """The type of participant per :rfc:`9073#section-6.2`.
 
-        This property MUST appear exactly once in a PARTICIPANT component.
         Returns a :class:`~icalendar.enums.PARTICIPANT_TYPE` member for
         IANA-registered values, a plain :class:`str` for unknown values,
-        or ``None`` when absent.
+        or ``None`` when absent. icalendar does not enforce that this
+        property appears exactly once.
 
         IANA-registered values from :rfc:`9073#section-11.2.1`:
         ``ACTIVE``, ``INACTIVE``, ``SPONSOR``, ``CONTACT``,
@@ -80,12 +83,16 @@ class Participant(Component):
     @property
     def locations(self) -> list:
         """All VLOCATION sub-components of this participant per :rfc:`9073#section-7.2`."""
-        return self.walk("VLOCATION")
+        from icalendar.cal.location import Location
+
+        return self.walk(Location.name)
 
     @property
     def resources(self) -> list:
         """All VRESOURCE sub-components of this participant per :rfc:`9073#section-7.3`."""
-        return self.walk("VRESOURCE")
+        from icalendar.cal.resource import Resource
+
+        return self.walk(Resource.name)
 
 
 __all__ = ["Participant"]

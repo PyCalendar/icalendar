@@ -872,14 +872,14 @@ ORDER = string_parameter(
     """Indicate the relative ordering of a property amongst multiple properties
 of the same type.
 
-Conformance:
-    This property parameter is specified in :rfc:`9073#section-5.1`.
+This property parameter is specified in :rfc:`9073#section-5.1`.
 
-    This parameter MAY be specified on any property that permits multiple
-    instances in a single component. The value is a positive integer
-    starting at 1; absent means the property is unordered among those without
-    an ORDER value. No duplicate ORDER values are allowed within the same
-    property name on a component.
+This parameter may be specified on any property that permits multiple instances
+in a single component. The value is a positive integer starting at ``1``. If
+it's absent, that means the property is unordered among those without an ORDER
+value. Although the RFC states that no duplicate ORDER values are allowed
+within the same property name on a component, icalendar doesn't enforce this
+requirement.
 """,
     convert=_convert_order_read,
     convert_to=_convert_order_write,
@@ -889,28 +889,25 @@ SCHEMA = string_parameter(
     "SCHEMA",
     """Identify the schema that a STRUCTURED-DATA value conforms to.
 
-Conformance:
-    This property parameter is specified in :rfc:`9073#section-5.2`.
+This property parameter is specified in :rfc:`9073#section-5.2`.
 
-    This parameter SHOULD be specified on the STRUCTURED-DATA property.
-    Its value is a URI identifying the schema the structured data
-    follows. It supplements the media type given by the FMTTYPE
-    parameter, which alone may not be specific enough to interpret the
-    value.
+This parameter should be specified on the STRUCTURED-DATA property. Its value
+is a URI identifying the schema the structured data follows. It supplements the
+media type given by the FMTTYPE parameter, which alone may not be specific
+enough to interpret the value.
 """,
 )
 
 DERIVED = boolean_parameter("DERIVED", False)
 """Indicate that a property's value is derived from other property values.
 
-Conformance:
-    This property parameter is specified in :rfc:`9073#section-5.3`.
+This property parameter is specified in :rfc:`9073#section-5.3`.
 
-    This parameter MAY be specified on any property whose value can be
-    derived from the value of one or more other properties. When set to
-    ``TRUE``, clients MUST NOT update the property's value directly, since
-    it is expected to be recomputed from the properties it derives from.
-    The default, when absent, is ``FALSE``.
+This parameter may be specified on any property whose value can be derived from
+the value of one or more other properties. In accordance with the RFC, when
+it's set to ``TRUE``, icalendar doesn't update the property's value directly,
+since it's expected to be recomputed from the properties from which it derives.
+The default, when absent, is ``FALSE``.
 """
 
 

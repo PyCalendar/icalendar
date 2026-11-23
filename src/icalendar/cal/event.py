@@ -270,16 +270,16 @@ class Event(Component):
     @property
     def locations(self):
         """All VLOCATION sub-components of this event per :rfc:`9073#section-7.2`."""
-        from icalendar.cal.vlocation import VLocation
+        from icalendar.cal.location import Location
 
-        return self.walk(VLocation.name)
+        return self.walk(Location.name)
 
     @property
     def resources(self):
         """All VRESOURCE sub-components of this event per :rfc:`9073#section-7.3`."""
-        from icalendar.cal.vresource import VResource
+        from icalendar.cal.resource import Resource
 
-        return self.walk(VResource.name)
+        return self.walk(Resource.name)
 
     @property
     def alarms(self) -> Alarms:
