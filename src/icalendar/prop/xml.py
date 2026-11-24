@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import sys
 from contextlib import contextmanager, suppress
 from copy import copy, deepcopy
 from io import BytesIO
@@ -23,10 +24,23 @@ if TYPE_CHECKING:
     from icalendar.compatibility import Self
 
 # The text is already decoded, so an encoding in the XML declaration does not apply.
-_DECLARED_ENCODING = re.compile(
-    r"""^(\ufeff?<\?xml\s[^>]*?)\s+encoding\s*=\s*("[^"]*"|'[^']*')""",
+# A single ``\s`` before ``encoding`` keeps the match linear.
+# The whitespace that stays in the declaration is valid XML.
+_DECLARED_ENCODING_PY310 = re.compile(
+    r"""^(\ufeff?<\?xml\s[^>]*?)\sencoding\s*=\s*("[^"]*"|'[^']*')""",
     re.ASCII,
 )
+if sys.version_info >= (3, 11):
+    # Possessive quantifiers match the declaration as alternating runs of
+    # whitespace and other characters that are never given back, so the match is
+    # linear and all whitespace before ``encoding`` is removed.
+    _DECLARED_ENCODING = re.compile(
+        r"""^(\ufeff?<\?xml\s[^\s>]*+(?:\s++[^\s>]++)*?)\s++encoding\s*+=\s*+"""
+        r"""("[^"]*+"|'[^']*+')""",
+        re.ASCII,
+    )
+else:
+    _DECLARED_ENCODING = _DECLARED_ENCODING_PY310
 # Bytes are decoded with the encoding of their XML declaration.
 _DECLARED_ENCODING_OF_BYTES = re.compile(
     rb"""^<\?xml\s[^>]*?\sencoding\s*=\s*["']([A-Za-z][A-Za-z0-9._-]*)["']"""
@@ -52,7 +66,7 @@ class vXml(vText):
     Use :attr:`element` to get the XML element.
 
     In xCal, the XML property does not exist.
-    Instead the XML elements are directly copied into the ``<properties>`` element,
+    Instead the XML elements are directly copied into the :term:`IC:properties` element,
     see :rfc:`6321#section-4.1`.
     :mod:`~xml.etree.ElementTree` chooses the namespace prefixes there.
 
@@ -205,7 +219,7 @@ class vXml(vText):
 
         All other property classes in :mod:`icalendar.prop` add children to the ``element`` parameter.
         :class:`vXml` is special because it holds a single XML 1.0 element per :rfc:`6321#section-4.1`.
-        Such an element resides directly inside the ``<properties>`` tag.
+        Such an element resides directly inside the IC:properties element.
         Because of this, the tag, attributes, text, and children of ``element``
         are replaced with the XML 1.0 element contained in this object.
 

@@ -7,6 +7,7 @@ from icalendar.compatibility import Self
 from icalendar.error import JCalParsingError
 from icalendar.parser import Parameters
 from icalendar.parser.xcal.base import XCalParser
+from icalendar.parser.xcal.string import _to_valid_xml_string
 from icalendar.parser.xcal.wrapper import from_xcal_wrapper
 from icalendar.parser_tools import DEFAULT_ENCODING, to_unicode
 
@@ -392,10 +393,11 @@ class vCalAddress(str):
     @classmethod
     @from_xcal_wrapper
     def from_xcal(cls, parser: XCalParser, params: Parameters) -> Self:
-        """Parse xCal from :rfc:`6321`.
+        """Parse xCal according to :rfc:`6321`.
 
         Parameters:
-            xml: The XML to parse or a parser.
+            parser: Required. The xCal to parse or a parser.
+            params: Required. The parameters of the xCal element.
 
         Raises:
             ~error.XCalParsingError: If the provided xCal is invalid.
@@ -407,7 +409,7 @@ class vCalAddress(str):
         """The xCal representation of this property according to :rfc:`6321`."""
         self.params.to_xcal(element)
         element = SubElement(element, "cal-address")
-        element.text = self.ical_value
+        element.text = _to_valid_xml_string(self.ical_value)
 
 
 __all__ = ["vCalAddress"]

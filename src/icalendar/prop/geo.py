@@ -10,6 +10,7 @@ from icalendar.error import JCalParsingError
 from icalendar.parser import Parameters
 from icalendar.parser.xcal.string import xsd_float_to_string
 from icalendar.parser.xcal.wrapper import from_xcal_wrapper
+from icalendar.prop.float import _float_to_ical
 
 if TYPE_CHECKING:
     from icalendar.compatibility import Self
@@ -108,7 +109,7 @@ class vGeo:
         self.params = Parameters(params)
 
     def to_ical(self) -> str:
-        return f"{self.latitude};{self.longitude}"
+        return f"{_float_to_ical(self.latitude)};{_float_to_ical(self.longitude)}"
 
     @property
     def ical_value(self) -> tuple[float, float]:
@@ -181,10 +182,11 @@ class vGeo:
     @classmethod
     @from_xcal_wrapper
     def from_xcal(cls, parser: XCalParser, params: Parameters) -> Self:
-        """Parse xCal from :rfc:`6321`.
+        """Parse xCal according to :rfc:`6321`.
 
         Parameters:
-            element: The xCal element to parse.
+            parser: Required. The xCal to parse or a parser.
+            params: Required. The parameters of the xCal element.
 
         Raises:
             ~error.XCalParsingError: If the provided xCal is invalid.

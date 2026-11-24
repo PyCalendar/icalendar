@@ -119,8 +119,8 @@ class vRecur(CaselessDict):
             >>> rrule
             vRecur({'FREQ': ['DAILY'], 'COUNT': [10]})
 
-        You can choose to add an rrule to an :class:`icalendar.cal.Event` or
-        :class:`icalendar.cal.Todo`.
+        You can choose to add an rrule to an :class:`~icalendar.cal.event.Event` or
+        :class:`~icalendar.cal.todo.Todo`.
 
         .. code-block:: pycon
 
@@ -500,10 +500,11 @@ class vRecur(CaselessDict):
     @classmethod
     @from_xcal_wrapper
     def from_xcal(cls, parser: XCalParser, params: Parameters) -> Self:
-        """Parse xCal from :rfc:`6321`.
+        """Parse xCal according to :rfc:`6321`.
 
         Parameters:
-            xml: The XML to parse or a parser.
+            parser: Required. The xCal to parse or a parser.
+            params: Required. The parameters of the xCal element.
 
         Raises:
             ~error.XCalParsingError: If the provided xCal is invalid.
