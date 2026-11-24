@@ -9,11 +9,11 @@ RUN apk upgrade --no-cache \
         python -m pip install --no-cache-dir --upgrade 'setuptools>=78.1.1'; \
     fi
 
-# Pin test dependencies to the versions in uv.lock.
+# Install pinned test dependencies.
 RUN python -m pip install --no-cache-dir \
-    pytest==9.1.1 \
-    hypothesis==6.168.3 \
-    pytz==2026.4
+    pytest==9.2.0 \
+    hypothesis==6.170.17 \
+    pytz==2026.6
 
 COPY dist/ /tmp/dist/
 
