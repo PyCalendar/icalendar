@@ -5,10 +5,10 @@ permissions:
 on:
   push:
     branches:
-    - main
-    - 8.x
+      - main
+      - 8.x
     tags:
-    - v*
+      - v*
   pull_request:
   schedule:
     - cron: '14 7 * * 0'  # run once a week on Sunday

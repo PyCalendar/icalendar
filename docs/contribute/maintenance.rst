@@ -104,8 +104,9 @@ New releases
 ------------
 
 This section explains how to create a new release on `PyPI <https://pypi.org/project/icalendar/>`_.
+It includes both final releases—major, minor, and patch—and pre-releases, and follows `PEP 440 <https://peps.python.org/pep-0440/>`_.
 
-Its examples were used for the 7.0.0 release of icalendar, a major release.
+The examples were used for the 8.0.0 release of icalendar, a major release.
 Adjust the examples for the current release as needed.
 
 Since collaborators and maintainers have write access to the repository, they can start the release process.
@@ -134,7 +135,7 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
 
     .. code-block:: shell
 
-        export VERSION=7.0.0
+        export VERSION=8.0.0
 
 #.  Update the ``main`` branch.
 
@@ -143,17 +144,17 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
         git checkout main
         git pull
 
-#.  If you'll create a new *major* release, update :file:`.github/workflows/tests.yml` to include the new release branch in the list of branches that trigger the CI checks.
+#.  If you'll create a new *major* release, update both :file:`.github/workflows/tests.yml` and :file:`.github/workflows/documentation.yml` to include the new release branch in the list of branches that trigger the CI checks.
 
     ..  code-block:: yaml
         :emphasize-lines: 4
 
         push:
           branches:
-          - main
-          - 8.x
+            - main
+            - 8.x
           tags:
-          - v*
+            - v*
 
     .. _hide-version-warning-banner:
 
@@ -183,14 +184,15 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
 
         git add CHANGES.rst news/ docs/conf.py
         git add .github/workflows/tests.yml  # Only for a new major release
+        git add .github/workflows/documentation.yml  # Only for a new major release
         git commit -m "version $VERSION"
         git push  # to PyCalendar/icalendar
 
-#.  Confirm the CI checks are running on the commit and pass before continuing, either at the end of the pull request or under the repository tab `Actions <https://github.com/PyCalendar/icalendar/actions>`_.
+#.  Confirm the CI checks are running on the commit and pass before continuing by visiting the repository tab `Actions <https://github.com/PyCalendar/icalendar/actions>`_.
     No tag should be pushed until CI is green on the version commit.
     If CI is not running, no release can be issued.
 
-#.  Create a tag for the release on its release branch ``*.x``, push, and make sure the CI checks are running.
+#.  Create a tag for the release on its release branch, push, and make sure the CI checks are running.
 
     a.  First, make sure you're on the ``main`` branch and it's current, in case someone else updated ``main`` while tests ran.
 
@@ -201,20 +203,44 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
 
     #.  Next, depending on the release type, do one of the following.
 
-        -   For a major release, create a new branch, and check it out.
+        ..  tab-set::
 
-            .. code-block:: shell
+            ..  tab-item:: major release
+                :sync: major
 
-                git switch -c 8.x
+                For a major release, create a new branch, and check it out.
 
-        -   For a minor or patch release, check out the existing branch, and update it.
+                .. code-block:: shell
 
-            .. code-block:: shell
+                    git switch -c 8.x
 
-                git checkout 8.x
-                git pull
+            ..  tab-item:: minor release
+                :sync: minor
 
-    #.  Next, merge ``main`` into the release branch.
+                For a minor or patch release, check out the existing branch, and update it.
+
+                .. code-block:: shell
+
+                    git checkout 8.x
+                    git pull
+
+            ..  tab-item:: patch release
+                :sync: patch
+
+                For a minor or patch release, check out the existing branch, and update it.
+
+                .. code-block:: shell
+
+                    git checkout 8.x
+                    git pull
+
+            ..  tab-item:: pre-release
+                :sync: pre
+
+                For a pre-release, continue to the next step.
+
+    #.  Next, for a final release, merge ``main`` into the release branch.
+        For a pre-release, skip to the next step.
 
         .. code-block:: shell
 
@@ -222,17 +248,43 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
 
     #.  Next, push changes upstream, changing the command according to the release type.
 
-        -   For a major release, push, create, and track the upstream branch.
+        ..  tab-set::
 
-            .. code-block:: shell
+            ..  tab-item:: major release
+                :sync: major
 
-                git push -u upstream 8.x  # to PyCalendar/icalendar
+                For a major release, push, create, and track the upstream branch.
 
-        -   For a minor or patch release, just push.
+                .. code-block:: shell
 
-            .. code-block:: shell
+                    git push -u upstream 8.x  # to PyCalendar/icalendar
 
-                git push  # to PyCalendar/icalendar
+            ..  tab-item:: minor release
+                :sync: minor
+
+                For a minor, patch, or pre-release, just push.
+
+                .. code-block:: shell
+
+                    git push  # to PyCalendar/icalendar
+
+            ..  tab-item:: patch release
+                :sync: patch
+
+                For a minor, patch, or pre-release, just push.
+
+                .. code-block:: shell
+
+                    git push  # to PyCalendar/icalendar
+
+            ..  tab-item:: pre-release
+                :sync: pre
+
+                For a minor, patch, or pre-release, just push.
+
+                .. code-block:: shell
+
+                    git push  # to PyCalendar/icalendar
 
     #.  Next, create a tag, and push the tag.
 
@@ -260,6 +312,12 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
     The approval window is 30 days.
     If it expires, push a new tag with a bumped version number.
 
+    ..  admonition:: pre-releases only
+
+        After you create the GitHub release, on its Release page, under :guilabel:`Release label`, select the radio button :guilabel:`This is a pre-release`.
+        The workflow sets it automatically for PEP 440 pre-release version tags.
+        If the radio button is not selected, edit the release on GitHub and set it manually before the release is widely announced.
+
 #.  Update the version switcher file :file:`docs/_static/version-switcher.json`.
 
     .. note::
@@ -270,7 +328,7 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
 
             json_url = "https://icalendar.readthedocs.io/en/latest/_static/version-switcher.json"
 
-    The following examples were used for the 7.0.0 release.
+    The following examples were used for the 8.0.0 release.
 
     a.  Check out the ``main`` branch and update it.
 
@@ -299,8 +357,8 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
                 :emphasize-lines: 2-3
 
                 {
-                    "name": "7.x (stable)",
-                    "version": "v7.0.0",
+                    "name": "8.x (stable)",
+                    "version": "v8.0.0",
                     "url": "https://icalendar.readthedocs.io/en/stable/",
                     "preferred": "true"
                 },
@@ -315,8 +373,8 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
             :emphasize-lines: 2-3
 
             {
-                "name": "7.x (stable)",
-                "version": "v7.0.1",
+                "name": "8.x (stable)",
+                "version": "v8.0.1",
                 "url": "https://icalendar.readthedocs.io/en/stable/",
                 "preferred": "true"
             },
@@ -351,7 +409,7 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
         git push  # to PyCalendar/icalendar
 
 #.  If you cut a new *major* release version, update the Sphinx configuration file :file:`docs/conf.py` on the *previous* numbered major release branch to show the version warning banner.
-    For example, when releasing 7.0.0, check out ``6.x``, and update it as shown.
+    For example, when releasing 8.0.0, check out ``7.x``, and update it as shown.
 
     .. code-block:: shell
 
@@ -393,30 +451,36 @@ However, only people with ``Environments/Configure PyPI`` access can approve an 
 
 #.  Add a comment to each of the issues mentioned in the new release.
 
-    .. code-block:: text
+    ..  tab-set::
 
-        This is included in v7.0.0.
 
-.. _pre-releases:
+        ..  tab-item:: major release
+            :sync: major
 
-Pre-releases
-------------
+            ..  code-block:: text
 
-Pre-releases use `PEP 440 <https://peps.python.org/pep-0440/>`_ suffixes: ``8.0.0a1``, ``8.0.0b1``, ``8.0.0rc1``.
-The release steps are the same as a standard release, with the following differences.
+                This is included in v8.0.0.
 
-The tag goes on ``main``, not on a ``*.x`` branch.
-When the stable branch is eventually cut, follow the standard process from :ref:`new-releases`.
+        ..  tab-item:: minor release
+            :sync: minor
 
-After you create the GitHub release, check that the :guilabel:`This is a pre-release` checkbox is set on the release page.
-The workflow sets it automatically for PEP 440 pre-release version tags.
-If the checkbox is not set, edit the release on GitHub and set it manually before the release is widely announced.
+            ..  code-block:: text
 
-When commenting on issues, use the qualifier so users know the version is not stable:
+                This is included in v8.0.0.
 
-.. code-block:: text
+        ..  tab-item:: patch release
+            :sync: patch
 
-    This is included in v8.0.0a1 (alpha).
+            ..  code-block:: text
+
+                This is included in v8.0.0.
+
+        ..  tab-item:: pre-release
+            :sync: pre
+
+            ..  code-block:: text
+
+                This is included in v8.0.0a1 (alpha).
 
 
 .. _backport-releases:
@@ -430,7 +494,7 @@ A backport release cherry-picks specific commits onto a ``*.x`` stable branch to
 
     .. code-block:: shell
 
-        export VERSION=7.3.2
+        export VERSION=7.3.3
 
 #.  Check that the stable branch is at the latest published tag.
     If it's behind, advance it first (see the last step of :ref:`new-releases`).
@@ -486,7 +550,7 @@ A backport release cherry-picks specific commits onto a ``*.x`` stable branch to
 
     .. code-block:: text
 
-        This is fixed in v7.3.2.
+        This is fixed in v7.3.3.
 
 
 .. _security-releases:
@@ -529,7 +593,7 @@ Updating Python versions
 
 When adding support for a new Python version, or removing support for an old one, the following files need to be updated:
 
-:file:`.github/workflows/tests.yml`
+:file:`.github/workflows/tests.yml` and :file:`.github/workflows/documentation.yml`
     Upgrade Python versions.
 :file:`.github/workflows/*.py`
     Add or remove the Python version from the test matrix.
