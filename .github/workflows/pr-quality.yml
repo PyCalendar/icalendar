@@ -11,10 +11,11 @@ permissions:
 on:
   # zizmor: ignore[dangerous-triggers] - pull_request_target needed to check PR quality from forks
   pull_request_target:
-    types: [opened, reopened]
+    types: [opened, reopened, edited]
 
 jobs:
   anti-slop:
+    if: github.event.action != 'edited'
     runs-on: ubuntu-latest
     steps:
       - uses: peakoss/anti-slop@57858eead489d08b255fab2af45a506c2ca6eab2 # v0.3.0
@@ -40,3 +41,31 @@ jobs:
             If you used AI assistance, follow the project's [Responsible AI use policy](https://icalendar.readthedocs.io/en/latest/contribute/index.html#responsible-ai-use) and provide the required disclosures.
           close-pr: false
           min-profile-completeness: 1
+
+  # Automated AI pull requests often replace the PR template with their own text.
+  # This heuristic checks that the most important template sections are present.
+  pr-template:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      REPO: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+      PR_BODY: ${{ github.event.pull_request.body }}
+      LABEL: Needs PR template
+    steps:
+      - name: Check that the PR template is used
+        run: |
+          missing=()
+          for section in "Description" "Checklist"; do
+            if ! grep -qiE "^#{2,3}[[:space:]]+${section}[[:space:]]*$" <<< "${PR_BODY//$'\r'/}"; then
+              missing+=("$section")
+            fi
+          done
+          if [ ${#missing[@]} -eq 0 ]; then
+            echo "PR template sections found."
+            gh api --method DELETE "repos/$REPO/issues/$PR_NUMBER/labels/$(jq -rn --arg l "$LABEL" '$l|@uri')" > /dev/null 2>&1 || true
+            exit 0
+          fi
+          echo "::error::Missing PR template sections: ${missing[*]}. Please use the pull request template."
+          gh api --method POST "repos/$REPO/issues/$PR_NUMBER/labels" -f "labels[]=$LABEL" > /dev/null
+          exit 1
