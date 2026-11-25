@@ -42,8 +42,7 @@ jobs:
           close-pr: false
           min-profile-completeness: 1
 
-  # Automated AI pull requests often replace the PR template with their own text.
-  # This heuristic checks that the most important template sections are present.
+  # Check that the PR template is used and add a label if not.
   pr-template:
     runs-on: ubuntu-latest
     env:
