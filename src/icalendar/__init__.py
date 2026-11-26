@@ -17,6 +17,7 @@ from icalendar.cal import (
     TimezoneDaylight,
     TimezoneStandard,
     Todo,
+    parse,
 )
 from icalendar.enums import (
     ACTION,
@@ -35,6 +36,7 @@ from icalendar.enums import (
 )
 from icalendar.error import (
     BrokenCalendarProperty,
+    CalendarInformationLost,
     ComponentEndMissing,
     ComponentStartMissing,
     FeatureWillBeRemovedInFutureVersion,
@@ -46,6 +48,8 @@ from icalendar.error import (
     InvalidToken,
     JCalParsingError,
     LocalTimezoneMissing,
+    NoCalendarsFound,
+    UnknownCalendarFormat,
     XCalParsingError,
 )
 
@@ -126,6 +130,7 @@ __all__ = [
     "Available",
     "BrokenCalendarProperty",
     "Calendar",
+    "CalendarInformationLost",
     "Component",
     "ComponentEndMissing",
     "ComponentFactory",
@@ -146,16 +151,19 @@ __all__ = [
     "LazyCalendar",
     "LocalTimezoneMissing",
     "NFields",
+    "NoCalendarsFound",
     "Parameters",
     "Timezone",
     "TimezoneDaylight",
     "TimezoneStandard",
     "Todo",
     "TypesFactory",
+    "UnknownCalendarFormat",
     "XCalParsingError",
     "__version__",
     "__version_tuple__",
     "is_utc",
+    "parse",
     "q_join",
     "q_split",
     "use_pytz",
