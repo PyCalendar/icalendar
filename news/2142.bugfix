@@ -1,0 +1,1 @@
+I used OpenCode hy4-flash-free to draft a fix for issue #2142 that identifies relative dateutil timezone filenames such as Pacific/Fiji on Windows when no zoneinfo root is available, then reproduced and verified it myself. :user:`fadiuniv1`

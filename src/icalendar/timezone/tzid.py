@@ -63,14 +63,15 @@ def tzids_from_tzinfo(tzinfo: tzinfo | None) -> tuple[str]:
         if olson is not None:
             return _get_equivalent_tzids(olson)
         return _get_equivalent_tzids(tzinfo._name)  # noqa: SLF001
-    if hasattr(tzinfo, "_filename"):  # dateutil.tz.tzfile  # noqa: SIM102
-        if DATEUTIL_ZONEINFO_PATH is not None:
-            # tzfile('/usr/share/zoneinfo/Europe/Berlin')
-            path = tzinfo._filename  # noqa: SLF001
-            if path.startswith(str(DATEUTIL_ZONEINFO_PATH)):
-                tzid = str(Path(path).relative_to(DATEUTIL_ZONEINFO_PATH))
-                return _get_equivalent_tzids(tzid)
-            return _get_equivalent_tzids(path)
+    if hasattr(tzinfo, "_filename"):  # dateutil.tz.tzfile
+        # dateutil stores an absolute path where a zoneinfo database exists,
+        # but a relative IANA id on Windows (issue #2142).
+        path = tzinfo._filename  # noqa: SLF001
+        if DATEUTIL_ZONEINFO_PATH is not None and path.startswith(
+            str(DATEUTIL_ZONEINFO_PATH)
+        ):
+            path = str(Path(path).relative_to(DATEUTIL_ZONEINFO_PATH))
+        return _get_equivalent_tzids(path.replace("\\", "/"))
     if isinstance(tzinfo, tz.tzutc):
         return _get_equivalent_tzids("UTC")
     return ()
