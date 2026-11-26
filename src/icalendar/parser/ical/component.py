@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING, ClassVar
 
 from icalendar.error import ICalParsingError, InvalidToken
 from icalendar.parser.content_line import Contentline, Contentlines
-from icalendar.parser.property import split_on_unescaped_comma
-from icalendar.prop import vBroken, vCategory
+from icalendar.prop import vBroken
 from icalendar.timezone import tzp
 
 if TYPE_CHECKING:
@@ -209,7 +208,7 @@ class ComponentIcalParser:
         # Handle special cases for value list preparation
         if name == "CATEGORIES" and self.handle_categories(params, vals, line):
             return
-        if name == "LOCATION-TYPE" and self._handle_text_list(name, params, line):
+        if name == "LOCATION-TYPE" and self.handle_location_type(params, vals, line):
             return
         if name == "FREEBUSY":
             # Handle FREEBUSY comma-separated values
@@ -293,27 +292,39 @@ class ComponentIcalParser:
         """
         return self._handle_text_list("CATEGORIES", params, line)
 
+    def handle_location_type(
+        self, params: Parameters, vals: str, line: Contentline
+    ) -> bool:
+        """Handle the LOCATION-TYPE property.
+
+        Returns:
+            ``True`` if handled, else ``False``.
+        """
+        return self._handle_text_list("LOCATION-TYPE", params, line)
+
     def _handle_text_list(
         self, name: str, params: Parameters, line: Contentline
     ) -> bool:
-        """Parse a comma-separated TEXT list from its original content line."""
+        """Let the registered type decode a TEXT list from the original line."""
         factory = self.get_factory_for_property(name, params)
-        if not issubclass(factory, vCategory):
+        from_ical_list = getattr(factory, "from_ical_list", None)
+        if from_ical_list is None:
             return False
-        # Use the raw value to split on commas before unescaping text.
-        line_str = str(line)
-        # The value separator is the first colon outside a quoted parameter
-        # section. ``rfind`` here would pick a colon that belongs to the value
-        # (``TEXT`` does not escape ``:``) and truncate the categories.
-        colon_idx = line.value_separator_index()
-        if colon_idx > 0:
-            raw_value = line_str[colon_idx + 1 :]
-            try:
-                category_list = split_on_unescaped_comma(raw_value)
-                vals_inst = factory(category_list)
-                vals_inst.params = params
-                self.component.add(name, vals_inst, encode=0)
-            except ValueError as e:
-                self.handle_property_parse_error(e, name, params, raw_value, line)
-            return True
-        return False
+        read_value = getattr(factory, "get_value_from_content_line", None)
+        try:
+            raw_value = (
+                read_value(line)
+                if read_value is not None
+                else line.raw_text_list_value()
+            )
+            if raw_value is None:
+                return False
+            value = from_ical_list(raw_value)
+            value.params = params
+            self.component.add(name, value, encode=False)
+        except (ValueError, TypeError) as e:
+            raw_value = line.raw_text_list_value()
+            if raw_value is None:
+                raw_value = line.raw_parts()[2]
+            self.handle_property_parse_error(e, name, params, raw_value, line)
+        return True

@@ -7,6 +7,7 @@ from icalendar import (
     Calendar,
     Component,
     Event,
+    Location,
     Timezone,
     Todo,
 )
@@ -25,6 +26,7 @@ CLASSES_WITH_NEW = [
     pytest.param(Event, {"summary": "Test"}, id="Event"),
     pytest.param(Todo, {"summary": "Test"}, id="Todo"),
     pytest.param(Calendar, {}, id="Calendar"),
+    pytest.param(Location, {}, id="Location"),
     pytest.param(Timezone, {}, id="Timezone"),
     pytest.param(Availability, {}, id="Availability"),
 ]

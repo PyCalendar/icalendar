@@ -67,6 +67,7 @@ from .float import vFloat
 from .geo import vGeo
 from .inline import vInline
 from .integer import vInt
+from .location_type import vLocationType
 from .n import NFields, vN
 from .org import vOrg
 from .recur import vFrequency, vMonth, vRecur, vSkip, vWeekday
@@ -92,6 +93,7 @@ VPROPERTY: TypeAlias = (
     | vFloat
     | vFrequency
     | vInt
+    | vLocationType
     | vMonth
     | vN
     | vOrg
@@ -136,6 +138,7 @@ __all__ = [
     "vGeo",
     "vInline",
     "vInt",
+    "vLocationType",
     "vMonth",
     "vN",
     "vOrg",

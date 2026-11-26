@@ -45,6 +45,7 @@ default_value_map = {
     prop.vBoolean: "BOOLEAN",
     prop.vCalAddress: "CAL-ADDRESS",
     prop.vCategory: "TEXT",
+    prop.vLocationType: "TEXT",
     prop.vDate: "DATE",
     prop.vDatetime: "DATE-TIME",
     prop.vDuration: "DURATION",

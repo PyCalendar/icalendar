@@ -202,6 +202,10 @@ class vText(str):
             from icalendar.prop import vCategory
 
             return vCategory.from_jcal(jcal_property)
+        if name == "location-type":
+            from .location_type import vLocationType
+
+            return vLocationType.from_jcal(jcal_property)
         if name == "request-status":
             from .request_status import vRequestStatus
 

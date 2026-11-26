@@ -30,6 +30,7 @@ Submodules
    icalendar.prop.image
    icalendar.prop.inline
    icalendar.prop.integer
+   icalendar.prop.location_type
    icalendar.prop.n
    icalendar.prop.org
    icalendar.prop.request_status

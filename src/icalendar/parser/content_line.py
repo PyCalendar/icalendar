@@ -317,6 +317,13 @@ class Contentline(str):
                 return i
         return -1
 
+    def raw_text_list_value(self) -> str | None:
+        """Return the raw TEXT list, or ``None`` if its separator is missing."""
+        separator = self.value_separator_index()
+        if separator < 0:
+            return None
+        return self[separator + 1 :]
+
     @classmethod
     def from_ical(cls, ical, strict=False):
         """Unfold the content lines in an iCalendar into long content lines."""

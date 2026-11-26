@@ -15,8 +15,6 @@ if TYPE_CHECKING:
 class ComponentFactory(CaselessDict):
     """Registered components from :rfc:`7953`, :rfc:`5545`, and :rfc:`9073`.
 
-    Support for RFC 9073 is limited to the ``VLOCATION`` component.
-
     On initialization, this class sets its keys to uppercase.
 
     To get a component, use this class as shown below.

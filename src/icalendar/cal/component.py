@@ -408,8 +408,8 @@ class Component(CaselessDict):
             and isinstance(value, list)
             and name.lower() not in ["rdate", "exdate", "categories", "location-type"]
         ):
-            # Keep lists together for properties represented by vDDDLists
-            # or vCategory; other lists represent repeated properties.
+            # Individually convert each value to an ical type except rdate and
+            # exdate, where lists of dates might be passed to vDDDLists.
             value = [self._encode(name, v, parameters, encode) for v in value]
         else:
             value = self._encode(name, value, parameters, encode)

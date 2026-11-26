@@ -1,1 +1,4 @@
-Added :class:`~icalendar.cal.location.Location` for ``VLOCATION`` as part of :rfc:`9073`. You can add multiple locations to events and tasks with ``add_component()``. ``NAME`` is now parsed as text, and ``LOCATION-TYPE`` accepts multiple types in one property. Repeated searches for nested components in :class:`~icalendar.cal.lazy.LazyCalendar` now preserve the results. Support for RFC 9073 remains partial. OpenAI Codex (GPT-6 Astra) assisted with implementation, tests, documentation, and compatibility checks against the main branch. @AthosTomich
+Added :class:`~icalendar.cal.location.Location` for ``VLOCATION`` components from :rfc:`9073`.
+Use ``Location.new()`` to create a location with a UID, name, description, coordinates, and location types.
+Events and tasks can contain multiple locations, and :class:`~icalendar.prop.location_type.vLocationType` stores multiple types in one ``LOCATION-TYPE`` property.
+OpenAI Codex (GPT-6) generated code and tests for this contribution. :user:`AthosTomich`
