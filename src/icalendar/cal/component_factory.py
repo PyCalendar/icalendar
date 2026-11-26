@@ -17,6 +17,8 @@ class ComponentFactory(CaselessDict):
 
     Support for RFC 9073 is limited to the ``VLOCATION`` component.
 
+    On initialization, this class sets its keys to uppercase.
+
     To get a component, use this class as shown below.
 
     .. code-block:: pycon
@@ -44,7 +46,6 @@ class ComponentFactory(CaselessDict):
     """
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Set keys to upper for initial dict."""
         super().__init__(*args, **kwargs)
         from icalendar.cal.alarm import Alarm
         from icalendar.cal.availability import Availability
