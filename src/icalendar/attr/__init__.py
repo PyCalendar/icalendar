@@ -2312,109 +2312,6 @@ def _get_links(self: Component) -> list[vUri | vUid | vXmlReference]:
     """LINK properties as a list.
 
     :meta private:
-
-    Purpose:
-        LINK provides a reference to external information related to a component.
-
-    Property Parameters:
-        The VALUE parameter is required.
-        Non-standard, link relation type, format type, label, and language parameters
-        can also be specified on this property.
-        The LABEL parameter is defined in :rfc:`7986`.
-
-    Conformance:
-        This property can be specified zero or more times in any iCalendar component.
-        LINK is specified in :rfc:`9253`.
-        The LINKREL parameter is required.
-
-    Description:
-        When used in a component, the value of this property points to
-        additional information related to the component.
-        For example, it may reference the originating web server.
-
-        This property is a serialization of the model in :rfc:`8288`,
-        where the link target is carried in the property value,
-        the link context is the containing calendar entity,
-        and the link relation type and any target attributes
-        are carried in iCalendar property parameters.
-
-        The LINK property parameters map to :rfc:`8288` attributes as follows:
-
-        LABEL
-            This parameter maps to the "title"
-            attribute defined in Section 3.4.1 of :rfc:`8288`.
-            LABEL is used to label the destination
-            of a link such that it can be used as a human-readable identifier
-            (e.g., a menu entry) in the language indicated by the LANGUAGE
-            (if present).
-        LANGUAGE
-            This parameter maps to the "hreflang" attribute defined in Section 3.4.1
-            of :rfc:`8288`. See :rfc:`5646`. Example: ``en``, ``de-ch``.
-        LINKREL
-            This parameter maps to the link relation type defined in Section 2.1 of
-            :rfc:`8288`. See `Registered Link Relation Types
-            <https://www.iana.org/assignments/link-relations/link-relations.xhtml>`_.
-        FMTTYPE
-            This parameter maps to the "type" attribute defined in Section 3.4.1 of
-            :rfc:`8288`.
-
-        There is no mapping for "title*", "anchor", "rev", or "media" :rfc:`8288`.
-
-    Examples:
-        The following is an example of this property,
-        which provides a reference to the source for the calendar object.
-
-        .. code-block:: ics
-
-            LINK;LINKREL=SOURCE;LABEL=Venue;VALUE=URI:
-             https://example.com/events
-
-        The following is an example of this property,
-        which provides a reference to an entity from which this one was derived.
-        The link relation is a vendor-defined value.
-
-        .. code-block:: ics
-
-            LINK;LINKREL="https://example.com/linkrel/derivedFrom";
-             VALUE=URI:
-             https://example.com/tasks/01234567-abcd1234.ics
-
-        The following is an example of this property,
-        which provides a reference to a fragment of an XML document.
-        The link relation is a vendor-defined value.
-
-        .. code-block:: ics
-
-            LINK;LINKREL="https://example.com/linkrel/costStructure";
-             VALUE=XML-REFERENCE:
-             https://example.com/xmlDocs/bidFramework.xml
-             #xpointer(descendant::CostStruc/range-to(
-             following::CostStrucEND[1]))
-
-        Set a link :class:`icalendar.prop.uri.vUri` to the event page:
-
-        .. code-block:: pycon
-
-            >>> from icalendar import Event, vUri
-            >>> from datetime import datetime
-            >>> link = vUri(
-            ...     "http://example.com/event-page",
-            ...     params={"LINKREL":"SOURCE"}
-            ... )
-            >>> event = Event.new(
-            ...     start=datetime(2025, 9, 17, 12, 0),
-            ...     summary="An Example Event with a page"
-            ... )
-            >>> event.links = [link]
-            >>> print(event.to_ical())
-            BEGIN:VEVENT
-            SUMMARY:An Example Event with a page
-            DTSTART:20250917T120000
-            DTSTAMP:20250517T080612Z
-            UID:d755cef5-2311-46ed-a0e1-6733c9e15c63
-            LINK;LINKREL="SOURCE":http://example.com/event-page
-            END:VEVENT
-
     """
     links = self.get("LINK", [])
     if not isinstance(links, list):
@@ -2451,7 +2348,115 @@ def _del_links(self: Component) -> None:
     self.pop("LINK")
 
 
-links_property = property(_get_links, _set_links, _del_links)
+links_property = property(
+    _get_links,
+    _set_links,
+    _del_links,
+    """LINK properties as a list.
+
+Purpose:
+    LINK provides a reference to external information related to a component.
+
+Property Parameters:
+    The VALUE parameter is required.
+    Non-standard, link relation type, format type, label, and language parameters
+    can also be specified on this property.
+    The LABEL parameter is defined in :rfc:`7986`.
+
+Conformance:
+    This property can be specified zero or more times in any iCalendar component.
+    LINK is specified in :rfc:`9253`.
+    The LINKREL parameter is required.
+
+Description:
+    When used in a component, the value of this property points to
+    additional information related to the component.
+    For example, it may reference the originating web server.
+
+    This property is a serialization of the model in :rfc:`8288`,
+    where the link target is carried in the property value,
+    the link context is the containing calendar entity,
+    and the link relation type and any target attributes
+    are carried in iCalendar property parameters.
+
+    The LINK property parameters map to :rfc:`8288` attributes as follows:
+
+    LABEL
+        This parameter maps to the "title"
+        attribute defined in Section 3.4.1 of :rfc:`8288`.
+        LABEL is used to label the destination
+        of a link such that it can be used as a human-readable identifier
+        (e.g., a menu entry) in the language indicated by the LANGUAGE
+        (if present).
+    LANGUAGE
+        This parameter maps to the "hreflang" attribute defined in Section 3.4.1
+        of :rfc:`8288`. See :rfc:`5646`. Example: ``en``, ``de-ch``.
+    LINKREL
+        This parameter maps to the link relation type defined in Section 2.1 of
+        :rfc:`8288`. See `Registered Link Relation Types
+        <https://www.iana.org/assignments/link-relations/link-relations.xhtml>`_.
+    FMTTYPE
+        This parameter maps to the "type" attribute defined in Section 3.4.1 of
+        :rfc:`8288`.
+
+    There is no mapping for "title*", "anchor", "rev", or "media" :rfc:`8288`.
+
+Examples:
+    The following is an example of this property,
+    which provides a reference to the source for the calendar object.
+
+    .. code-block:: ics
+
+        LINK;LINKREL=SOURCE;LABEL=Venue;VALUE=URI:
+         https://example.com/events
+
+    The following is an example of this property,
+    which provides a reference to an entity from which this one was derived.
+    The link relation is a vendor-defined value.
+
+    .. code-block:: ics
+
+        LINK;LINKREL="https://example.com/linkrel/derivedFrom";
+         VALUE=URI:
+         https://example.com/tasks/01234567-abcd1234.ics
+
+    The following is an example of this property,
+    which provides a reference to a fragment of an XML document.
+    The link relation is a vendor-defined value.
+
+    .. code-block:: ics
+
+        LINK;LINKREL="https://example.com/linkrel/costStructure";
+         VALUE=XML-REFERENCE:
+         https://example.com/xmlDocs/bidFramework.xml
+         #xpointer(descendant::CostStruc/range-to(
+         following::CostStrucEND[1]))
+
+    Set a link :class:`icalendar.prop.uri.vUri` to the event page:
+
+    .. code-block:: pycon
+
+        >>> from icalendar import Event, vUri
+        >>> from datetime import datetime
+        >>> link = vUri(
+        ...     "http://example.com/event-page",
+        ...     params={"LINKREL":"SOURCE"}
+        ... )
+        >>> event = Event.new(
+        ...     start=datetime(2025, 9, 17, 12, 0),
+        ...     summary="An Example Event with a page"
+        ... )
+        >>> event.links = [link]
+        >>> print(event.to_ical())
+        BEGIN:VEVENT
+        SUMMARY:An Example Event with a page
+        DTSTART:20250917T120000
+        DTSTAMP:20250517T080612Z
+        UID:d755cef5-2311-46ed-a0e1-6733c9e15c63
+        LINK;LINKREL="SOURCE":http://example.com/event-page
+        END:VEVENT
+""",
+)
 
 RELATED_TO_TYPE_SETTER: TypeAlias = (
     str | vText | vUri | vUid | list[str | vText | vUri | vUid] | None
