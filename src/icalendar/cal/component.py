@@ -1253,7 +1253,7 @@ class Component(CaselessDict):
 
         Returns:
             - ``None`` if an argument is passed.
-            - :class:`bytes` if called with no arguments.
+            - :class:`python:bytes` if called with no arguments.
 
         Raises:
             TypeError: If ``destination`` is neither an XML
