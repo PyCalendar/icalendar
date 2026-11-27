@@ -22,7 +22,7 @@ icalendar supports the following RFC standards.
 :rfc:`7529`
     Non-Gregorian Recurrence Rules in the Internet Calendaring and Scheduling Core Object Specification (iCalendar)
 :rfc:`9074`
-    "VALARM" Extensions for iCalendar
+    VALARM Extensions for iCalendar
 :rfc:`7953`
     Calendar Availability
 :rfc:`7986`
