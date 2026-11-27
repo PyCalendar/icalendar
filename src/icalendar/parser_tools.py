@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from icalendar.error import CalendarDecodeError
+
 #: The supported sequence types.
 SEQUENCE_TYPES = (list, tuple)
 #: The default encoding to use when encoding or decoding iCalendar data.
@@ -35,16 +37,23 @@ def to_unicode(value: ICAL_TYPE, encoding: str = "utf-8-sig") -> str:
     """Converts a value to Unicode, even if it is already a Unicode string.
 
     Parameters:
-        value: The value to convert.
+        value: Required. The value to convert.
         encoding: The encoding to use in the conversion.
+
+    Raises:
+        ~icalendar.error.CalendarDecodeError: If ``value`` cannot be decoded.
+
+    ..  versionchanged:: 0.0.0
+        Raise :class:`~icalendar.error.CalendarDecodeError` instead of
+        replacing bytes that cannot be decoded.
     """
     if isinstance(value, str):
         return value
     if isinstance(value, bytes):
         try:
             return value.decode(encoding)
-        except UnicodeDecodeError:
-            return value.decode("utf-8-sig", "replace")
+        except UnicodeDecodeError as error:
+            raise CalendarDecodeError(error) from error
     else:
         return value
 
