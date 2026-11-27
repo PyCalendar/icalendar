@@ -130,7 +130,17 @@ class vUri(str):
         """
         return f"{self.__class__.__name__}({self.uri!r})"
 
-    from icalendar.param import FMTTYPE, GAP, LABEL, LANGUAGE, LINKREL, RELTYPE, VALUE
+    from icalendar.param import (
+        DERIVED,
+        FMTTYPE,
+        GAP,
+        LABEL,
+        LANGUAGE,
+        LINKREL,
+        ORDER,
+        RELTYPE,
+        VALUE,
+    )
 
     def to_xcal(self, element: Element) -> None:
         """Add the xCal representation of this property according to :rfc:`6321`."""

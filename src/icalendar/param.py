@@ -853,19 +853,63 @@ def _del_GAP(prop):  # noqa: N802
 
 GAP = property(_get_GAP, _set_GAP, _del_GAP)
 
+
+def _convert_order_read(value: str) -> int:
+    """Convert ORDER string to int on read."""
+    return int(value)
+
+
+def _convert_order_write(value) -> str:
+    """Validate and convert ORDER to string for storage."""
+    result = int(value)
+    if result < 1:
+        raise ValueError(f"ORDER must be a positive integer >= 1, got {result}")
+    return str(result)
+
+
 ORDER = string_parameter(
     "ORDER",
-    """Specify the ordering of the property instance to which it's attached.
+    """Indicate the relative ordering of a property amongst multiple properties
+of the same type.
 
-    This property parameter is specified in :rfc:`9073#section-5.1`.
+This property parameter is specified in :rfc:`9073#section-5.1`.
 
-    The value is a positive integer. A value of ``1`` means the instance
-    appears first.
-    """,
-    default=lambda: None,
-    convert=int,
-    convert_to=str,
+This parameter may be specified on any property that permits multiple instances
+in a single component. The value is a positive integer starting at ``1``. If
+it's absent, that means the property is unordered among those without an ORDER
+value. Although the RFC states that no duplicate ORDER values are allowed
+within the same property name on a component, icalendar doesn't enforce this
+requirement.
+""",
+    convert=_convert_order_read,
+    convert_to=_convert_order_write,
 )
+
+SCHEMA = string_parameter(
+    "SCHEMA",
+    """Identify the schema that a STRUCTURED-DATA value conforms to.
+
+This property parameter is specified in :rfc:`9073#section-5.2`.
+
+This parameter should be specified on the STRUCTURED-DATA property. Its value
+is a URI identifying the schema the structured data follows. It supplements the
+media type given by the FMTTYPE parameter, which alone may not be specific
+enough to interpret the value.
+""",
+)
+
+DERIVED = boolean_parameter("DERIVED", False)
+"""Indicate that a property's value is derived from other property values.
+
+This property parameter is specified in :rfc:`9073#section-5.3`.
+
+This parameter may be specified on any property whose value can be derived from
+the value of one or more other properties. In accordance with the RFC, when
+it's set to ``TRUE``, icalendar doesn't update the property's value directly,
+since it's expected to be recomputed from the properties from which it derives.
+The default, when absent, is ``FALSE``.
+"""
+
 
 __all__ = [
     "ALTREP",
@@ -873,6 +917,7 @@ __all__ = [
     "CUTYPE",
     "DELEGATED_FROM",
     "DELEGATED_TO",
+    "DERIVED",
     "DIR",
     "EMAIL",
     "FBTYPE",
@@ -888,6 +933,7 @@ __all__ = [
     "RELATED",
     "ROLE",
     "RSVP",
+    "SCHEMA",
     "SENT_BY",
     "TZID",
     "VALUE",

@@ -142,6 +142,15 @@ class AlarmTime:
         return self.alarm.attachments
 
     @property
+    def proximity(self):
+        """The type of location-based trigger for this alarm.
+
+        This delegates to :attr:`Alarm.proximity
+        <icalendar.cal.alarm.Alarm.proximity>`.
+        """
+        return self.alarm.proximity
+
+    @property
     def parent(self) -> Parent | None:
         """The component that contains the alarm.
 

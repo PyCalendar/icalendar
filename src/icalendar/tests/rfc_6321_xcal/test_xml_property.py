@@ -175,12 +175,16 @@ def test_xml_property_from_xcal_reads_what_to_xcal_writes():
     "properties",
     [
         # case C: an element in another namespace inside of a property
-        "<new-property><parameters/>"
-        '<custom xmlns="http://example.com/ns">Hello</custom></new-property>',
+        (
+            "<new-property><parameters/>"
+            '<custom xmlns="http://example.com/ns">Hello</custom></new-property>'
+        ),
         # case D: an element in another namespace inside of an unknown value type
-        "<new-property><parameters/>"
-        '<custom><root xmlns="http://example.com/ns">Hello</root></custom>'
-        "</new-property>",
+        (
+            "<new-property><parameters/>"
+            '<custom><root xmlns="http://example.com/ns">Hello</root></custom>'
+            "</new-property>"
+        ),
     ],
 )
 def test_xml_property_from_xcal_only_directly_in_properties(properties):

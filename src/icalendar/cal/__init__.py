@@ -14,6 +14,9 @@ from .event import Event
 from .free_busy import FreeBusy
 from .journal import Journal
 from .lazy import LazyCalendar
+from .location import Location
+from .participant import Participant
+from .resource import Resource
 from .timezone import Timezone, TimezoneDaylight, TimezoneStandard
 from .todo import Todo
 
@@ -28,6 +31,9 @@ __all__ = [
     "FreeBusy",
     "Journal",
     "LazyCalendar",
+    "Location",
+    "Participant",
+    "Resource",
     "Timezone",
     "TimezoneDaylight",
     "TimezoneStandard",

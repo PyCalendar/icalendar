@@ -1,0 +1,11 @@
+BEGIN:VEVENT
+SUMMARY:RFC Reading Group: 9073 Is Actually Interesting
+DTSTART:20261121T160000Z
+DTEND:20261121T170000Z
+UID:rfc9073-vresource-test@example.com
+BEGIN:VRESOURCE
+UID:rfc9073-vresource-uid@example.com
+NAME:The Sentient Projector (It Knows When You Click Past Its Slide)
+RESOURCE-TYPE:PROJECTOR
+END:VRESOURCE
+END:VEVENT

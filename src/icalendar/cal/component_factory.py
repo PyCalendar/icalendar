@@ -15,8 +15,6 @@ if TYPE_CHECKING:
 class ComponentFactory(CaselessDict):
     """Registered components from :rfc:`7953` and :rfc:`5545`.
 
-    On initialization, this class sets its keys to uppercase.
-
     To get a component, use this class as shown below.
 
     .. code-block:: pycon
@@ -52,6 +50,9 @@ class ComponentFactory(CaselessDict):
         from icalendar.cal.event import Event
         from icalendar.cal.free_busy import FreeBusy
         from icalendar.cal.journal import Journal
+        from icalendar.cal.location import Location
+        from icalendar.cal.participant import Participant
+        from icalendar.cal.resource import Resource
         from icalendar.cal.timezone import (
             Timezone,
             TimezoneDaylight,
@@ -70,6 +71,9 @@ class ComponentFactory(CaselessDict):
         self.add_component_class(Alarm)
         self.add_component_class(Available)
         self.add_component_class(Availability)
+        self.add_component_class(Participant)
+        self.add_component_class(Location)
+        self.add_component_class(Resource)
 
     def add_component_class(self, cls: type[Component]) -> None:
         """Add a component class to the factory.
