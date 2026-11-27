@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -494,6 +495,89 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def byyearday(self) -> tuple[int, ...]:
+        """The BYYEARDAY part of the recurrence rule.
+
+        This specifies a list of days of the year for the recurrence, per
+        :rfc:`5545#section-3.3.10`. Valid values are integers from 1 to 366
+        or from -366 to -1. The value 0 is not allowed.
+
+        Returns:
+            A tuple of integer days of the year, or an empty tuple if ``BYYEARDAY`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to int, is 0,
+                or is outside the valid ranges of -366 to -1 or 1 to 366.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=YEARLY;BYYEARDAY=1,100,300").byyearday
+                (1, 100, 300)
+                >>> vRecur.from_ical("FREQ=YEARLY;BYYEARDAY=-1").byyearday
+                (-1,)
+                >>> vRecur.from_ical("FREQ=YEARLY").byyearday
+                ()
+        """
+        values = self.get("BYYEARDAY")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[int] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(f"BYYEARDAY values must be integers, got {val!r}")
+            try:
+                day = int(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYYEARDAY values must be integers, got {val!r}"
+                ) from e
+            if day == 0 or not -366 <= day <= 366:
+                raise InvalidCalendar(
+                    "BYYEARDAY values must be between -366 and -1 or 1 and 366, "
+                    f"got {day}"
+                )
+            result.append(day)
+        return tuple(result)
+
+    @byyearday.setter
+    def byyearday(self, value: int | Iterable[int] | None) -> None:
+        """Set the BYYEARDAY part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.byyearday
+            return
+        if isinstance(value, int) and not isinstance(value, bool):
+            days = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            days = list(value)
+        else:
+            raise TypeError(
+                f"byyearday must be an int or an iterable of ints, got {value!r}"
+            )
+        if not days:
+            del self.byyearday
+            return
+        validated: list[vInt] = []
+        for d in days:
+            if not isinstance(d, int) or isinstance(d, bool):
+                raise TypeError(f"byyearday items must be integers, got {d!r}")
+            if d == 0 or not -366 <= d <= 366:
+                raise InvalidCalendar(
+                    "BYYEARDAY values must be between -366 and -1 or 1 and 366, "
+                    f"got {d}"
+                )
+            validated.append(vInt(d))
+        self["BYYEARDAY"] = validated
+
+    @byyearday.deleter
+    def byyearday(self) -> None:
+        """Delete the BYYEARDAY part of the recurrence rule."""
+        self.pop("BYYEARDAY", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other
