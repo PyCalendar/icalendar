@@ -1,0 +1,1 @@
+Deprecated ``Parameters.params()``, an undocumented alias for ``Parameters.keys()`` with no callers in the codebase. It still works but emits a :exc:`DeprecationWarning` and will be removed in icalendar 9. I used SWE-2 to assist with this change. :user:`Seyamalam`

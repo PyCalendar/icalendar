@@ -50,3 +50,13 @@ def test_delete_value_None(p):
     p.value = None
     assert p.value is None
     assert "VALUE" not in p
+
+
+def test_params_deprecated(p):
+    """``Parameters.params()`` is deprecated in favor of ``keys()``."""
+    p["CN"] = "Doe, John"
+    with pytest.warns(
+        DeprecationWarning,
+        match="params is deprecated and will be removed in icalendar 9",
+    ):
+        assert list(p.params()) == list(p.keys())
