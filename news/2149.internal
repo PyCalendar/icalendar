@@ -1,0 +1,1 @@
+Added tests that check change log entries in the news directory for a valid file name, a single line, no leading hyphen, and a :user: attribution. I used Claude Opus 5.5 to draft the tests, then reviewed and ran them myself. :user:`wmortenson199`
