@@ -43,7 +43,7 @@ def c_rdate(request) -> C_RDATE:
         ),
     ]
 )
-def rdate(request, tzp):
+def rdate(request, tzp) -> date | datetime | tuple[datetime, datetime]:
     """Possible values for an rdate."""
     return request.param(tzp)
 
