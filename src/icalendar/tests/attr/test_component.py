@@ -14,7 +14,7 @@ from icalendar.error import InvalidCalendar
 
 
 @pytest.fixture(params=[Event, Todo, Journal, FreeBusy])
-def dtstamp_comp(request):
+def dtstamp_comp(request) -> Event | Todo | Journal | FreeBusy:
     """a component to test"""
     return request.param()
 
