@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -494,6 +495,88 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def bymonthday(self) -> tuple[int, ...]:
+        """The BYMONTHDAY part of the recurrence rule.
+
+        This specifies a list of days of the month for the recurrence, per
+        :rfc:`5545#section-3.3.10`. Valid values are integers from 1 to 31
+        or from -31 to -1. The value 0 is not allowed.
+
+        Returns:
+            A tuple of integer days of the month, or an empty tuple if ``BYMONTHDAY`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to int, is 0,
+                or is outside the valid ranges of -31 to -1 or 1 to 31.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=MONTHLY;BYMONTHDAY=1,15,-1").bymonthday
+                (1, 15, -1)
+                >>> vRecur.from_ical("FREQ=YEARLY").bymonthday
+                ()
+        """
+        if "BYMONTHDAY" not in self:
+            return ()
+        values = self["BYMONTHDAY"]
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[int] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(
+                    f"BYMONTHDAY values must be integers, got {val!r}"
+                )
+            try:
+                day = int(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYMONTHDAY values must be integers, got {val!r}"
+                ) from e
+            if day == 0 or not -31 <= day <= 31:
+                raise InvalidCalendar(
+                    "BYMONTHDAY values must be between -31 and -1 or 1 and 31, "
+                    f"got {day}"
+                )
+            result.append(day)
+        return tuple(result)
+
+    @bymonthday.setter
+    def bymonthday(self, value: int | Iterable[int] | None) -> None:
+        """Set the BYMONTHDAY part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.bymonthday
+            return
+        if isinstance(value, int) and not isinstance(value, bool):
+            days = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            days = list(value)
+        else:
+            raise TypeError(
+                f"bymonthday must be an int or an iterable of ints, got {value!r}"
+            )
+        if not days:
+            del self.bymonthday
+            return
+        validated: list[vInt] = []
+        for d in days:
+            if not isinstance(d, int) or isinstance(d, bool):
+                raise TypeError(f"bymonthday items must be integers, got {d!r}")
+            if d == 0 or not -31 <= d <= 31:
+                raise InvalidCalendar(
+                    f"BYMONTHDAY values must be between -31 and -1 or 1 and 31, got {d}"
+                )
+            validated.append(vInt(d))
+        self["BYMONTHDAY"] = validated
+
+    @bymonthday.deleter
+    def bymonthday(self) -> None:
+        """Delete the BYMONTHDAY part of the recurrence rule."""
+        self.pop("BYMONTHDAY", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other
