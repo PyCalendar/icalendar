@@ -16,6 +16,12 @@ from icalendar.parser import (
     _foldline,
     _unescape_char,
 )
+from icalendar.parser.string import (
+    _UNESCAPE_CHAR_BYTES_REGEX,
+    _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+    _UNESCAPE_CHAR_REGEX,
+    _UNESCAPE_CHAR_REPLACEMENTS,
+)
 
 
 @pytest.mark.parametrize(
@@ -307,6 +313,188 @@ def test_escaped_characters_read(event_name, expected_cn, expected_ics, events):
 def test_unescape_char():
     assert _unescape_char(b"123") == b"123"
     assert _unescape_char(b"\\n") == b"\n"
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        # a literal backslash before "n"/"N" must survive: the escaped-backslash
+        # pair is consumed as a unit before the next character is considered
+        (r"C:\\numbers", "C:" + chr(92) + "numbers"),
+        (r"C:\\Numbers", "C:" + chr(92) + "Numbers"),
+        # double-escaped backslash then an escaped newline
+        ("a" + chr(92) * 3 + "n b", "a" + chr(92) + "\n b"),
+    ],
+)
+def test_unescape_char_keeps_backslash_before_n(value, expected):
+    r""" "unescaped backslashes are consumed as pairs, never combined with a later escape."""
+    assert _unescape_char(value) == expected
+    assert _unescape_char(value.encode()) == expected.encode()
+
+
+def test_unescape_char_round_trip():
+    r"""_unescape_char must reverse _escape_char for text with backslashes."""
+    original = "Read C:" + chr(92) + "numbers.csv first"
+    assert _unescape_char(_escape_char(original)) == original
+
+
+def _unescape_regex_options(regex):
+    """Return the exact text each alternative of ``regex`` matches.
+
+    The unescape regexes are plain alternations of literal escapes, so the
+    parse tree is one branch of LITERAL opcodes per option. A regex with
+    character classes, groups, or other non-literal parts fails loudly so a
+    future change cannot silently invalidate the consistency tests.
+    """
+    try:
+        from re import _parser as sre_parse  # Python 3.11+
+    except ImportError:  # Python 3.10
+        import sre_parse
+    options = []
+    for op, arg in sre_parse.parse(regex.pattern):
+        # opcodes are plain strings on Python <= 3.12 and enum members later
+        op_name = getattr(op, "name", op)
+        assert op_name == "BRANCH", f"{regex.pattern!r} is not a plain alternation"
+        _, branches = arg
+        for branch in branches:
+            literals = []
+            for branch_op, code in branch:
+                branch_op_name = getattr(branch_op, "name", branch_op)
+                assert branch_op_name == "LITERAL", (
+                    f"{regex.pattern!r} has a non-literal option"
+                )
+                literals.append(code)
+            options.append(
+                bytes(literals)
+                if isinstance(regex.pattern, bytes)
+                else "".join(chr(code) for code in literals)
+            )
+    return options
+
+
+@pytest.mark.parametrize(
+    ("regex", "replacements"),
+    [
+        pytest.param(
+            _UNESCAPE_CHAR_REGEX,
+            _UNESCAPE_CHAR_REPLACEMENTS,
+            id="str",
+        ),
+        pytest.param(
+            _UNESCAPE_CHAR_BYTES_REGEX,
+            _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+            id="bytes",
+        ),
+    ],
+)
+def test_unescape_char_map_keys_are_matched_by_regex(regex, replacements):
+    r"""Every replacement-map key must be one option the regex matches."""
+    for key in replacements:
+        assert regex.fullmatch(key), (
+            f"map key {key!r} is not matched by {regex.pattern!r}"
+        )
+
+
+@pytest.mark.parametrize(
+    ("regex", "replacements"),
+    [
+        pytest.param(
+            _UNESCAPE_CHAR_REGEX,
+            _UNESCAPE_CHAR_REPLACEMENTS,
+            id="str",
+        ),
+        pytest.param(
+            _UNESCAPE_CHAR_BYTES_REGEX,
+            _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+            id="bytes",
+        ),
+    ],
+)
+def test_unescape_char_regex_options_are_map_keys(regex, replacements):
+    r"""Every regex option must have an entry in the replacement map.
+
+    Otherwise a match could reach the substitution without a replacement.
+    """
+    options = _unescape_regex_options(regex)
+    assert options, f"{regex.pattern!r} has no options"
+    for option in options:
+        assert option in replacements, (
+            f"regex option {option!r} has no entry in the replacement map"
+        )
+
+
+def test_unescape_char_str_and_bytes_replacements_are_consistent():
+    r"""The str and bytes unescape tables must stay in sync."""
+    assert set(_UNESCAPE_CHAR_REPLACEMENTS) == {
+        key.decode() for key in _UNESCAPE_CHAR_BYTES_REPLACEMENTS
+    }
+    for key, replacement in _UNESCAPE_CHAR_REPLACEMENTS.items():
+        assert key.encode() in _UNESCAPE_CHAR_BYTES_REPLACEMENTS
+        assert replacement.encode() == _UNESCAPE_CHAR_BYTES_REPLACEMENTS[key.encode()]
+
+
+@pytest.mark.parametrize(
+    ("regex", "replacements"),
+    [
+        pytest.param(
+            _UNESCAPE_CHAR_REGEX,
+            _UNESCAPE_CHAR_REPLACEMENTS,
+            id="str",
+        ),
+        pytest.param(
+            _UNESCAPE_CHAR_BYTES_REGEX,
+            _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+            id="bytes",
+        ),
+    ],
+)
+def test_unescape_char_regex_is_derived_from_the_map(regex, replacements):
+    r"""The alternation must list exactly the map keys, longest first.
+
+    The pattern is built from the keys of the replacement map, so hand
+    editing one without the other fails here.
+    """
+    options = _unescape_regex_options(regex)
+    assert set(options) == set(replacements)
+    option_lengths = [len(option) for option in options]
+    assert option_lengths == sorted(option_lengths, reverse=True)
+
+
+@pytest.mark.parametrize(
+    ("regex", "replacements"),
+    [
+        pytest.param(
+            _UNESCAPE_CHAR_REGEX,
+            _UNESCAPE_CHAR_REPLACEMENTS,
+            id="str",
+        ),
+        pytest.param(
+            _UNESCAPE_CHAR_BYTES_REGEX,
+            _UNESCAPE_CHAR_BYTES_REPLACEMENTS,
+            id="bytes",
+        ),
+    ],
+)
+def test_unescape_char_regex_matches_nothing_besides_the_map_keys(regex, replacements):
+    r"""Only the map keys fully match: prefixes and unlisted escapes must not."""
+    is_bytes = isinstance(regex.pattern, bytes)
+
+    def encode(value: str) -> str | bytes:
+        return value.encode() if is_bytes else value
+
+    for key in replacements:
+        for end in range(1, len(key)):
+            prefix = key[:end]
+            assert not regex.fullmatch(prefix), (
+                f"{regex.pattern!r} fully matches the key prefix {prefix!r}"
+            )
+    for char in "NnTtXx7;,":
+        escape = encode("\\" + char)
+        if escape in replacements:
+            continue
+        assert not regex.fullmatch(escape), (
+            f"{regex.pattern!r} fully matches {escape!r} without a replacement"
+        )
 
 
 @pytest.mark.parametrize(
