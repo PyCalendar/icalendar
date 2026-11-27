@@ -162,7 +162,8 @@ def closes_quoted_section(text: str, quote_index: int) -> bool:
     section. A DQUOTE followed by other text is an escaped quote inside
     the value instead.
     """
-    for ch in text[quote_index + 1 :]:
+    for index in range(quote_index + 1, len(text)):
+        ch = text[index]
         if ch in " \t":
             continue
         return ch in _STRUCTURAL_DELIMITERS

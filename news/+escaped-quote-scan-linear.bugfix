@@ -1,0 +1,1 @@
+Fixed parsing time growing quadratically with the number of escaped quotes, such as ``\"``, in a quoted parameter value. A content line of about 1 MiB took 100 seconds to parse. I used AI (Claude Opus 5.5) to find the issue and to draft the fix, the test, and this change log entry. @shamsManna
