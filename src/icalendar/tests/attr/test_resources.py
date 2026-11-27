@@ -14,7 +14,7 @@ ET = Event | Todo
 
 
 @pytest.fixture(params=[Event, Todo])
-def component(request):
+def component(request) -> ET:
     """An empty component with possible resources."""
     return request.param()
 

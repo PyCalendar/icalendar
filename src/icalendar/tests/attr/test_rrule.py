@@ -21,7 +21,7 @@ RRULE_4 = vRecur.from_ical(
 
 
 @pytest.fixture(params=[RRULE_0, RRULE_1, RRULE_2, RRULE_3, RRULE_4])
-def rrule(request) -> str:
+def rrule(request) -> vRecur:
     """An rrule."""
     return request.param
 

@@ -1,0 +1,1 @@
+Corrected the return type hint on the rrule test fixture in test_rrule.py from str to vRecur, matching what it actually returns. I used Claude Sonnet 5 to identify the incorrect hint and verify the fix against its usage. @AlexBritoOfficial
