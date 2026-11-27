@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, tzinfo
 from typing import TYPE_CHECKING, Any, ClassVar, TypeAlias
 
 from icalendar.caselessdict import CaselessDict
@@ -94,7 +94,9 @@ class vDDDTypes(TimeBase):
         return self.to_property_type().to_ical()
 
     @classmethod
-    def from_ical(cls, ical, timezone=None):
+    def from_ical(
+        cls, ical: str | Self, timezone: str | tzinfo | None = None
+    ) -> DT_TYPE:
         if isinstance(ical, cls):
             return ical.dt
         u = ical.upper()

@@ -1,0 +1,1 @@
+Added type annotations to :meth:`~icalendar.prop.dt.types.vDDDTypes.from_ical`. I used an AI assistant (Grok Bot) to help locate an untyped function not already covered by an open pull request, confirm the argument and return types from the implementation and tests, and prepare this changelog entry. @sneha-shukla-dev
