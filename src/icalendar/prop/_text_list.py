@@ -15,7 +15,12 @@ from icalendar.prop.text import vText
 
 
 class TextList:
-    """One iCalendar property containing a list of TEXT values."""
+    """One iCalendar property containing a list of TEXT values.
+
+    Parameters:
+        values: A single string or an iterable of individual values.
+        params: The iCalendar property parameters.
+    """
 
     default_value: ClassVar[str] = "TEXT"
     params: Parameters
@@ -23,21 +28,20 @@ class TextList:
     def __init__(
         self, values: Iterable[str] | str, /, params: dict[str, Any] | None = None
     ) -> None:
-        """Create a property from its text values.
-
-        Parameters:
-            values: A single string or an iterable of individual values.
-            params: The iCalendar property parameters.
-
-        Example:
-            >>> from icalendar import vLocationType
-            >>> vLocationType("hotel").ical_value
-            ['hotel']
-        """
         if isinstance(values, str) or not isinstance(values, Iterable):
             values = [values]
-        self._values: list[vText | str] = [vText(value) for value in values]
+        self._values: list[vText | str] = [
+            vText(value) for value in self._checked_values(values)
+        ]
         self.params = Parameters(params)
+
+    @staticmethod
+    def _checked_values(values: Iterable[str]) -> Iterable[str]:
+        """Return the values for this property.
+
+        :meta private:
+        """
+        return values
 
     def __iter__(self) -> Iterator[vText | str]:
         return iter(self._values)
@@ -58,13 +62,6 @@ class TextList:
             return self._values == other
         return NotImplemented
 
-    def __hash__(self) -> int:
-        """Hash the text values.
-
-        :meta private:
-        """
-        return hash(tuple(self._values))
-
     def __repr__(self) -> str:
         """String representation.
 
@@ -80,7 +77,7 @@ class TextList:
     def to_ical(self) -> bytes:
         return b",".join(
             value.to_ical() if hasattr(value, "to_ical") else vText(value).to_ical()
-            for value in self._values
+            for value in self._checked_values(self._values)
         )
 
     @staticmethod
@@ -124,7 +121,7 @@ class TextList:
             ['location-type', {}, 'text', 'hotel', 'restaurant']
         """
         result = [name, self.params.to_jcal(), self.VALUE.lower()]
-        result.extend(map(str, self._values))
+        result.extend(map(str, self._checked_values(self._values)))
         if not self._values:
             result.append("")
         return result
@@ -158,8 +155,9 @@ class TextList:
             >>> [child.text for child in element.findall("text")]
             ['Work', 'Travel']
         """
+        values = self._checked_values(self._values)
         self.params.to_xcal(element)
-        for value in self._values:
+        for value in values:
             if not isinstance(value, vText):
                 value = vText(value)
             value.to_xcal(element)

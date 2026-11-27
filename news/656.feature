@@ -1,4 +1,1 @@
-Added :class:`~icalendar.cal.location.Location` for ``VLOCATION`` components from :rfc:`9073`.
-Use ``Location.new()`` to create a location with a UID, name, description, coordinates, and location types.
-Events and tasks can contain multiple locations, and :class:`~icalendar.prop.location_type.vLocationType` stores multiple types in one ``LOCATION-TYPE`` property.
-OpenAI Codex (GPT-6) generated code and tests for this contribution. :user:`AthosTomich`
+Added :class:`~icalendar.cal.location.Location` for VLOCATION components from :rfc:`9073`. Previously, icalendar parsed VLOCATION as a generic component. Use :meth:`Location.new <icalendar.cal.location.Location.new>` to create a location with a UID, name, description, coordinates, and location types. Events and tasks can contain multiple locations, and :class:`~icalendar.prop.location_type.vLocationType` stores multiple types in one LOCATION-TYPE property. OpenAI Codex (GPT-6) generated code and tests for this contribution. :user:`AthosTomich`

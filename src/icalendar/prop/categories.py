@@ -7,7 +7,12 @@ from icalendar.prop.text import vText
 
 
 class vCategory(TextList):
-    """The values of the CATEGORIES property."""
+    """The values of the CATEGORIES property.
+
+    Parameters:
+        values: Required. A single category name or an iterable of category names.
+        params: Optional iCalendar parameters for this CATEGORIES property.
+    """
 
     @property
     def _values(self) -> list[vText | str]:
@@ -17,6 +22,13 @@ class vCategory(TextList):
     @_values.setter
     def _values(self, values: list[vText | str]) -> None:
         self.cats = values
+
+    def __hash__(self) -> int:
+        """Hash the category values.
+
+        :meta private:
+        """
+        return hash(tuple(self.cats))
 
     @classmethod
     def from_ical_list(cls, raw_value: str) -> Self:

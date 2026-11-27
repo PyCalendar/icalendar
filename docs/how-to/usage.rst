@@ -597,17 +597,13 @@ The following example filters through all subcomponents of the calendar, and if 
     >>> print(calendar.events[1].summary)
     ORTHODOX CHRISTMAS
 
-.. _add-multiple-locations:
-
 Add multiple locations
 ''''''''''''''''''''''
 
-Use a :class:`~icalendar.cal.location.Location` for each distinct place associated with an event or task, as defined in :rfc:`9073#section-7.2`.
-Each location requires a ``UID`` and can have a ``NAME``, ``DESCRIPTION``, ``GEO``, and ``LOCATION-TYPE``.
-The ``name`` attribute identifies the component as ``VLOCATION``; access its display name through ``location["NAME"]``.
-
-Create a hotel that also has a restaurant.
-Pass a list to ``LOCATION-TYPE`` to describe multiple types of the same place.
+To add multiple locations to an event or task, create a :class:`~icalendar.cal.location.Location` for each place and attach each one with :meth:`~icalendar.cal.component.Component.add_component`.
+The properties NAME, DESCRIPTION, and GEO are optional, but UID is required.
+If you omit ``uid`` when calling :meth:`Location.new <icalendar.cal.location.Location.new>`, icalendar will generate a unique identifier for you.
+For example, a conference event might have one location for the hotel and another for the car park.
 
 .. code-block:: pycon
 
@@ -618,41 +614,48 @@ Pass a list to ``LOCATION-TYPE`` to describe multiple types of the same place.
     ...     summary="Conference",
     ...     start=datetime(2026, 1, 15, 12, tzinfo=timezone.utc),
     ... )
-    >>> hotel = Location()
-    >>> hotel.add("uid", "hotel@example.com")
-    >>> hotel.add("name", "Central Hotel")
-    >>> hotel.add("description", "Hotel and restaurant for the conference")
-    >>> hotel.add("geo", (48.2, 16.37))
-    >>> hotel.add("location-type", ["hotel", "restaurant"])
-    >>> hotel["LOCATION-TYPE"].to_ical()
-    b'hotel,restaurant'
+    >>> hotel = Location.new(
+    ...     uid="hotel@example.com",
+    ...     name="Central Hotel",
+    ...     description="Hotel and restaurant for the conference",
+    ...     geo=(48.2, 16.37),
+    ... )
+    >>> parking = Location.new(name="Conference parking")
     >>> event.add_component(hotel)
-
-Represent the nearby car park as a separate location.
-
-.. code-block:: pycon
-
-    >>> parking = Location()
-    >>> parking.add("uid", "parking@example.com")
-    >>> parking.add("name", "Conference parking")
-    >>> parking.add("location-type", "parking")
     >>> event.add_component(parking)
-    >>> calendar = Calendar.new(subcomponents=[event])
-    >>> restored = Calendar.from_ical(calendar.to_ical())
-    >>> [str(place["NAME"]) for place in restored.events[0].walk("VLOCATION")]
-    ['Central Hotel', 'Conference parking']
 
-Use the same methods to associate a location with a :class:`~icalendar.cal.todo.Todo`.
+You can also add a location to a :class:`~icalendar.cal.todo.Todo` by using ``add_component()``.
 
 .. code-block:: pycon
 
     >>> task = Todo.new(uid="delivery@example.com", summary="Deliver supplies")
     >>> task.add_component(hotel)
-    >>> str(task.walk("VLOCATION")[0]["NAME"])
-    'Central Hotel'
+    >>> print(task.walk("VLOCATION")[0].location_name)
+    Central Hotel
 
-This supports the location properties listed above.
-Support for the remaining extensions in RFC 9073 is described in :doc:`/reference/rfc-support`.
+The optional ``location_types`` argument can be passed to ``Location.new()``, or you can set :attr:`~icalendar.cal.location.Location.location_types` on an existing location.
+Use a string for one type, such as ``location_types="parking"``.
+For multiple types, use a list of strings, such as ``location_types=["hotel", "restaurant"]``.
+This produces one ``LOCATION-TYPE:hotel,restaurant`` line in the iCalendar file.
+
+.. code-block:: pycon
+
+    >>> hotel.location_types = ["hotel", "restaurant"]
+    >>> parking.location_types = "parking"
+    >>> hotel["LOCATION-TYPE"].to_ical()
+    b'hotel,restaurant'
+
+After reading the calendar back, you can use ``walk("VLOCATION")`` on the event to find both places.
+Use :attr:`~icalendar.cal.location.Location.location_name` to read each place's display name.
+
+.. code-block:: pycon
+
+    >>> calendar = Calendar.new(subcomponents=[event])
+    >>> restored = Calendar.from_ical(calendar.to_ical())
+    >>> for place in restored.events[0].walk("VLOCATION"):
+    ...     print(place.location_name)
+    Central Hotel
+    Conference parking
 
 
 Add timezones to a calendar

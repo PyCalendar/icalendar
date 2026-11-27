@@ -14,6 +14,7 @@ from icalendar import (
     vText,
 )
 from icalendar.cal import Location as CalLocation
+from icalendar.error import InvalidCalendar
 from icalendar.parser.ical import ComponentIcalParser
 from icalendar.prop import vBroken, vUnknown
 
@@ -384,6 +385,138 @@ def test_location_text_round_trip():
     assert restored.geo == (-23.55, -46.63)
     assert restored.location_types == ["café,terrace", "room\\A"]
     assert restored == location
+
+
+@pytest.mark.parametrize("value_param", ["", ";VALUE=TEXT", ";VALUE=X-UNREGISTERED"])
+def test_categories_factory_receives_unescaped_items(
+    component_factory, types_factory, value_param
+):
+    class RegisteredCategories:
+        default_value = "TEXT"
+
+        def __init__(self, items):
+            self.items = items
+
+        @staticmethod
+        def from_ical(value):
+            return value.split(",")
+
+    types_factory["categories"] = RegisteredCategories
+    source = (
+        "BEGIN:VEVENT\r\n"
+        f"CATEGORIES{value_param};LANGUAGE=en:Work\\,Home,Travel\r\n"
+        "END:VEVENT\r\n"
+    )
+    event = ComponentIcalParser(source, component_factory, types_factory).parse()[0]
+    assert event["CATEGORIES"].items == ["Work,Home", "Travel"]
+    assert event["CATEGORIES"].params["LANGUAGE"] == "en"
+
+
+@pytest.mark.parametrize("invalid", [b"hotel", bytearray(b"hotel"), ["hotel", 1]])
+def test_location_types_require_strings(invalid):
+    loc = Location.new(location_types="parking")
+    with pytest.raises(TypeError):
+        loc.location_types = invalid
+    assert loc.location_types == ["parking"]
+    with pytest.raises(TypeError):
+        vLocationType(invalid)
+
+
+@pytest.mark.parametrize("value_type", ["URI", "UNKNOWN"])
+def test_location_types_preserve_other_value_types(value_type):
+    raw = f"LOCATION-TYPE;VALUE={value_type}:https://example.org/place"
+    loc = Location.from_ical(f"BEGIN:VLOCATION\r\n{raw}\r\nEND:VLOCATION\r\n")
+    with pytest.raises(InvalidCalendar):
+        _ = loc.location_types
+    assert raw.encode() in loc.to_ical().splitlines()
+
+
+def test_location_types_accept_a_plain_text_item():
+    loc = Location()
+    loc["LOCATION-TYPE"] = "hotel,terrace"
+    before = loc.to_ical()
+    assert loc.location_types == ["hotel,terrace"]
+    assert type(loc["LOCATION-TYPE"]) is str
+    assert loc.to_ical() == before
+    loc.location_types.append("restaurant")
+    assert Location.from_ical(loc.to_ical()).location_types == [
+        "hotel,terrace",
+        "restaurant",
+    ]
+
+
+def test_edit_location_types_keeps_params_and_rejects_partial_updates():
+    loc = Location.new(location_types="hotel")
+    prop = loc["LOCATION-TYPE"]
+    prop.params["X-NOTE"] = "venue"
+    types = loc.location_types
+    with pytest.raises(TypeError):
+        types.extend(["parking", 42])
+    assert types == ["hotel"]
+    loc.location_types += ["restaurant"]
+    assert loc["LOCATION-TYPE"] is prop
+    assert loc["LOCATION-TYPE"].params["X-NOTE"] == "venue"
+    assert types == ["hotel", "restaurant"]
+    types.clear()
+    types.append("office")
+    assert loc.location_types == ["office"]
+    del loc.location_types
+    assert loc.location_types is None
+
+
+def test_empty_location_type_value_cannot_be_serialized():
+    from xml.etree.ElementTree import Element
+
+    with pytest.raises(ValueError, match="at least one"):
+        vLocationType([])
+    prop = vLocationType("hotel")
+    prop.values.clear()
+    with pytest.raises(ValueError, match="at least one"):
+        prop.to_ical()
+    with pytest.raises(ValueError, match="at least one"):
+        prop.to_jcal("location-type")
+    with pytest.raises(ValueError, match="at least one"):
+        prop.to_xcal(Element("location-type"))
+
+
+@pytest.mark.parametrize("remove", ["assign", "clear", "pop", "slice"])
+def test_removing_last_location_type(remove):
+    loc = Location.new(uid="venue", location_types="hotel")
+    if remove == "assign":
+        loc.location_types = []
+    elif remove == "clear":
+        loc.location_types.clear()
+    elif remove == "pop":
+        assert loc.location_types.pop() == "hotel"
+    else:
+        del loc.location_types[:]
+    assert loc.location_types is None
+    for restored in (
+        loc,
+        Location.from_ical(loc.to_ical()),
+        Location.from_jcal(loc.to_jcal()),
+        Location.from_xcal(loc.to_xcal())[0],
+    ):
+        assert "LOCATION-TYPE" not in restored
+        assert restored == loc
+
+
+def test_duplicate_name_does_not_become_a_list():
+    loc = Location.from_ical(
+        "BEGIN:VLOCATION\r\nUID:venue\r\nNAME;LANGUAGE=en:Main\r\n"
+        "NAME;LANGUAGE=de:Haupt\r\nEND:VLOCATION\r\n"
+    )
+    with pytest.raises(InvalidCalendar, match="Multiple NAME"):
+        _ = loc.location_name
+    assert len(loc["NAME"]) == 2
+    loc.location_name = vText("Hotel", params={"LANGUAGE": "de"})
+    assert loc.location_name == "Hotel"
+    assert loc["NAME"].params["LANGUAGE"] == "de"
+
+
+def test_location_type_is_unhashable():
+    with pytest.raises(TypeError):
+        hash(vLocationType("hotel"))
 
 
 def test_invalid_geo():

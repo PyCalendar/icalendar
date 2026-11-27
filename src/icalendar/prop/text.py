@@ -4,6 +4,7 @@ import re
 from typing import Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
+from icalendar import prop
 from icalendar.compatibility import Self
 from icalendar.error import JCalParsingError
 from icalendar.parser import Parameters, _escape_char
@@ -187,7 +188,9 @@ class vText(str):
         return [cls("Hello World!")]
 
     @classmethod
-    def from_jcal(cls, jcal_property: list) -> Self:
+    def from_jcal(
+        cls, jcal_property: list
+    ) -> "Self | prop.vCategory | prop.vLocationType | prop.vRequestStatus":
         """Parse jCal from :rfc:`7265`.
 
         Parameters:
@@ -199,17 +202,11 @@ class vText(str):
         JCalParsingError.validate_property(jcal_property, cls)
         name = jcal_property[0]
         if name == "categories":
-            from icalendar.prop import vCategory
-
-            return vCategory.from_jcal(jcal_property)
+            return prop.vCategory.from_jcal(jcal_property)
         if name == "location-type":
-            from .location_type import vLocationType
-
-            return vLocationType.from_jcal(jcal_property)
+            return prop.vLocationType.from_jcal(jcal_property)
         if name == "request-status":
-            from .request_status import vRequestStatus
-
-            return vRequestStatus.from_jcal(jcal_property)
+            return prop.vRequestStatus.from_jcal(jcal_property)
         string = jcal_property[3]  # TODO: accept list or string but join with ;
         JCalParsingError.validate_value_type(string, str, cls, 3)
         return cls(

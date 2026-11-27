@@ -2,14 +2,17 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING, ClassVar, cast
 
 from icalendar.error import ICalParsingError, InvalidToken
 from icalendar.parser.content_line import Contentline, Contentlines
+from icalendar.parser.property import split_on_unescaped_comma
 from icalendar.prop import vBroken
 from icalendar.timezone import tzp
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from icalendar.cal import Component, ComponentFactory
     from icalendar.parser.parameter import Parameters
     from icalendar.prop import VPROPERTY, TypesFactory
@@ -297,6 +300,11 @@ class ComponentIcalParser:
     ) -> bool:
         """Handle the LOCATION-TYPE property.
 
+        Parameters:
+            line: The original content line.
+            params: The parameters of the property.
+            vals: The unescaped property value.
+
         Returns:
             ``True`` if handled, else ``False``.
         """
@@ -306,11 +314,20 @@ class ComponentIcalParser:
         self, name: str, params: Parameters, line: Contentline
     ) -> bool:
         """Let the registered type decode a TEXT list from the original line."""
+        component = self.component
+        if component is None:
+            return False
         factory = self.get_factory_for_property(name, params)
         from_ical_list = getattr(factory, "from_ical_list", None)
         if from_ical_list is None:
-            return False
-        read_value = getattr(factory, "get_value_from_content_line", None)
+            if name != "CATEGORIES" or (
+                params.value not in (None, "TEXT")
+                and params.value in self._types_factory
+            ):
+                return False
+            read_value = None
+        else:
+            read_value = getattr(factory, "get_value_from_content_line", None)
         try:
             raw_value = (
                 read_value(line)
@@ -319,9 +336,13 @@ class ComponentIcalParser:
             )
             if raw_value is None:
                 return False
-            value = from_ical_list(raw_value)
+            if from_ical_list is None:
+                categories_factory = cast("Callable[[list[str]], VPROPERTY]", factory)
+                value = categories_factory(split_on_unescaped_comma(raw_value))
+            else:
+                value = from_ical_list(raw_value)
             value.params = params
-            self.component.add(name, value, encode=False)
+            component.add(name, value, encode=False)
         except (ValueError, TypeError) as e:
             raw_value = line.raw_text_list_value()
             if raw_value is None:
