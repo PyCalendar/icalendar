@@ -9,9 +9,26 @@ Run with:
 import pytest
 from generate_matrix import generate_matrix
 
-CASES_ALL = {"3.10", "3.11", "3.12", "3.13", "3.14", "3.10 (nopytz)", "pypy3"}
-CASES_MIN = {"3.10", "3.14", "3.10 (nopytz)"}
-CASES_NO_PYPY = CASES_ALL - {"pypy3"}
+RUNNERS = {"ubuntu-latest", "windows-latest", "macos-latest"}
+
+CASES_ALL = {
+    "3.10 (ubuntu-latest)",
+    "3.10 (windows-latest)",
+    "3.11 (ubuntu-latest)",
+    "3.12 (ubuntu-latest)",
+    "3.13 (ubuntu-latest)",
+    "3.14 (ubuntu-latest)",
+    "3.14 (windows-latest)",
+    "3.14 (macos-latest)",
+    "3.10 (nopytz, macos-latest)",
+    "pypy3 (ubuntu-latest)",
+}
+CASES_MIN = {
+    "3.10 (windows-latest)",
+    "3.14 (ubuntu-latest)",
+    "3.10 (nopytz, macos-latest)",
+}
+CASES_NO_PYPY = CASES_ALL - {"pypy3 (ubuntu-latest)"}
 CASES_0 = set()
 
 
@@ -127,6 +144,7 @@ def test_all_cases_are_always_included(running_names, skipped_names, matrix):
     [
         "test_name",
         "python_version",
+        "runner",
         "skip",
         "test_command",
     ],
@@ -134,6 +152,37 @@ def test_all_cases_are_always_included(running_names, skipped_names, matrix):
 def test_parameters_are_present(matrix, attribute):
     for case in matrix["include"]:
         assert attribute in case, f"Missing {attribute} in {case}"
+
+
+def test_runners_are_supported(matrix):
+    """Only runners that exist are used, so no job waits for a typo."""
+    for case in matrix["include"]:
+        assert case["runner"] in RUNNERS, case
+
+
+def test_skipped_jobs_run_on_ubuntu(matrix):
+    """Skipped jobs still start a runner: do not spend macOS or Windows minutes."""
+    for case in matrix["include"]:
+        if case["skip"]:
+            assert case["runner"] == "ubuntu-latest", case
+
+
+def test_minimal_set_covers_all_operating_systems():
+    """A pull request tests on Linux, Windows and macOS."""
+    matrix = generate_matrix("refs/heads/pr-branch", "", "pull_request")
+    running = {case["runner"] for case in matrix["include"] if not case["skip"]}
+    assert running == RUNNERS
+
+
+def test_full_run_covers_every_version_on_ubuntu():
+    """Every supported Python version runs on Ubuntu when all jobs run."""
+    matrix = generate_matrix("refs/heads/main", "", "push")
+    versions = {
+        case["python_version"]
+        for case in matrix["include"]
+        if not case["skip"] and case["runner"] == "ubuntu-latest"
+    }
+    assert {"3.10", "3.11", "3.12", "3.13", "3.14"} <= versions
 
 
 @pytest.mark.parametrize(
@@ -152,5 +201,9 @@ def test_parameters_are_present(matrix, attribute):
 def test_pypy_only_runs_on_push_to_main(event_name, git_ref, expected_skip):
     """Run the slow PyPy job after changes are merged or pushed to main."""
     matrix = generate_matrix(git_ref, "", event_name)
-    pypy = next(case for case in matrix["include"] if case["test_name"] == "pypy3")
+    pypy = next(
+        case
+        for case in matrix["include"]
+        if case["test_name"] == "pypy3 (ubuntu-latest)"
+    )
     assert pypy["skip"] is expected_skip

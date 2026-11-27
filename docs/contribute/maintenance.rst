@@ -530,9 +530,10 @@ Updating Python versions
 When adding support for a new Python version, or removing support for an old one, the following files need to be updated:
 
 :file:`.github/workflows/tests.yml`
-    Upgrade Python versions.
-:file:`.github/workflows/*.py`
-    Add or remove the Python version from the test matrix.
+    Keep the test jobs in sync with the matrix, for example the runners.
+:file:`.github/workflows/generate_matrix.py`
+    Add or remove the Python version from the test matrix and choose the
+    runner each job uses.
 :file:`tox.ini`
     Update the ``envlist`` to include or remove the Python version.
 :file:`pyproject.toml`
