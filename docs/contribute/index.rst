@@ -251,6 +251,43 @@ Examples of poor peer reviews include the following.
     See :ref:`responsible-ai-use`.
 -   Restating the obvious.
 
+Useful peer review
+------------------
+
+A useful peer review is friendly and it helps contributors learn more about the project.
+Usually more than one review is needed to prepare a Pull Request for merge.
+Although maintainers have a final say in the matter, they are by no means perfect and welcome your unique perspective, especially in reviews.
+
+The listing below gives guidance on what maintainers look for in Pull Requests.
+A training on these quality checks will be a positive trait in any other software project.
+
+-   Is the change consistent with the code base and the direction the project are heading?
+    This can include:
+
+    -   Small tests with this structure: fixture, parametrization, setup, assert.
+    -   Is the change mentioned or used in all places that should know about it?
+    -   Are docstrings following the :ref:`Python docstrings` guide, especially Parameters and Returns Sections.
+    -   Is the grammar and spelling of the documentation correct?
+    -   Reading the documentation for the first time - do you understand how and why to use the functions?
+        The documentation should help find and use the right functions and not reiterate the code content of a function.
+    -   Reading the standards that icalendar is built on - is the change breaking standards or improving functionality? See :ref:`RFC support`
+
+-   These are common mistakes and an early review can really help get a PR merged more quickly:
+
+    -   The links are short but methods are often linked with the class in front of them.
+    -   The PR template is not used.
+    -   Tests are big, do not use the calendar files or existing fixtures in :file:`conftest.py`.
+    -   Tests should refer to the issue and also be placed in the correct locations, possibly new files.
+    -   Are all code lines covered by tests?
+
+-   Contributors might also ask for help and clarification.
+    A reviewer should respond to those questions regarding their review.
+    In the end, better software is only built together.
+-   The PR template guides contributions with a check list.
+    A review has the merge in mind and helps contributors through the next steps that they are facing.
+-   A good and effective peer review is never perfect.
+    It is easier to focus on one area of improvement like tests, docs, or consistency and communicate that well.
+    A general review that does not go deep can merely propose superficial improvements whereas a deep dive into one area of project quality is sure to yield more substantial improvements.
 
 .. _issue-requirements:
 
