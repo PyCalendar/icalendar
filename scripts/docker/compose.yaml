@@ -1,0 +1,5 @@
+services:
+  alpine:
+    build:
+      context: ../..
+      dockerfile: scripts/docker/alpine/Dockerfile
