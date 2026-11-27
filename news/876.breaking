@@ -1,0 +1,1 @@
+:meth:`Component.decoded <icalendar.cal.component.Component.decoded>` now returns a :class:`list` of Python values for ``EXDATE`` and ``RDATE`` instead of the :class:`vDDDLists <icalendar.prop.dt.list.vDDDLists>` object. I used Claude Opus 5.5 to write this change, and reviewed and edited it myself. @Dahshan228

@@ -38,7 +38,7 @@ from icalendar.parser import (
 )
 from icalendar.parser.ical.component import ComponentIcalParser
 from icalendar.parser_tools import DEFAULT_ENCODING
-from icalendar.prop import VPROPERTY, TypesFactory, vDDDLists, vText, vUnknown
+from icalendar.prop import VPROPERTY, TypesFactory, vText, vUnknown
 from icalendar.prop.xml import _preserve_indentation_of_xcal_extension_properties
 from icalendar.timezone import tzp
 from icalendar.tools import is_date
@@ -440,9 +440,6 @@ class Component(CaselessDict):
         # want to encode the string into a real icalendar.prop property.
         if hasattr(value, "ical_value"):
             return value.ical_value
-        if isinstance(value, vDDDLists):
-            # TODO: Workaround unfinished decoding
-            return value
         decoded = self.types_factory.from_ical(name, value)
         # TODO: remove when proper decoded is implemented in every prop.* class
         # Workaround to decode vText properly. vUnknown is not a vText

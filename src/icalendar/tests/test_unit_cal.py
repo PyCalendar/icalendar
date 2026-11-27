@@ -80,7 +80,7 @@ def test_get_default_value(c):
 
 def test_default_list_example(c):
     c.add("rdate", [datetime(2013, 3, 28), datetime(2013, 3, 27)])
-    assert isinstance(c.decoded("rdate"), prop.vDDDLists)
+    assert c.decoded("rdate") == [datetime(2013, 3, 28), datetime(2013, 3, 27)]
 
 
 def test_render_component(calendar_component):

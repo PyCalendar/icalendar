@@ -126,6 +126,22 @@ class vDDDLists:
         """
         return self.dts[0].dt
 
+    @property
+    def ical_value(self) -> list:
+        """Return the values as a :class:`list`.
+
+        Each item is the Python value of one entry: a
+        :class:`~datetime.datetime`, :class:`~datetime.date`, or, for a
+        period, a tuple of its start and its end or duration.
+
+        .. seealso::
+
+            :rfc:`5545#section-3.8.5.1` for EXDATE and
+            :rfc:`5545#section-3.8.5.2` for RDATE.
+
+        """
+        return [dt.dt for dt in self.dts]
+
     def to_xcal(self, element: Element) -> None:
         """Convert a vDDDTypes to an xCal element."""
         self.params.to_xcal(element)
