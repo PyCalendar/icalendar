@@ -5,18 +5,22 @@ on:
   push:
     branches:
       - main
+      - 8.x
+    tags:
+      - v*
     paths:
       - 'docs/**'
-  # Build pull requests
+  # Build pull requests only on changes to files in the following paths
   pull_request:
     paths:
       - 'docs/**'
       - 'Makefile'
       - 'src/icalendar/*.py'
+      - 'src/icalendar/attr/*.py'
       - 'src/icalendar/cal/*.py'
+      - 'src/icalendar/parser/*.py'
       - 'src/icalendar/prop/*.py'
       - 'src/icalendar/timezone/*.py'
-      - 'styles/**'
       - '.github/workflows/documentation.yml'
       - '.readthedocs.yaml'
       - '.vale.ini'
@@ -57,4 +61,5 @@ jobs:
         run: make vale VALEOPTS="--minAlertLevel='warning'" PYTHONVERSION=${{ matrix.python-version }}
 
       - name: Check for broken links
+        if: ${{ matrix.python-version == '3.14' }}
         run: make linkcheckbroken PYTHONVERSION=${{ matrix.python-version }}

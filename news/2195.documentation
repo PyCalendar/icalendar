@@ -1,0 +1,1 @@
+Updated maintenance documentation. Merged pre-release steps into "New releases" section with tabs. Aligned with current version. Include :file:`.github/workflows/documentation.yml` in files to edit. :user:`stevepiercy`
