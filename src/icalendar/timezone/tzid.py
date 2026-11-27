@@ -33,6 +33,13 @@ DATEUTIL_ZONEINFO_PATH = (
 )
 
 
+def _get_available_timezones() -> set:
+    """Get timezone IDs through the zoneinfo provider's shared cache."""
+    from .zoneinfo import ZONEINFO
+
+    return ZONEINFO()._available_timezones  # noqa: SLF001
+
+
 def tzids_from_tzinfo(tzinfo: tzinfo | None) -> tuple[str]:
     """Get several timezone ids if we can identify the timezone.
 
@@ -63,14 +70,33 @@ def tzids_from_tzinfo(tzinfo: tzinfo | None) -> tuple[str]:
         if olson is not None:
             return _get_equivalent_tzids(olson)
         return _get_equivalent_tzids(tzinfo._name)  # noqa: SLF001
-    if hasattr(tzinfo, "_filename"):  # dateutil.tz.tzfile  # noqa: SIM102
-        if DATEUTIL_ZONEINFO_PATH is not None:
-            # tzfile('/usr/share/zoneinfo/Europe/Berlin')
-            path = tzinfo._filename  # noqa: SLF001
-            if path.startswith(str(DATEUTIL_ZONEINFO_PATH)):
-                tzid = str(Path(path).relative_to(DATEUTIL_ZONEINFO_PATH))
+    if hasattr(tzinfo, "_filename"):  # dateutil.tz.tzfile
+        path = Path(tzinfo._filename)  # noqa: SLF001
+        known_tzids = _get_available_timezones()
+        # dateutil can retain a relative TZID (notably when using the tzdata
+        # package), or an absolute path into a system zoneinfo directory.
+        # Resolve the latter against the known directory when possible.
+        if not path.is_absolute():
+            tzid = path.as_posix()
+            if tzid in known_tzids:
                 return _get_equivalent_tzids(tzid)
-            return _get_equivalent_tzids(path)
+            return ()
+        if DATEUTIL_ZONEINFO_PATH is not None:
+            try:
+                tzid = path.relative_to(DATEUTIL_ZONEINFO_PATH).as_posix()
+            except ValueError:
+                pass
+            else:
+                if tzid in known_tzids:
+                    return _get_equivalent_tzids(tzid)
+        # Some dateutil builds do not expose the zoneinfo root. Find a valid
+        # TZID suffix in the absolute path, independent of path separators.
+        parts = path.parts
+        for index in range(1, len(parts)):
+            tzid = "/".join(parts[index:])
+            if tzid in known_tzids:
+                return _get_equivalent_tzids(tzid)
+        return ()
     if isinstance(tzinfo, tz.tzutc):
         return _get_equivalent_tzids("UTC")
     return ()

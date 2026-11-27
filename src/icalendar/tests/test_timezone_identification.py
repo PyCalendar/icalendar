@@ -32,6 +32,41 @@ def test_can_identify_dateutil(tzid):
     assert tzid in tzids_from_tzinfo(gettz(tzid))
 
 
+@pytest.mark.parametrize(
+    ("requested_tzid", "expected_equivalent_tzid"),
+    [
+        ("Pacific/Fiji", "Pacific/Fiji"),
+        ("Brazil/West", "America/Manaus"),
+        ("Chile/EasterIsland", "Pacific/Easter"),
+        ("Arctic/Longyearbyen", "Atlantic/Jan_Mayen"),
+    ],
+)
+def test_can_identify_dateutil_tzfile_aliases(requested_tzid, expected_equivalent_tzid):
+    """Relative dateutil filenames resolve to IDs and their known aliases."""
+    from types import SimpleNamespace
+
+    tzinfo = SimpleNamespace(_filename=requested_tzid)
+    tzids = tzids_from_tzinfo(tzinfo)
+    assert requested_tzid in tzids
+    assert expected_equivalent_tzid in tzids
+
+
+def test_dateutil_tzfile_with_absolute_filename_returns_ids(tmp_path):
+    from types import SimpleNamespace
+
+    filename = tmp_path / "zoneinfo" / "America" / "Manaus"
+    tzinfo = SimpleNamespace(_filename=str(filename))
+    tzids = tzids_from_tzinfo(tzinfo)
+    assert "America/Manaus" in tzids
+    assert "Brazil/West" in tzids
+
+
+def test_dateutil_tzfile_with_unrecognized_filename_returns_no_ids():
+    from types import SimpleNamespace
+
+    assert tzids_from_tzinfo(SimpleNamespace(_filename="not/a/timezone")) == ()
+
+
 def test_utc_is_identified(utc):
     """Test UTC because it is handled in a special way."""
     assert "UTC" in tzids_from_tzinfo(utc)
