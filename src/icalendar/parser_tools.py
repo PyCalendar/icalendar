@@ -37,6 +37,9 @@ def to_unicode(value: ICAL_TYPE, encoding: str = "utf-8-sig") -> str:
     Parameters:
         value: The value to convert.
         encoding: The encoding to use in the conversion.
+
+    Returns:
+        The Unicode string representation of the value.
     """
     if isinstance(value, str):
         return value
@@ -52,12 +55,17 @@ def to_unicode(value: ICAL_TYPE, encoding: str = "utf-8-sig") -> str:
 def data_encode(
     data: ICAL_TYPE | dict | list, encoding: str = DEFAULT_ENCODING
 ) -> bytes | list[bytes] | dict:
-    """Encode all datastructures to the given encoding.
+    """Encode all data structures to the given encoding.
 
     Currently Unicode strings, dicts, and lists are supported.
 
     Parameters:
-        data: The datastructure to encode.
+        data: Required. The data structure to encode.
+        encoding: The encoding to use in the conversion. Default is
+            ``DEFAULT_ENCODING``, set in :mod:`parser_tools`.
+
+    Returns:
+        The encoded data structure.
     """
     # https://stackoverflow.com/questions/1254454/fastest-way-to-convert-a-dicts-keys-values-from-unicode-to-str
     if isinstance(data, str):

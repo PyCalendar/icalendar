@@ -44,7 +44,7 @@ from icalendar.timezone import tzp
 from icalendar.tools import is_date
 
 if TYPE_CHECKING:
-    from collections.abc import Iterable
+    from collections.abc import Callable, Iterable, Sequence
 
     from icalendar.compatibility import Self
 
@@ -190,7 +190,10 @@ class Component(CaselessDict):
         """Return a component with this name.
 
         Parameters:
-            name: Name of the component, i.e. ``VCALENDAR``
+            name: Required. The name of the component, such as ``VCALENDAR``.
+
+        Returns:
+            The component class registered for ``name``.
         """
         return cls._get_component_factory().get_component_class(name)
 
@@ -303,20 +306,26 @@ class Component(CaselessDict):
     # handling of property values
 
     @classmethod
-    def _encode(cls, name, value, parameters=None, encode=1):
+    def _encode(
+        cls,
+        name: str,
+        value: Any,
+        parameters: dict[str, str] | Parameters | None = None,
+        encode: bool = True,
+    ) -> Any:
         """Encode values to icalendar property values.
 
         :meta private:
 
         Parameters:
-            name (str): Required. Name of the property.
-            value (obj): Required. Value of the property. Either a native Python type or
-                any of icalendar's own property types.
-            encode (bool): ``True`` if the value should be encoded to one of
+            name: Required. Name of the property.
+            value: Required. Value of the property. Either a native Python
+                type or any of icalendar's own property types.
+            encode: ``True`` if the value should be encoded to one of
                 icalendar's own property types (falls back to ``vText``),
-                or ``False`` if not.
-            parameters (dict or None): Property parameter dictionary for the value.
-                Only used if ``encode`` is set to ``True``.
+                or ``False`` if not. Default is ``True``.
+            parameters: Property parameter dictionary for the value. Only
+                used if ``encode`` is set to ``True``.
 
         Returns:
             The encoded icalendar property value.
@@ -370,17 +379,14 @@ class Component(CaselessDict):
         RFC requires.
 
         Parameters:
-            name: Name of the property.
-            value:
-                Value of the property. Either a basic Python type or any of
-                icalendar's own property types.
-            parameters:
-                Property parameter dictionary for the value. Only consulted
-                when ``encode`` is ``True``.
-            encode:
-                ``True`` if the value should be encoded to one of icalendar's
-                own property types (fallback is ``vText``); ``False`` to
-                store the value as-is.
+            name: Required. Name of the property.
+            value: Required. Value of the property. Either a basic Python type
+                or any of icalendar's own property types.
+            encode: ``True`` if the value should be encoded to one of
+                icalendar's own property types (fallback is ``vText``);
+                ``False`` to store the value as-is. Default is ``True``.
+            parameters: Property parameter dictionary for the value. Only
+                consulted when ``encode`` is ``True``.
 
         Returns:
             ``None``
@@ -452,10 +458,19 @@ class Component(CaselessDict):
         return decoded
 
     def decoded(self, name: str, default: Any = _marker) -> Any:
-        """Returns decoded value of property.
+        """Return the decoded value of a property.
 
         A component maps keys to icalendar property value types.
-        This function returns values compatible to native Python types.
+        This function returns values compatible with native Python types.
+
+        Parameters:
+            name: Required. The name of the property.
+            default: The value to return if the property is not present. If
+                omitted, a ``KeyError`` is raised.
+
+        Returns:
+            The decoded value of the property, or ``default`` if the
+            property is not present.
         """
         if name in self:
             value = self[name]
@@ -477,12 +492,22 @@ class Component(CaselessDict):
             return [self._decode(name, val) for val in vals]
         return vals
 
-    def set_inline(self, name, values, encode=1):
-        """Converts a list of values into comma separated string and sets value
-        to that.
+    def set_inline(self, name: str, values: Sequence[str], encode: bool = True):
+        """Convert a list of values into a comma-separated string and set the
+        property value to it.
+
+        Parameters:
+            name: Required. Name of the property.
+            values: Required. Values of the properties. The properties are
+                encoded, if ``encode`` is truthy. Then they are joined to
+                form the property value.
+            encode: ``True`` if each value in values should be encoded to one
+                of icalendar's own property types with a fallback to
+                :attr:`~icalendar.prop.text.vText`, else ``False``.
+                Default is ``True``.
         """
         if encode:
-            values = [self._encode(name, value, encode=1) for value in values]
+            values = [self._encode(name, value, encode=True) for value in values]
         self[name] = self.types_factory["inline"](q_join(values))
 
     #########################
@@ -493,7 +518,7 @@ class Component(CaselessDict):
         self.subcomponents.append(component)
 
     def _walk(
-        self, name: str | None, select: callable[[Component], bool]
+        self, name: str | None, select: Callable[[Component], bool]
     ) -> list[Component]:
         """Walk to given component.
 
@@ -508,10 +533,15 @@ class Component(CaselessDict):
             stack.extend(reversed(component.subcomponents))
         return result
 
+    @staticmethod
+    def __identity(_component: Component) -> bool:
+        """Identity selector for :meth:`Component.walk`."""
+        return True
+
     def walk(
         self,
         name: str | None = None,
-        select: callable[[Component], bool] = lambda _: True,
+        select: Callable[[Component], bool] | None = None,
     ) -> list[Component]:
         """Return this component and its subcomponents that match the filters.
 
@@ -522,8 +552,9 @@ class Component(CaselessDict):
         Parameters:
             name: Component name to keep, such as ``"VEVENT"``; ``None`` keeps
                 every name.
-            select: Function that takes a component and returns ``True`` to
-                keep it. By default, every component is kept.
+            select: Function that takes a component as its first argument and
+                returns ``True`` to keep it, or ``False`` otherwise. Default is
+                ``None``, which keeps every component.
 
         Returns:
             list[Component]: The matching components, starting with this one
@@ -531,7 +562,7 @@ class Component(CaselessDict):
         """
         if name is not None:
             name = name.upper()
-        return self._walk(name, select)
+        return self._walk(name, select or self.__identity)
 
     def with_uid(self, uid: str) -> list[Component]:
         """Return a list of components with the given UID.
@@ -684,10 +715,15 @@ class Component(CaselessDict):
         contentlines.append("")  # remember the empty string in the end
         return contentlines
 
-    def to_ical(self, sorted: bool = True):
-        """
-        :param sorted: Whether parameters and properties should be
-                       lexicographically sorted.
+    def to_ical(self, sorted: bool = True) -> bytes:
+        """Convert component to iCalendar format.
+
+        Parameters:
+            sorted: Whether parameters and properties should be
+                lexicographically sorted. Default is ``True``.
+
+        Returns:
+            The iCalendar representation of the component.
         """
 
         content_lines = self.content_lines(sorted=sorted)
@@ -989,6 +1025,7 @@ class Component(CaselessDict):
             created: The :attr:`created` of the component.
             last_modified: The :attr:`last_modified` of the component.
             links: The :attr:`links` of the component.
+            refids: The :attr:`refids` of the component.
             related_to: The :attr:`related_to` of the component.
             stamp: The :attr:`DTSTAMP` of the component.
             subcomponents: The subcomponents of the component.
@@ -1402,7 +1439,9 @@ class Component(CaselessDict):
         return components
 
 
-def _node_from_jcal(jcal, starting_cls: type[Component]) -> tuple[Component, list]:
+def _node_from_jcal(
+    jcal: list, starting_cls: type[Component]
+) -> tuple[Component, list]:
     """Parse a single jCal component without recursing into subcomponents.
 
     :meta private:
