@@ -685,9 +685,14 @@ class Component(CaselessDict):
         return contentlines
 
     def to_ical(self, sorted: bool = True):
-        """
-        :param sorted: Whether parameters and properties should be
-                       lexicographically sorted.
+        """Convert the component and its subcomponents to iCalendar data.
+
+        Parameters:
+            sorted: Whether to sort parameters and properties
+                lexicographically.
+
+        Returns:
+            The serialized iCalendar data as bytes.
         """
 
         content_lines = self.content_lines(sorted=sorted)
