@@ -88,3 +88,13 @@ def test_tzwin_non_utc_is_identified():
 
     tzinfo = gettz("Eastern Standard Time")
     assert tzid_from_tzinfo(tzinfo) == "America/New_York"
+
+
+@pytest.mark.parametrize("filename", ["Pacific/Fiji", "Pacific\\Fiji"])
+def test_dateutil_relative_filename_without_zoneinfo_root(monkeypatch, filename):
+    """A relative dateutil filename is a tzid even without a zoneinfo root (#2142)."""
+    from types import SimpleNamespace
+
+    monkeypatch.setattr("icalendar.timezone.tzid.DATEUTIL_ZONEINFO_PATH", None)
+    tzinfo = SimpleNamespace(_filename=filename)
+    assert "Pacific/Fiji" in tzids_from_tzinfo(tzinfo)
