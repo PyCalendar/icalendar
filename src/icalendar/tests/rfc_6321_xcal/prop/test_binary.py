@@ -4,7 +4,6 @@ https://datatracker.ietf.org/doc/html/rfc6321#section-3.6.1
 https://www.w3.org/TR/xmlschema-2/#base64Binary
 """
 
-import sys
 from xml.etree import ElementTree as ET
 
 import pytest
@@ -51,10 +50,7 @@ def test_whitespace_is_ignored(types_factory: TypesFactory):
     assert vBinary.from_xcal(e).bytes == b"The quick"
 
 
-INVALID_VALUES = ["INVALID!", "a"]
-
-if sys.version_info >= (3, 12):
-    INVALID_VALUES.append("MTIz=")
+INVALID_VALUES = ["INVALID!", "a", "MTIz=", "YR=="]
 
 
 @pytest.mark.parametrize("invalid", INVALID_VALUES)

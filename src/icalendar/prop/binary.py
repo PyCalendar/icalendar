@@ -176,6 +176,12 @@ class vBinary:
         """
         element = parser.parse_tag(cls.default_value)
         text = element.get_text_without_whitespace()
+        if len(text) % 4 != 0:
+            raise XCalParsingError(
+                "Expected base64 encoded data",
+                None,  # do not print potentially huge chunks of data
+                element,
+            )
         try:
             binary = base64.b64decode(text, validate=True)
         except binascii.Error as e:
@@ -184,6 +190,12 @@ class vBinary:
                 None,  # do not print potentially huge chunks of data
                 element,
             ) from e
+        if base64.b64encode(binary).decode("ascii") != text:
+            raise XCalParsingError(
+                "Expected base64 encoded data",
+                None,  # do not print potentially huge chunks of data
+                element,
+            )
         return cls(binary, params=params)
 
 

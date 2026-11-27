@@ -1,0 +1,1 @@
+Reject non-canonical Base64 strings in ``vBinary.from_xcal``. :user:`meat-daemon-404`
