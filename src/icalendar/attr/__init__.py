@@ -587,38 +587,44 @@ def single_string_property(
 
 color_property = single_string_property(
     "COLOR",
-    """This property specifies a color used for displaying the component.
+    """A CSS3 color name or hex value used when displaying a component.
 
-    This implements :rfc:`7986` ``COLOR`` property.
+This property implements ``COLOR`` from :rfc:`7986#section-5.9`.
+Clients may use the value as the background color of an event, to-do,
+or journal entry. The value is a case-insensitive CSS3 color name, for
+example ``"turquoise"``, or a hex code, for example ``"#ffffff"``, taken
+from the `CSS3 color specification <https://www.w3.org/TR/css-color-3/>`_.
 
-    Property Parameters:
-        IANA and non-standard property parameters can
-        be specified on this property.
+This property can be specified once on a ``VEVENT``, ``VTODO``, or
+``VJOURNAL`` component. You can get, set, and delete the color as a
+string.
 
-    Conformance:
-        This property can be specified once in an iCalendar
-        object or in ``VEVENT``, ``VTODO``, or ``VJOURNAL`` calendar components.
+This property can be used in icalendar through its Python attributes of:
 
-    Description:
-        This property specifies a color that clients MAY use
-        when presenting the relevant data to a user.  Typically, this
-        would appear as the "background" color of events or tasks.  The
-        value is a case-insensitive color name taken from the CSS3 set of
-        names, defined in Section 4.3 of `W3C.REC-css3-color-20110607 <https://www.w3.org/TR/css-color-3/>`_.
+-   :attr:`Event.color <icalendar.cal.event.Event.color>`
+-   :attr:`Journal.color <icalendar.cal.journal.Journal.color>`
+-   :attr:`Todo.color <icalendar.cal.todo.Todo.color>`
 
-    Example:
-        ``"turquoise"``, ``"#ffffff"``
+Example:
+    Set a color on a to-do, print its iCalendar representation, and then
+    read the value back.
 
-        .. code-block:: pycon
+    ..  code-block:: pycon
 
-            >>> from icalendar import Todo
-            >>> todo = Todo()
-            >>> todo.color = "green"
-            >>> print(todo.to_ical())
-            BEGIN:VTODO
-            COLOR:green
-            END:VTODO
-    """,
+        >>> from icalendar import Todo
+        >>> todo = Todo()
+        >>> todo.color = "green"
+        >>> print(todo.to_ical().decode())
+        BEGIN:VTODO
+        COLOR:green
+        END:VTODO
+        >>> todo.color
+        'green'
+
+See also:
+    :attr:`Calendar.color <icalendar.cal.calendar.Calendar.color>` for the
+    calendar-level color, including the ``X-APPLE-CALENDAR-COLOR`` alias.
+""",
 )
 
 sequence_property = single_int_property(
