@@ -495,6 +495,63 @@ class vRecur(CaselessDict):
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
 
+    @property
+    def rscale(self) -> str | None:
+        """The RSCALE part of the recurrence rule.
+
+        This specifies the calendar scale used for the recurrence rule, per
+        :rfc:`7529#section-3.1`. Common values include ``GREGORIAN``,
+        ``CHINESE``, ``ETHIOPIC``, ``HEBREW``, and ``ISLAMIC``.
+
+        Returns:
+            The calendar scale as an uppercase string, or ``None`` if ``RSCALE`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to a valid string,
+                is empty, or contains recurrence part separators (``;`` or ``,``).
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("RSCALE=CHINESE;FREQ=YEARLY").rscale
+                'CHINESE'
+                >>> vRecur.from_ical("FREQ=YEARLY").rscale is None
+                True
+        """
+        values = self.get("RSCALE")
+        if values is None or (isinstance(values, SEQUENCE_TYPES) and len(values) == 0):
+            return None
+        value = values[0] if isinstance(values, SEQUENCE_TYPES) else values
+        if isinstance(value, bool):
+            raise InvalidCalendar(f"RSCALE must be a string, got {value!r}")
+        str_val = str(value).strip().upper()
+        if not str_val:
+            raise InvalidCalendar("RSCALE cannot be empty")
+        if _contains_part_separator(str_val):
+            raise InvalidCalendar(f"RSCALE cannot contain ';' or ',', got {str_val!r}")
+        return str_val
+
+    @rscale.setter
+    def rscale(self, value: str | None) -> None:
+        """Set the RSCALE part of the recurrence rule, or delete it if None."""
+        if value is None:
+            del self.rscale
+            return
+        if not isinstance(value, str) or isinstance(value, bool):
+            raise TypeError(f"rscale must be a string, got {value!r}")
+        cleaned = value.strip().upper()
+        if not cleaned:
+            raise InvalidCalendar("RSCALE cannot be empty")
+        if _contains_part_separator(cleaned):
+            raise InvalidCalendar(f"RSCALE cannot contain ';' or ',', got {value!r}")
+        self["RSCALE"] = [vText(cleaned)]
+
+    @rscale.deleter
+    def rscale(self) -> None:
+        """Delete the RSCALE part of the recurrence rule."""
+        self.pop("RSCALE", None)
+
     def __eq__(self, other: object) -> bool:
         """self == other
 

@@ -1,0 +1,1 @@
+Add ``rscale`` property accessor to :class:`icalendar.prop.vRecur` according to :rfc:`7529#section-3.1` - by :user:`RishabhIIITD`.
