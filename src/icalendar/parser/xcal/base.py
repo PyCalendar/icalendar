@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import deque
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -30,7 +31,7 @@ class XCalParser:
 
     def __init__(self, element: Element | ElementAdapter) -> None:
         self._element = ElementAdapter.with_element(element)
-        self._children = self._element.children
+        self._children = deque(self._element.children)
         self._consumed = 0
         self._element_is_parsed = False
 
@@ -62,7 +63,7 @@ class XCalParser:
         """
         if self.is_finished():
             raise InvalidParserState("No more children available.")
-        self._children = self._children[1:]
+        self._children.popleft()
         self._consumed += 1
 
     @property
