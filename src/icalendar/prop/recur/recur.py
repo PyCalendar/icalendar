@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -494,6 +495,87 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def bysecond(self) -> tuple[int, ...]:
+        """The BYSECOND part of the recurrence rule.
+
+        This specifies a list of seconds within a minute for the recurrence,
+        per :rfc:`5545#section-3.3.10`. Valid values are integers from 0 to 60
+        (where 60 represents a leap second).
+
+        Returns:
+            A tuple of integer seconds, or an empty tuple if ``BYSECOND`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to int or is
+                outside the valid range of 0 to 60.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=MINUTELY;BYSECOND=0,30").bysecond
+                (0, 30)
+                >>> vRecur.from_ical("FREQ=MINUTELY;BYSECOND=60").bysecond
+                (60,)
+                >>> vRecur.from_ical("FREQ=MINUTELY").bysecond
+                ()
+        """
+        values = self.get("BYSECOND")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[int] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(f"BYSECOND values must be integers, got {val!r}")
+            try:
+                second = int(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYSECOND values must be integers, got {val!r}"
+                ) from e
+            if not 0 <= second <= 60:
+                raise InvalidCalendar(
+                    f"BYSECOND values must be between 0 and 60, got {second}"
+                )
+            result.append(second)
+        return tuple(result)
+
+    @bysecond.setter
+    def bysecond(self, value: int | Iterable[int] | None) -> None:
+        """Set the BYSECOND part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.bysecond
+            return
+        if isinstance(value, int) and not isinstance(value, bool):
+            seconds = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            seconds = list(value)
+        else:
+            raise TypeError(
+                f"bysecond must be an int or an iterable of ints, got {value!r}"
+            )
+        if not seconds:
+            del self.bysecond
+            return
+        validated: list[vNonNegativeInt] = []
+        for s in seconds:
+            if not isinstance(s, int) or isinstance(s, bool):
+                raise TypeError(f"bysecond items must be integers, got {s!r}")
+            if not 0 <= s <= 60:
+                raise InvalidCalendar(
+                    f"BYSECOND values must be between 0 and 60, got {s}"
+                )
+            validated.append(vNonNegativeInt(s))
+        self["BYSECOND"] = validated
+
+    @bysecond.deleter
+    def bysecond(self) -> None:
+        """Delete the BYSECOND part of the recurrence rule."""
+        self.pop("BYSECOND", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other
