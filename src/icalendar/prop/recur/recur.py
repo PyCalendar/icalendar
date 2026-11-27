@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any, ClassVar
 from xml.etree.ElementTree import Element, SubElement
 
@@ -494,6 +495,86 @@ class vRecur(CaselessDict):
     def wkst(self) -> None:
         """Delete the WKST part of the recurrence rule."""
         self.pop("WKST", None)
+
+    @property
+    def byhour(self) -> tuple[int, ...]:
+        """The BYHOUR part of the recurrence rule.
+
+        This specifies a list of hours of the day for the recurrence, per
+        :rfc:`5545#section-3.3.10`. Valid values are integers from 0 to 23.
+
+        Returns:
+            A tuple of integer hours, or an empty tuple if ``BYHOUR`` is not set.
+
+        Raises:
+            InvalidCalendar: if a stored value cannot be converted to int or is
+                outside the valid range of 0 to 23.
+
+        Example:
+            ..  code-block:: pycon
+
+                >>> from icalendar.prop import vRecur
+                >>> vRecur.from_ical("FREQ=DAILY;BYHOUR=9,12,18").byhour
+                (9, 12, 18)
+                >>> vRecur.from_ical("FREQ=DAILY;BYHOUR=0").byhour
+                (0,)
+                >>> vRecur.from_ical("FREQ=DAILY").byhour
+                ()
+        """
+        values = self.get("BYHOUR")
+        if values is None:
+            return ()
+        if not isinstance(values, SEQUENCE_TYPES):
+            values = [values]
+        result: list[int] = []
+        for val in values:
+            if isinstance(val, bool):
+                raise InvalidCalendar(f"BYHOUR values must be integers, got {val!r}")
+            try:
+                hour = int(val)
+            except (TypeError, ValueError) as e:
+                raise InvalidCalendar(
+                    f"BYHOUR values must be integers, got {val!r}"
+                ) from e
+            if not 0 <= hour <= 23:
+                raise InvalidCalendar(
+                    f"BYHOUR values must be between 0 and 23, got {hour}"
+                )
+            result.append(hour)
+        return tuple(result)
+
+    @byhour.setter
+    def byhour(self, value: int | Iterable[int] | None) -> None:
+        """Set the BYHOUR part of the recurrence rule, or delete it if None or empty."""
+        if value is None:
+            del self.byhour
+            return
+        if isinstance(value, int) and not isinstance(value, bool):
+            hours = [value]
+        elif isinstance(value, Iterable) and not isinstance(value, (str, bytes)):
+            hours = list(value)
+        else:
+            raise TypeError(
+                f"byhour must be an int or an iterable of ints, got {value!r}"
+            )
+        if not hours:
+            del self.byhour
+            return
+        validated: list[vNonNegativeInt] = []
+        for h in hours:
+            if not isinstance(h, int) or isinstance(h, bool):
+                raise TypeError(f"byhour items must be integers, got {h!r}")
+            if not 0 <= h <= 23:
+                raise InvalidCalendar(
+                    f"BYHOUR values must be between 0 and 23, got {h}"
+                )
+            validated.append(vNonNegativeInt(h))
+        self["BYHOUR"] = validated
+
+    @byhour.deleter
+    def byhour(self) -> None:
+        """Delete the BYHOUR part of the recurrence rule."""
+        self.pop("BYHOUR", None)
 
     def __eq__(self, other: object) -> bool:
         """self == other
