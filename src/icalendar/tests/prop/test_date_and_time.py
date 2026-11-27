@@ -19,7 +19,7 @@ from icalendar.prop import VPROPERTY
 from icalendar.timezone.tzid import is_utc
 
 if TYPE_CHECKING:
-    from icalendar.cal.event import Event
+    from icalendar.cal import Event
 
 
 @pytest.mark.parametrize(

@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from dateutil.rrule import rrule
 
     from icalendar import prop
-    from icalendar.cal.timezone import Timezone
+    from icalendar.cal import Timezone
 
 
 class TZProvider(ABC):

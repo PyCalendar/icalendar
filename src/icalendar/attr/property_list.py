@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-    from icalendar.cal.component import Component
+    from icalendar.cal import Component
 
 
 class PropertyListView(MutableSequence):
