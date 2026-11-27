@@ -63,3 +63,28 @@ def test_parse_jcal_value_uses_the_matching_parser(
     for parser in unused_parsers:
         monkeypatch.setattr(parser, "parse_jcal_value", fail)
     assert vDDDTypes.parse_jcal_value(value) == expected
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        date(2026, 11, 23),
+        datetime(2026, 11, 23, 12, 30),
+        time(12, 30),
+        timedelta(hours=2),
+        (datetime(2026, 11, 23), datetime(2026, 11, 24)),
+        (datetime(2026, 11, 23), timedelta(hours=2)),
+    ],
+)
+def test_ical_value(value):
+    """Return the underlying Python value for every supported type."""
+    assert vDDDTypes(value).ical_value == value
+
+
+def test_ical_value_preserves_timezone(tzp):
+    """Keep the timezone of the underlying datetime."""
+    value = tzp.localize_utc(datetime(2026, 11, 23, 12, 30))
+    result = vDDDTypes(value).ical_value
+
+    assert result == value
+    assert result.tzinfo is value.tzinfo

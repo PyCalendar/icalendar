@@ -67,6 +67,18 @@ class vDDDTypes(TimeBase):
         self.params = Parameters(params)
         self.params.update_tzid_from(dt)
 
+    @property
+    def ical_value(self) -> DT_TYPE:
+        """Return the underlying Python date, time, duration, or period value.
+
+        Examples:
+            >>> from datetime import date
+            >>> from icalendar.prop import vDDDTypes
+            >>> vDDDTypes(date(2026, 11, 23)).ical_value
+            datetime.date(2026, 11, 23)
+        """
+        return self.dt
+
     def to_property_type(self) -> vDatetime | vDate | vDuration | vTime | vPeriod:
         """Convert to a property type.
 
