@@ -24,6 +24,7 @@ from icalendar.prop.dt import (
 from icalendar.prop.float import vFloat
 from icalendar.prop.geo import vGeo
 from icalendar.prop.inline import vInline
+from icalendar.prop.location_type import vLocationType
 from icalendar.prop.n import vN
 from icalendar.prop.org import vOrg
 from icalendar.prop.recur import vFrequency, vRecur, vWeekday
@@ -83,6 +84,7 @@ class TypesFactory(CaselessDict):
             vUri,
             vWeekday,
             vCategory,
+            vLocationType,
             vAdr,
             vN,
             vOrg,
@@ -111,6 +113,7 @@ class TypesFactory(CaselessDict):
         self["inline"] = vInline
         self["date-time-list"] = vDDDLists
         self["categories"] = vCategory
+        self["location-type"] = vLocationType
         self["request-status-text"] = vRequestStatus  # RFC 5545 and 6321
         self["adr"] = vAdr  # RFC 6350 vCard
         self["n"] = vN  # RFC 6350 vCard
@@ -146,6 +149,8 @@ class TypesFactory(CaselessDict):
             "description": "text",
             "geo": "geo",
             "location": "text",
+            "location-type": "location-type",  # RFC 9073
+            "name": "text",  # RFC 7986 and RFC 9073
             "percent-complete": "integer",
             "priority": "integer",
             "resources": "text",

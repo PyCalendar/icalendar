@@ -29,6 +29,7 @@ from icalendar import (
     Event,
     FreeBusy,
     Journal,
+    Location,
     Todo,
     vCalAddress,
 )
@@ -48,20 +49,38 @@ param_summary_components = pytest.mark.parametrize(
     "component", [Event, Todo, Alarm, Journal, Available, Availability]
 )
 param_description_components = pytest.mark.parametrize(
-    "component", [Event, Todo, Alarm, Journal, Available, Availability]
+    "component", [Event, Todo, Alarm, Journal, Available, Availability, Location]
 )
 COMPONENTS_DTSTAMP = {
     Component,
     Event,
     Journal,
+    Location,
     Todo,
     FreeBusy,
     Available,
     Availability,
 }
 COMPONENTS_DTSTAMP_AUTOMATIC = {Event, Journal, Todo, FreeBusy, Available, Availability}
-COMPONENTS_UID_AUTOMATIC = {Event, Todo, Journal, Available, Availability, Calendar}
-COMPONENTS_UID = {Event, Todo, Journal, Alarm, Calendar, Available, Availability}
+COMPONENTS_UID_AUTOMATIC = {
+    Event,
+    Todo,
+    Journal,
+    Available,
+    Availability,
+    Calendar,
+    Location,
+}
+COMPONENTS_UID = {
+    Event,
+    Todo,
+    Journal,
+    Alarm,
+    Calendar,
+    Available,
+    Availability,
+    Location,
+}
 COMPONENTS_SEQUENCE = {Event, Todo, Journal, Availability}
 COMPONENTS_CATEGORIES = {Event, Journal, Todo, Calendar, Availability, Available}
 COMPONENTS_ORGANIZER = {Availability, Event, FreeBusy, Journal, Todo}
@@ -72,6 +91,7 @@ COMPONENTS_DESCRIPTION = {
     Event,
     Todo,
     Journal,
+    Location,
     Alarm,
     Available,
     Availability,
@@ -82,6 +102,7 @@ COMPONENTS_COMMENT = {
     Event,
     Todo,
     Journal,
+    Location,
     FreeBusy,
     Available,
     Availability,
@@ -104,6 +125,7 @@ COMPONENTS_LINKS = COMPONENTS_RELATED_TO = COMPONENTS_CONCEPTS = COMPONENTS_REFI
     Event,
     FreeBusy,
     Journal,
+    Location,
     Todo,
 }
 

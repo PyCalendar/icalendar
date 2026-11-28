@@ -317,6 +317,16 @@ class Contentline(str):
                 return i
         return -1
 
+    def raw_text_list_value(self) -> str | None:
+        """Return the raw TEXT list, or ``None`` if its separator is missing."""
+        # The value separator is the first colon outside a quoted parameter
+        # section. ``rfind`` here would pick a colon that belongs to the value
+        # (``TEXT`` does not escape ``:``) and truncate the categories.
+        separator = self.value_separator_index()
+        if separator < 0:
+            return None
+        return self[separator + 1 :]
+
     @classmethod
     def from_ical(cls, ical, strict=False):
         """Unfold the content lines in an iCalendar into long content lines."""

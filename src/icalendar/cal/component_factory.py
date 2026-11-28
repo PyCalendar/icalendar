@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class ComponentFactory(CaselessDict):
-    """Registered components from :rfc:`7953` and :rfc:`5545`.
+    """Registered components from :rfc:`7953`, :rfc:`5545`, and :rfc:`9073`.
 
     On initialization, this class sets its keys to uppercase.
 
@@ -52,6 +52,7 @@ class ComponentFactory(CaselessDict):
         from icalendar.cal.event import Event
         from icalendar.cal.free_busy import FreeBusy
         from icalendar.cal.journal import Journal
+        from icalendar.cal.location import Location
         from icalendar.cal.timezone import (
             Timezone,
             TimezoneDaylight,
@@ -63,6 +64,7 @@ class ComponentFactory(CaselessDict):
         self.add_component_class(Event)
         self.add_component_class(Todo)
         self.add_component_class(Journal)
+        self.add_component_class(Location)
         self.add_component_class(FreeBusy)
         self.add_component_class(Timezone)
         self.add_component_class(TimezoneStandard)

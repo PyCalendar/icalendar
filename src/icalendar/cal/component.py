@@ -406,7 +406,7 @@ class Component(CaselessDict):
         if (
             encode
             and isinstance(value, list)
-            and name.lower() not in ["rdate", "exdate", "categories"]
+            and name.lower() not in ["rdate", "exdate", "categories", "location-type"]
         ):
             # Individually convert each value to an ical type except rdate and
             # exdate, where lists of dates might be passed to vDDDLists.
