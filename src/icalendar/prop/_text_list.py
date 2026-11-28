@@ -52,7 +52,7 @@ class TextList:
         return self._values
 
     def __eq__(self, other: object) -> bool:
-        """Compare the text values.
+        """self == other
 
         :meta private:
         """
@@ -71,7 +71,7 @@ class TextList:
 
     @property
     def ical_value(self) -> list[str]:
-        """The individual values as strings."""
+        """The list of values as strings."""
         return [str(value) for value in self._values]
 
     def to_ical(self) -> bytes:
@@ -107,7 +107,7 @@ class TextList:
     from icalendar.param import VALUE
 
     def to_jcal(self, name: str) -> list:
-        """Serialize the property to jCal.
+        """The jCal representation for this property.
 
         Parameters:
             name: The jCal property name.
@@ -142,7 +142,7 @@ class TextList:
         return cls(jcal_property[3:], Parameters.from_jcal_property(jcal_property))
 
     def to_xcal(self, element: Element) -> None:
-        """Write one xCal text element per value.
+        """Add the xCal representation of this property according to :rfc:`6321`.
 
         Parameters:
             element: The property element that receives the parameters and values.
@@ -172,7 +172,7 @@ class TextList:
             params: Required. The parameters of the xCal element.
 
         Raises:
-            ~icalendar.error.XCalParsingError: If the provided xCal is invalid.
+            ~error.XCalParsingError: If the provided xCal is invalid.
         """
         elements = parser.parse_tags(cls.default_value)
         return cls([element.get_xsd_string() for element in elements], params=params)

@@ -71,7 +71,16 @@ COMPONENTS_UID_AUTOMATIC = {
     Calendar,
     Location,
 }
-COMPONENTS_UID = COMPONENTS_UID_AUTOMATIC | {Alarm}
+COMPONENTS_UID = {
+    Event,
+    Todo,
+    Journal,
+    Alarm,
+    Calendar,
+    Available,
+    Availability,
+    Location,
+}
 COMPONENTS_SEQUENCE = {Event, Todo, Journal, Availability}
 COMPONENTS_CATEGORIES = {Event, Journal, Todo, Calendar, Availability, Available}
 COMPONENTS_ORGANIZER = {Availability, Event, FreeBusy, Journal, Todo}

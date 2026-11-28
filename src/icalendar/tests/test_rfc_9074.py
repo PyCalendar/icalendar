@@ -43,6 +43,6 @@ def test_proximity(events):
     assert len(alarm.subcomponents) == 1
     location = alarm.subcomponents[0]
     assert isinstance(location, Location)
-    assert location.uid == "123456-abcdef-98765432"
+    assert location["UID"] == "123456-abcdef-98765432"
     assert location.location_name == "Office"
     assert location["URL"] == "geo:40.443,-79.945;u=10"

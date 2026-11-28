@@ -209,18 +209,22 @@ class ComponentIcalParser:
         tzid = params.get("TZID") if params and name in self.datetime_names else None
 
         # Handle special cases for value list preparation
-        if name == "CATEGORIES" and self.handle_categories(params, vals, line):
-            return
-        if name == "LOCATION-TYPE" and self.handle_location_type(params, vals, line):
-            return
-        if name == "FREEBUSY":
+        vals_list = None
+        if name == "CATEGORIES":
+            if self.handle_categories(params, vals, line):
+                return
+        elif name == "LOCATION-TYPE":
+            if self.handle_location_type(params, vals, line):
+                return
+        elif name == "FREEBUSY":
             # Handle FREEBUSY comma-separated values
             vals_list = vals.split(",")
         # Workaround broken ICS files with empty RDATE
         # (not EXDATE - let it parse and fail)
         elif name == "RDATE" and vals == "":
             vals_list = []
-        else:
+
+        if vals_list is None:
             factory = self.get_factory_for_property(name, params)
             # Value types that must not be unescaped provide their own value.
             get_value_from_content_line = getattr(
@@ -283,16 +287,15 @@ class ComponentIcalParser:
     def handle_categories(
         self, params: Parameters, vals: str, line: Contentline
     ) -> bool:
-        """Handle the special case of the CATEGORIES property.
-
-        Parameters:
-            params: The parameters of the property.
-            vals: The value of the property.
-            line: The original content line.
+        """Handle the special case of CATEGORIES property.
 
         Returns:
             ``True`` if handled, else ``False``.
         """
+        # Special handling for CATEGORIES - need raw value
+        # before unescaping to properly split on unescaped commas
+        # Parse categories immediately (not lazily) for both
+        # strict and tolerant components.
         return self._handle_text_list("CATEGORIES", params, line)
 
     def handle_location_type(
@@ -335,8 +338,10 @@ class ComponentIcalParser:
                 else line.raw_text_list_value()
             )
             if raw_value is None:
+                # Fallback to normal processing if we can't find colon
                 return False
             if from_ical_list is None:
+                # CATEGORIES needs special comma handling
                 categories_factory = cast("Callable[[list[str]], VPROPERTY]", factory)
                 value = categories_factory(split_on_unescaped_comma(raw_value))
             else:

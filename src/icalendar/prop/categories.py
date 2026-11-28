@@ -23,13 +23,6 @@ class vCategory(TextList):
     def _values(self, values: list[vText | str]) -> None:
         self.cats = values
 
-    def __hash__(self) -> int:
-        """Hash the category values.
-
-        :meta private:
-        """
-        return hash(tuple(self.cats))
-
     @classmethod
     def from_ical_list(cls, raw_value: str) -> Self:
         """Use TEXT escaping for content lines. Direct string callers use the legacy decoder."""
@@ -39,21 +32,34 @@ class vCategory(TextList):
     def from_ical(ical: list[str] | str | bytes) -> list[str]:
         """Parse a CATEGORIES value from iCalendar format.
 
-        A list contains individual, unescaped categories. A comma-separated
-        string uses the legacy splitting rules. The component parser reads
-        the escaped TEXT list with :meth:`from_ical_list`.
+        The component parser calls :meth:`from_ical_list`, which
+        already splits the CATEGORIES property into a list of unescaped
+        category strings. New code should therefore pass a list of strings.
+
+        Passing a single comma-separated string is supported only for
+        backwards compatibility with older parsing code and is considered
+        legacy behavior.
 
         Parameters:
-            ical: A list of category strings or a legacy comma-separated value.
+            ical: A list of category strings (preferred), or a single comma-separated
+                string from a legacy caller.
 
         Returns:
             A list of category strings.
         """
         if isinstance(ical, list):
+            # Already split by the caller
             return ical
         # Legacy: simple comma split (no escaping handled)
         ical = to_unicode(ical)
         return ical.split(",")
+
+    def __hash__(self) -> int:
+        """Hash of the vCategory object.
+
+        :meta private:
+        """
+        return hash(tuple(self.cats))
 
     @classmethod
     def examples(cls) -> list[Self]:
