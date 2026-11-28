@@ -76,6 +76,8 @@ class Component(CaselessDict):
     Component is the base object for calendar, Event and the other
     components defined in :rfc:`5545`. Normally you will not use this class
     directly, but rather one of the subclasses.
+
+    On initialization, this class sets its keys to upper case.
     """
 
     name: ClassVar[str | None] = None
@@ -175,7 +177,10 @@ class Component(CaselessDict):
 
     @classmethod
     def _get_component_factory(cls) -> ComponentFactory:
-        """Get the component factory."""
+        """Get the component factory.
+
+        :meta private:
+        """
         if cls._components_factory is None:
             cls._components_factory = ComponentFactory()
         return cls._components_factory
@@ -233,6 +238,8 @@ class Component(CaselessDict):
     ) -> str | None:
         """Infer the ``VALUE`` parameter from a Python type.
 
+        :meta private:
+
         Parameters:
             value: Python native type, one of :class:`datetime.date`, :class:`datetime.datetime`,
                 :class:`datetime.timedelta`, :class:`datetime.time`, :class:`tuple`,
@@ -262,18 +269,23 @@ class Component(CaselessDict):
         return None
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        """Set keys to upper for initial dict."""
         super().__init__(*args, **kwargs)
         # set parameters here for properties that use non-default values
         self.subcomponents: list[Component] = []  # Components can be nested.
         self.errors: list[tuple[str | None, str]] = []
 
     def __bool__(self) -> bool:
-        """Returns True, CaselessDict would return False if it had no items."""
+        """Returns ``True``, CaselessDict would return ``False`` if it had no items.
+
+        :meta private:
+        """
         return True
 
     def __getitem__(self, key) -> VPROPERTY:
-        """Get property value from the component dictionary."""
+        """Get property value from the component dictionary.
+
+        :meta private:
+        """
         return super().__getitem__(key)
 
     def get(self, key, default=None) -> Any:
@@ -294,23 +306,20 @@ class Component(CaselessDict):
     def _encode(cls, name, value, parameters=None, encode=1):
         """Encode values to icalendar property values.
 
-        :param name: Name of the property.
-        :type name: string
+        :meta private:
 
-        :param value: Value of the property. Either of a basic Python type of
-                      any of the icalendar's own property types.
-        :type value: Python native type or icalendar property type.
+        Parameters:
+            name (str): Required. Name of the property.
+            value (obj): Required. Value of the property. Either a native Python type or
+                any of icalendar's own property types.
+            encode (bool): ``True`` if the value should be encoded to one of
+                icalendar's own property types (falls back to ``vText``),
+                or ``False`` if not.
+            parameters (dict or None): Property parameter dictionary for the value.
+                Only used if ``encode`` is set to ``True``.
 
-        :param parameters: Property parameter dictionary for the value. Only
-                           available, if encode is set to True.
-        :type parameters: Dictionary
-
-        :param encode: True, if the value should be encoded to one of
-                       icalendar's own property types (Fallback is "vText")
-                       or False, if not.
-        :type encode: Boolean
-
-        :returns: icalendar property value
+        Returns:
+            The encoded icalendar property value.
         """
         if not encode:
             return value
@@ -420,7 +429,10 @@ class Component(CaselessDict):
         self[name] = value
 
     def _decode(self, name: str, value: VPROPERTY):
-        """Internal for decoding property values."""
+        """Internal for decoding property values.
+
+        :meta private:
+        """
 
         # TODO: Currently the decoded method calls the icalendar.prop instances
         # from_ical. We probably want to decode properties into Python native
@@ -483,7 +495,10 @@ class Component(CaselessDict):
     def _walk(
         self, name: str | None, select: callable[[Component], bool]
     ) -> list[Component]:
-        """Walk to given component."""
+        """Walk to given component.
+
+        :meta private:
+        """
         result = []
         stack = [self]
         while stack:
@@ -498,14 +513,21 @@ class Component(CaselessDict):
         name: str | None = None,
         select: callable[[Component], bool] = lambda _: True,
     ) -> list[Component]:
-        """Recursively traverses component and subcomponents. Returns sequence
-        of same. If name is passed, only components with name will be returned.
+        """Return this component and its subcomponents that match the filters.
 
-        :param name: The name of the component or None such as ``VEVENT``.
-        :param select: A function that takes the component as first argument
-          and returns True/False.
-        :returns: A list of components that match.
-        :rtype: list[Component]
+        A component is kept only if it matches both ``name`` and ``select``.
+        The name match is case-insensitive, so ``"vevent"`` finds ``VEVENT``
+        components.
+
+        Parameters:
+            name: Component name to keep, such as ``"VEVENT"``; ``None`` keeps
+                every name.
+            select: Function that takes a component and returns ``True`` to
+                keep it. By default, every component is kept.
+
+        Returns:
+            list[Component]: The matching components, starting with this one
+                if it matches.
         """
         if name is not None:
             name = name.upper()
@@ -524,6 +546,8 @@ class Component(CaselessDict):
 
     def _validate_name(self):
         """Make sure the component has a name.
+
+        :meta private:
 
         Raises:
             ValueError: If this component does not have a name.
@@ -592,7 +616,10 @@ class Component(CaselessDict):
 
     @classmethod
     def _get_ical_parser(cls, st: str | bytes) -> ComponentIcalParser:
-        """Get the iCal parser for the given input string."""
+        """Get the iCal parser for the given input string.
+
+        :meta private:
+        """
         return ComponentIcalParser(st, cls._get_component_factory(), cls.types_factory)
 
     @classmethod
@@ -668,6 +695,8 @@ class Component(CaselessDict):
 
     def __repr__(self) -> str:
         """String representation of class with all of its subcomponents.
+
+        :meta private:
 
         Implemented iteratively rather than recursively so that calendars
         with deeply nested subcomponents do not raise ``RecursionError``.
@@ -878,7 +907,10 @@ class Component(CaselessDict):
 
     @staticmethod
     def _utc_now() -> datetime:
-        """Return now as UTC value."""
+        """Return now as UTC value.
+
+        :meta private:
+        """
         return datetime.now(timezone.utc)
 
     uid = uid_property
@@ -921,6 +953,12 @@ class Component(CaselessDict):
     @staticmethod
     def _validate_start_and_end(start, end):
         """This validates start and end.
+
+        :meta private:
+
+        Parameters:
+            end: Required. The end of the calendar component.
+            start: Required. The start of the calendar component.
 
         Raises:
             ~icalendar.error.InvalidCalendar: If the information is not valid
@@ -1228,7 +1266,8 @@ class Component(CaselessDict):
             - :class:`bytes` if called with no arguments.
 
         Raises:
-            TypeError: If ``destination`` is neither an XML Element nor a file-like
+            TypeError: If ``destination`` is neither an XML
+                :class:`~xml.etree.ElementTree.Element` nor a file-like
                 object, or if ``indent`` is neither an integer nor a string.
             ~icalendar.error.InvalidCalendar: If an XML property cannot be written
                 to xCal. See :meth:`vXml.to_xcal() <icalendar.prop.xml.vXml.to_xcal>`.
@@ -1249,7 +1288,7 @@ class Component(CaselessDict):
                         <text>2.0</text>
                       </version>
                       <prodid>
-                        <text>-//collective//icalendar//7.0.0//EN</text>
+                        <text>-//PyCalendar//icalendar//7.0.0//EN</text>
                       </prodid>
                       <uid>
                         <text>d755cef5-2311-46ed-a0e1-6733c9e15c63</text>
@@ -1352,7 +1391,7 @@ class Component(CaselessDict):
             True
 
         """
-        from icalendar.parser.xcal.component import XCalComponentParser
+        from icalendar.parser.xcal.component import XCalComponentsParser
 
         if isinstance(xcal, Path):
             xcal = xcal.open("rb")
@@ -1366,7 +1405,7 @@ class Component(CaselessDict):
             raise TypeError(
                 f"Expected an XML Element, bytes, Path, or file object. Got {xcal}"
             )
-        parser = XCalComponentParser(
+        parser = XCalComponentsParser(
             element, cls._get_component_factory(), cls.types_factory
         )
         components = []
@@ -1390,6 +1429,8 @@ def _jcal_subcomponents(subcomponents: list) -> Iterator[tuple[int, Any]]:
 
 def _node_from_jcal(jcal, starting_cls: type[Component]) -> tuple[Component, list]:
     """Parse a single jCal component without recursing into subcomponents.
+
+    :meta private:
 
     Module-level helper for :meth:`~icalendar.cal.component.Component.from_jcal`: it has no ties to a
     class or instance (the relevant class is passed in as ``starting_cls``), so
